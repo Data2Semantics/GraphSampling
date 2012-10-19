@@ -1,2 +1,3 @@
 Total AERS reports: 1019665
+
 Total AERS cases: 863855
