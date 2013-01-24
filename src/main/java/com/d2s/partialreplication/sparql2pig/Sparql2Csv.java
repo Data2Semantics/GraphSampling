@@ -1,4 +1,4 @@
-package com.d2s.partialreplication.sparql2csv;
+package com.d2s.partialreplication.sparql2pig;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -19,9 +19,9 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 import au.com.bytecode.opencsv.CSVWriter;
 
 public class Sparql2Csv {
-	private static String DEFAULT_CSV_FILE = "output.csv";
-	private static char DEFAULT_DELIMITER = ',';
-	private static boolean DEFAULT_INCLUDE_HEADERS = false;
+	public static String DEFAULT_CSV_FILE = "output.csv";
+	public static char DEFAULT_DELIMITER = ',';
+	public static boolean DEFAULT_INCLUDE_HEADERS = false;
 
 	private String csvFile;
 	private char delimiter;
@@ -56,22 +56,6 @@ public class Sparql2Csv {
 	}
 
 	private void createCsv() throws IOException, MalformedQueryException, QueryEvaluationException {
-
-		// HTTPRepository endpoint = new HTTPRepository(this.endpoint);
-		// endpoint.initialize();
-		//
-		// RepositoryConnection conn =
-		// endpoint.getConnection();
-		// try {
-		// TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
-		// TupleQueryResult result = query.evaluate();
-		// while (result.hasNext()) {
-		// System.out.println("woei");
-		// }
-		// }
-		// finally {
-		// conn.close();
-		// }
 		Query query = QueryFactory.create(queryString);
 		QueryExecution qexec = QueryExecutionFactory.sparqlService(endpoint, query);
 
