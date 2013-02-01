@@ -1,4 +1,4 @@
-REGISTER lib/d2s4pig-1.0.jar;
+REGISTER /home/lrd900/lib/d2s4pig-1.0.jar;
 DEFINE NtLoader com.data2semantics.pig.loaders.NtLoader();
 
 rdfGraph = LOAD 'openphacts.nt' USING NtLoader() AS (sub:chararray, pred:chararray, obj:chararray);
