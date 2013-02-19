@@ -44,7 +44,7 @@ STORE max_diff
 
 """)
 
-d = 0.5
+d = 0.5 #damping factor
 docs_in= "data/simple"
 
 for i in range(10):
