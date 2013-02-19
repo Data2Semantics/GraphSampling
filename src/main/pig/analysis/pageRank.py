@@ -45,11 +45,11 @@ STORE max_diff
 """)
 
 d = 0.5 #damping factor
-docs_in= "data/simple"
+docs_in= "unweightedLitAsNodeGrouped"
 
 for i in range(10):
-    docs_out = "out/pagerank_data_" + str(i + 1)
-    max_diff = "out/max_diff_" + str(i + 1)
+    docs_out = "pagerank/pagerank_data_" + str(i + 1)
+    max_diff = "pagerank/max_diff_" + str(i + 1)
     Pig.fs("rmr " + docs_out)
     Pig.fs("rmr " + max_diff)
     stats = P.bind().runSingle()

@@ -17,4 +17,8 @@ rdfGraph = LOAD 'openphacts.nt' USING NtLoader() AS (sub:chararray, pred:chararr
  */
 rewrittenGraph = FOREACH rdfGraph GENERATE sub, 1, obj ; --just use a weight of 1 for now
 
-STORE rewrittenGraph INTO 'directedUnweighted' USING PigStorage('\t');
+
+--STORE rewrittenGraph INTO 'unweightedLitAsNode' USING PigStorage('\t');
+
+rewrittenGraphGrouped = GROUP rewrittenGraph BY sub;
+STORE rewrittenGraphGrouped INTO 'unweightedLitAsNodeGrouped' USING PigStorage('\t');
