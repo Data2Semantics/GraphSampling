@@ -1,79 +1,18 @@
-SET DEFAULT_PARALLEL 20;
 REGISTER lib/datafu.jar;
 DEFINE UnorderedPairs datafu.pig.bags.UnorderedPairs();
 REGISTER lib/d2s4pig-1.0.jar;
 DEFINE NtLoader com.data2semantics.pig.loaders.NtLoader();
 DEFINE LONGHASH com.data2semantics.pig.udfs.LongHash();
 
---rdfGraph = LOAD 'rdfGraph.csv' USING PigStorage() AS (sub:chararray, pred:chararray, obj:chararray);
---largeGraph = LOAD 'openphacts.nt' USING PigStorage(' ') AS (sub:chararray, pred:chararray, obj:chararray);
 largeGraph = LOAD 'openphacts.nt' USING NtLoader() AS (sub:chararray, pred:chararray, obj:chararray);
---rdfGraphText = SAMPLE largeGraph 0.0000001; --0.0000001: 76 items
-rdfGraphText = SAMPLE largeGraph 0.001; --0.0001: 75745 items
---dump rdfGraphText;
+--largeGraph = SAMPLE largeGraph 0.0000001; --0.0000001: 76 items
+largeGraph = SAMPLE largeGraph 0.001; --0.0001: 75745 items
+--dump largeGraph;
 
 rdfGraph = FOREACH rdfGraphText GENERATE LONGHASH(sub) AS sub:long, LONGHASH(pred) AS pred:long, LONGHASH(obj) AS obj:long;
 
 dictionaryLarge = FOREACH rdfGraphText GENERATE FLATTEN(TOBAG(TOTUPLE(LONGHASH(sub), sub), TOTUPLE(LONGHASH(pred), pred),TOTUPLE(LONGHASH(obj), obj)));
 dictionary = DISTINCT dictionaryLarge;
-
-
-/**
-
-subListLong = FOREACH rdfGraph GENERATE LONGHASH(sub) AS sub:long;
-distinctSubs = DISTINCT subListLong;
-distinctSubsGrouped = GROUP distinctSubs ALL;
-subCount = FOREACH distinctSubsGrouped GENERATE SIZE(distinctSubs);
-
-
-subList = FOREACH rdfGraph GENERATE sub AS sub:chararray;
-distinctSubs = DISTINCT subList;
-distinctSubsGrouped = GROUP distinctSubs ALL;
-subCount = FOREACH distinctSubsGrouped GENERATE SIZE(distinctSubs);
-*/
-
-
---rdfGrouped = GROUP rdfGraph ALL;
---rdfCount = FOREACH rdfGrouped GENERATE COUNT(rdfGraph);--don't really understand why we need a grouping. if just counts a bag right, why not the original origData bag
---
---graph1 = FILTER rdfGraph BY pred is null;
---graph2 = FILTER rdfGraph BY sub is null;
---graph3 = FILTER rdfGraph BY obj is null;
---
---triplesWithNulls = UNION graph1, graph2, graph3;
---graph3Grouped = GROUP graph3 ALL;
---graph3Count = FOREACH graph3Grouped GENERATE COUNT(graph3);
---
---
---triplesWithNullsGrouped = GROUP triplesWithNulls ALL;
---triplesWithNullsCount = FOREACH triplesWithNullsGrouped GENERATE COUNT(triplesWithNulls);--don't really understand why we need a grouping. if just counts a bag right, why not the original origData bag
---DUMP triplesWithNullsCount;
-----DUMP rdfCount;
---DUMP triplesWithNulls;
-
-
-
-
-
---origData = LIMIT orig 10;
---count something:
-rdfGrouped = GROUP rdfGraph ALL;
-/*
-creates: 
-(all,{(s1,p1,o1),(s2,p2,o2),(s2,p3,o3),(s3,p4,o4)})
-*/
-rdfCount = FOREACH rdfGrouped GENERATE COUNT(rdfGraph);--don't really understand why we need a grouping. if just counts a bag right, why not the original origData bag
-
-
-
-
-
-/**
- * CREATING A NETWORK OF S->O NODES (directed, unlabelled)
- */
-unlabbelledGraph = FOREACH rdfGraph GENERATE sub, obj, 1; --just use a weight of 1 for now
-
-
 
 
 
@@ -124,14 +63,14 @@ spoObjectGraph = FOREACH objGroup GENERATE FLATTEN(UnorderedPairs(rdfGraph));
 --spoObjectGraph = foreach spoObjectPairs generate FLATTEN($0);
 
 
---spoGraph = UNION spoSubjectGraph, spoPredicateGraph, spoObjectGraph;
-spoGraph = spoObjectGraph;
+spoGraph = UNION spoSubjectGraph, spoPredicateGraph, spoObjectGraph;
 /*
  creates
  (("sub1","pred1","obj1"),("sub1","pred1","obj2"))
  (("sub1","pred1","obj1"),("sub1","pred3","obj3"))
  (("sub1","pred1","obj2"),("sub1","pred1","obj1"))
  */
+ 
  
  /*
   * Make weighted graph. Append a numerical value to the tuples, representing how many sub/pred/obj both share
@@ -147,7 +86,7 @@ spoGraph = spoObjectGraph;
 --	--check if there exists something in spoGraph with the inverse
 --	generate part1, part2;
 --}
---weightedSpoGraph = FOREACH spoGraph GENERATE $0, $1, 1; --just use a weight of 1 for each node for now... (do the thing above later)
+weightedSpoGraph = FOREACH spoGraph GENERATE $0, $1, 1; --just use a weight of 1 for each node for now... (do the thing above later)
 --
 --
 
@@ -170,7 +109,6 @@ sortedSpoGraph = FOREACH spoGraph {
 
 sortedSpoGraphGrouped = GROUP sortedSpoGraph BY (spo1, spo2);
 weightedSpoGraph = FOREACH sortedSpoGraphGrouped GENERATE FLATTEN(group), COUNT(sortedSpoGraph);
---dump weightedSpoGraph;
 
 
 --rm dictionary;
