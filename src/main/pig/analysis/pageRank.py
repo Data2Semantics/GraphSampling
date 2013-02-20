@@ -45,7 +45,7 @@ STORE max_diff
 """)
 
 d = 0.5 #damping factor
-docs_in= "unweightedLitAsNodeGrouped"
+docs_in= "unweightedLitAsNodeGroupedHashed"
 inputType = "chararray" #use long if we have hashed urls
 for i in range(10):
     docs_out = "pagerank/pagerank_data_" + str(i + 1)
