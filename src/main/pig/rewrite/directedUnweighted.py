@@ -22,10 +22,10 @@ DEFINE LONGHASH com.data2semantics.pig.udfs.LongHash();
 """
 
 if sample == 1:
-    """rdfGraph = LOAD '$inputFile' USING NtLoader() AS (sub:chararray, pred:chararray, obj:chararray);
+    pigScript += """rdfGraph = LOAD '$inputFile' USING NtLoader() AS (sub:chararray, pred:chararray, obj:chararray);
     """
 else:
-    """inputGraph = LOAD '$inputFile' USING NtLoader() AS (sub:chararray, pred:chararray, obj:chararray);
+    pigScript += """inputGraph = LOAD '$inputFile' USING NtLoader() AS (sub:chararray, pred:chararray, obj:chararray);
     rdfGraph = SAMPLE inputGraph $sample;
     """
 
