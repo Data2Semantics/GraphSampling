@@ -38,7 +38,7 @@ else:
 """
 if groupResults:
     pigScript += """rewrittenGraphGrouped = GROUP rewrittenGraph BY $0;
-rmf '$outputFile'
+rmf $outputFile
 STORE rewrittenGraphGrouped INTO '$outputFile' USING PigStorage();"""
 else:
     pigScript += """STORE rewrittenGraph INTO '$outputFile' USING PigStorage();"""
