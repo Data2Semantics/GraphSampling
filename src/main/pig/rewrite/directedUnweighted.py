@@ -12,7 +12,7 @@ if groupResults:
 if useLongHash:
     outputFile += "Hashed"
 if int(float(sample)) != 1:
-    outputFile += sample
+    outputFile += "_" + sample
 longHash = "LONGHASH"
 pigScript = """
 REGISTER lib/datafu.jar;
