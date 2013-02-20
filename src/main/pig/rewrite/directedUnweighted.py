@@ -31,8 +31,9 @@ else:
     """
 
 if groupResults:
-    pigScript += """rdfGraphGrouped = GROUP rdfGraph BY sub;
-rewrittenGraph = FOREACH rdfGraphGrouped GENERATE $longHash(group), 1, $longHash(rdfGraph.obj);
+    pigScript += """rdfGraphHashed = FOREACH rdfGraph GENERATE $longHash(group), $longHash(rdfGraph.obj);
+rdfGraphGrouped = GROUP rdfGraphHashed BY $0;
+rewrittenGraph = FOREACH rdfGraphGrouped GENERATE group, 1, rdfGraph.$1;
 
 rmf $outputFile
 STORE rewrittenGraph INTO '$outputFile' USING PigStorage();"""
