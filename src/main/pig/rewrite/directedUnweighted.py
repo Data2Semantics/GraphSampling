@@ -26,7 +26,7 @@ if sample == 1:
     """
 else:
     """inputGraph = LOAD '$inputFile' USING NtLoader() AS (sub:chararray, pred:chararray, obj:chararray);
-    rdfGraph = SAMPLE largeGraph $sample;
+    rdfGraph = SAMPLE inputGraph $sample;
     """
 
 
@@ -39,7 +39,7 @@ else:
 if groupResults:
     pigScript += """rewrittenGraphGrouped = GROUP rewrittenGraph BY $0;
 
-STORE rewrittenGraphGrouped INTO '$outputFile' USING PigStorage('\t');"""
+STORE rewrittenGraphGrouped INTO '$outputFile' USING PigStorage();"""
 else:
     pigScript += """STORE rewrittenGraph INTO '$outputFile' USING PigStorage();"""
 
