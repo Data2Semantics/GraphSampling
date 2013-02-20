@@ -11,9 +11,9 @@ if groupResults:
     outputFile += "Grouped"
 if useLongHash:
     outputFile += "Hashed"
-if int(float(sample)) != 1
+if int(float(sample)) != 1:
     outputFile += sample
-
+longHash = "LONGHASH"
 pigScript = """
 REGISTER lib/datafu.jar;
 DEFINE UnorderedPairs datafu.pig.bags.UnorderedPairs();
@@ -30,19 +30,19 @@ else:
     rdfGraph = SAMPLE inputGraph $sample;
     """
 
-
-if useLongHash:
-    pigScript += """rewrittenGraph = FOREACH rdfGraph GENERATE LONGHASH(sub), 1, LONGHASH(obj) ; --just use a weight of 1 for now
-"""
-else:
-    pigScript += """rewrittenGraph = FOREACH rdfGraph GENERATE sub, 1, obj ; --just use a weight of 1 for now
-"""
 if groupResults:
-    pigScript += """rewrittenGraphGrouped = GROUP rewrittenGraph BY $0;
+    pigScript += """rdfGraphGrouped = GROUP rdfGraph BY sub;
+rewrittenGraph = FOREACH rdfGraphGrouped GENERATE $longHash(group), 1, $longHash(rdfGraph.obj);
+
 rmf $outputFile
-STORE rewrittenGraphGrouped INTO '$outputFile' USING PigStorage();"""
+STORE rewrittenGraph INTO '$outputFile' USING PigStorage();"""
 else:
-    pigScript += """STORE rewrittenGraph INTO '$outputFile' USING PigStorage();"""
+    pigScript += """rewrittenGraph = FOREACH rdfGraph GENERATE $longHash(sub), 1, $longHash(obj)"""
+    
+
+pigScript += """
+rmf $outputFile
+STORE rewrittenGraph INTO '$outputFile' USING PigStorage();"""
 
 
 P = Pig.compile(pigScript)
