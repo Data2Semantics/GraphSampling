@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from org.apache.pig.scripting import *
+from org.apache.pig.scripting import Pig
 """
 input:
 www.A.com    1    { (www.B.com), (www.C.com), (www.D.com), (www.E.com) }
@@ -11,7 +11,7 @@ www.F.com    1    { (www.B.com), (www.C.com) }"""
 P = Pig.compile("""
 previous_pagerank = 
     LOAD '$docs_in'
-    AS ( url: chararray, pagerank: float, links:{ link: ( url: chararray ) } );
+    AS ( url: $inputType, pagerank: float, links:{ link: ( url: $inputType ) } );
 
 outbound_pagerank = 
     FOREACH previous_pagerank 
@@ -46,7 +46,7 @@ STORE max_diff
 
 d = 0.5 #damping factor
 docs_in= "unweightedLitAsNodeGrouped"
-
+inputType = "chararray" #use long if we have hashed urls
 for i in range(10):
     docs_out = "pagerank/pagerank_data_" + str(i + 1)
     max_diff = "pagerank/max_diff_" + str(i + 1)

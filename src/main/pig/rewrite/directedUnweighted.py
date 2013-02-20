@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from org.apache.pig.scripting import *
+from org.apache.pig.scripting import Pig
 
 
 inputFile = "openphacts.nt"
