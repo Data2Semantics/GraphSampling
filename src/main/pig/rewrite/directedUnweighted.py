@@ -37,11 +37,11 @@ else:
     pigScript += """rewrittenGraph = FOREACH rdfGraph GENERATE sub, 1, obj ; --just use a weight of 1 for now
 """
 if groupResults:
-    pigScript += """rewrittenGraphGrouped = GROUP rewrittenGraph BY sub;
+    pigScript += """rewrittenGraphGrouped = GROUP rewrittenGraph BY $0;
 
 STORE rewrittenGraphGrouped INTO '$outputFile' USING PigStorage('\t');"""
 else:
-    pigScript += """STORE rewrittenGraph INTO '$outputFile' USING PigStorage('\t');"""
+    pigScript += """STORE rewrittenGraph INTO '$outputFile' USING PigStorage();"""
 
 
 P = Pig.compile(pigScript)
