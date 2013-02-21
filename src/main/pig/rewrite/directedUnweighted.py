@@ -39,12 +39,11 @@ if groupResults:
     if useLongHash:
         pigScript += """rdfGraphHashed = FOREACH filteredGraph GENERATE $longHash(sub), $longHash(obj);
 rdfGraphGrouped = GROUP rdfGraphHashed BY $0;
+rewrittenGraph = FOREACH rdfGraphGrouped GENERATE group, 1, rdfGraphHashed.$1;
 """
     else:
         pigScript += """rdfGraphGrouped = GROUP filteredGraph BY $0;
-"""
-        
-    pigScript += """rewrittenGraph = FOREACH rdfGraphGrouped GENERATE group, 1, rdfGraphHashed.$1;
+rewrittenGraph = FOREACH rdfGraphGrouped GENERATE group, 1, filteredGraph.$1
 """
 else:
     if useLongHash:
