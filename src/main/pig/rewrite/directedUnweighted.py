@@ -13,7 +13,6 @@ if useLongHash:
     outputFile += "Hashed"
 if int(float(sample)) != 1:
     outputFile += "_" + sample
-longHash = "LONGHASH"
 pigScript = """
 REGISTER lib/datafu.jar;
 DEFINE UnorderedPairs datafu.pig.bags.UnorderedPairs();
@@ -31,15 +30,15 @@ else:
     """
 
 if groupResults:
-    pigScript += """rdfGraphHashed = FOREACH rdfGraph GENERATE $longHash(sub), $longHash(obj);
+    pigScript += """rdfGraphHashed = FOREACH rdfGraph GENERATE $longHash(rdfGraph.sub), $longHash(rdfGraph.obj);
 rdfGraphGrouped = GROUP rdfGraphHashed BY $0;
-rewrittenGraph = FOREACH rdfGraphGrouped GENERATE group, 1, rdfGraph.$1;
+rewrittenGraph = FOREACH rdfGraphGrouped GENERATE group, 1, rdfGraphHashed.$1;
 
 rmf $outputFile
 STORE rewrittenGraph INTO '$outputFile' USING PigStorage();"""
 else:
     pigScript += """rewrittenGraph = FOREACH rdfGraph GENERATE $longHash(sub), 1, $longHash(obj)"""
-    
+
 
 pigScript += """
 rmf $outputFile
@@ -48,5 +47,3 @@ STORE rewrittenGraph INTO '$outputFile' USING PigStorage();"""
 
 P = Pig.compile(pigScript)
 stats = P.bind().runSingle()
-if not stats.isSuccessful():
-    raise 'failed'
