@@ -4,7 +4,7 @@ from org.apache.pig.scripting import Pig
 
 inputFile = "openphacts.nt"
 outputFile = "unweightedLitAsNode"
-sample = "0.0001" #0.0000001: 76 items, 0.0001: 75745 items
+sample = "1" #0.0000001: 76 items, 0.0001: 75745 items
 groupResults = True
 useLongHash = True
 if groupResults:
@@ -43,14 +43,14 @@ rewrittenGraph = FOREACH rdfGraphGrouped GENERATE group, 1, rdfGraphHashed.$1;
 """
     else:
         pigScript += """rdfGraphGrouped = GROUP rdfGraph BY $0;
-rewrittenGraph = FOREACH rdfGraphGrouped GENERATE group, 1, rdfGraph.$1
+rewrittenGraph = FOREACH rdfGraphGrouped GENERATE group, 1, rdfGraph.$2;
 """
 else:
     if useLongHash:
-        pigScript += """rewrittenGraph = FOREACH rdfGraph GENERATE $longHash(sub), 1, $longHash(obj)
+        pigScript += """rewrittenGraph = FOREACH rdfGraph GENERATE $longHash(sub), 1, $longHash(obj);
 """
     else:
-        pigScript += """rewrittenGraph = FOREACH rdfGraph GENERATE sub, 1, obj
+        pigScript += """rewrittenGraph = FOREACH rdfGraph GENERATE sub, 1, obj;
 """
 
 
