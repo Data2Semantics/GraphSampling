@@ -28,29 +28,29 @@ else:
     pigScript += """inputGraph = LOAD '$inputFile' USING NtLoader() AS (sub:chararray, pred:chararray, obj:chararray);
     rdfGraph = SAMPLE inputGraph $sample;
     """
-
-pigScript += """
-filteredGraph1 = filter rdfGraph by sub is not null;
-filteredGraph2 = filter filteredGraph1 by pred is not null;
-filteredGraph = filter filteredGraph2 by obj is not null;
-"""
+#
+#pigScript += """
+#filteredGraph1 = filter rdfGraph by sub is not null;
+#filteredGraph2 = filter filteredGraph1 by pred is not null;
+#filteredGraph = filter filteredGraph2 by obj is not null;
+#"""
 
 if groupResults:
     if useLongHash:
-        pigScript += """rdfGraphHashed = FOREACH filteredGraph GENERATE $longHash(sub), $longHash(obj);
+        pigScript += """rdfGraphHashed = FOREACH rdfGraph GENERATE $longHash(sub), $longHash(obj);
 rdfGraphGrouped = GROUP rdfGraphHashed BY $0;
 rewrittenGraph = FOREACH rdfGraphGrouped GENERATE group, 1, rdfGraphHashed.$1;
 """
     else:
-        pigScript += """rdfGraphGrouped = GROUP filteredGraph BY $0;
-rewrittenGraph = FOREACH rdfGraphGrouped GENERATE group, 1, filteredGraph.$1
+        pigScript += """rdfGraphGrouped = GROUP rdfGraph BY $0;
+rewrittenGraph = FOREACH rdfGraphGrouped GENERATE group, 1, rdfGraph.$1
 """
 else:
     if useLongHash:
-        pigScript += """rewrittenGraph = FOREACH filteredGraph GENERATE $longHash(sub), 1, $longHash(obj)
+        pigScript += """rewrittenGraph = FOREACH rdfGraph GENERATE $longHash(sub), 1, $longHash(obj)
 """
     else:
-        pigScript += """rewrittenGraph = FOREACH filteredGraph GENERATE sub, 1, obj
+        pigScript += """rewrittenGraph = FOREACH rdfGraph GENERATE sub, 1, obj
 """
 
 
