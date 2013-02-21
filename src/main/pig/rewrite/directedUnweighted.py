@@ -7,10 +7,12 @@ outputFile = "unweightedLitAsNode"
 sample = "0.0001" #0.0000001: 76 items, 0.0001: 75745 items
 groupResults = True
 useLongHash = True
+longHash = ""
 if groupResults:
     outputFile += "Grouped"
 if useLongHash:
     outputFile += "Hashed"
+    longHash = "LONGHASH"
 if int(float(sample)) != 1:
     outputFile += "_" + sample
 pigScript = """
@@ -43,12 +45,14 @@ rewrittenGraph = FOREACH rdfGraphGrouped GENERATE group, 1, rdfGraphHashed.$1;
 rmf $outputFile
 STORE rewrittenGraph INTO '$outputFile' USING PigStorage();"""
 else:
-    pigScript += """rewrittenGraph = FOREACH filteredGraph GENERATE $longHash(sub), 1, $longHash(obj)"""
+    pigScript += """rewrittenGraph = FOREACH filteredGraph GENERATE $longHash(sub), 1, $longHash(obj)
+"""
 
 
 pigScript += """
 rmf $outputFile
-STORE rewrittenGraph INTO '$outputFile' USING PigStorage();"""
+STORE rewrittenGraph INTO '$outputFile' USING PigStorage();
+"""
 
 
 P = Pig.compile(pigScript)
