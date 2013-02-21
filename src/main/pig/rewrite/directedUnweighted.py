@@ -7,12 +7,10 @@ outputFile = "unweightedLitAsNode"
 sample = "0.0001" #0.0000001: 76 items, 0.0001: 75745 items
 groupResults = True
 useLongHash = True
-longHash = ""
 if groupResults:
     outputFile += "Grouped"
 if useLongHash:
     outputFile += "Hashed"
-    longHash = "LONGHASH"
 if int(float(sample)) != 1:
     outputFile += "_" + sample
 pigScript = """
@@ -38,14 +36,22 @@ filteredGraph = filter filteredGraph2 by obj is not null;
 """
 
 if groupResults:
-    pigScript += """rdfGraphHashed = FOREACH filteredGraph GENERATE $longHash(sub), $longHash(obj);
+    if useLongHash:
+        pigScript += """rdfGraphHashed = FOREACH filteredGraph GENERATE $longHash(sub), $longHash(obj);
 rdfGraphGrouped = GROUP rdfGraphHashed BY $0;
-rewrittenGraph = FOREACH rdfGraphGrouped GENERATE group, 1, rdfGraphHashed.$1;
-
-rmf $outputFile
-STORE rewrittenGraph INTO '$outputFile' USING PigStorage();"""
+"""
+    else:
+        pigScript += """rdfGraphGrouped = GROUP filteredGraph BY $0;
+"""
+        
+    pigScript += """rewrittenGraph = FOREACH rdfGraphGrouped GENERATE group, 1, rdfGraphHashed.$1;
+"""
 else:
-    pigScript += """rewrittenGraph = FOREACH filteredGraph GENERATE $longHash(sub), 1, $longHash(obj)
+    if useLongHash:
+        pigScript += """rewrittenGraph = FOREACH filteredGraph GENERATE $longHash(sub), 1, $longHash(obj)
+"""
+    else:
+        pigScript += """rewrittenGraph = FOREACH filteredGraph GENERATE sub, 1, obj
 """
 
 
