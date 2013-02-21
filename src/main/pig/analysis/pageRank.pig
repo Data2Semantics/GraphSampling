@@ -1,6 +1,15 @@
 previous_pagerank = 
-    LOAD 'unweightedLitAsNodeGrouped'
+    LOAD 'unweightedLitAsNodeGrouped_0.001'
     AS ( url: chararray, pagerank: float, links:{ link: ( url: chararray ) } );
+
+
+B1 = filter previous_pagerank by url is not null;
+B2 = filter B1 by pagerank is not null;
+B3 = filter B2 by links is not null;
+
+STORE B3 
+    INTO 'B3';
+
 
 outbound_pagerank = 
     FOREACH previous_pagerank 
@@ -17,6 +26,11 @@ new_pagerank =
         FLATTEN ( previous_pagerank.links ) AS links,
         FLATTEN ( previous_pagerank.pagerank ) AS previous_pagerank;
 
+STORE new_pagerank 
+    INTO 'unweightedLitAsNodeGrouped_out';
+
+
+
 pagerank_diff = FOREACH new_pagerank GENERATE ABS ( previous_pagerank - pagerank );
 
 max_diff = 
@@ -24,9 +38,10 @@ max_diff =
         ( GROUP pagerank_diff ALL )
     GENERATE
         MAX ( pagerank_diff );
-
+STORE max_diff 
+    INTO 'unweightedLitAsNodeGrouped_diff';
+    
+    
 STORE new_pagerank 
     INTO 'unweightedLitAsNodeGrouped_out';
 
-STORE max_diff 
-    INTO 'unweightedLitAsNodeGrouped_diff';

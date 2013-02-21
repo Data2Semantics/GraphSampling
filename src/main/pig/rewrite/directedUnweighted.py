@@ -29,15 +29,21 @@ else:
     rdfGraph = SAMPLE inputGraph $sample;
     """
 
+pigScript += """
+filteredGraph1 = filter rdfGraph by sub is not null;
+filteredGraph2 = filter filteredGraph1 by pred is not null;
+filteredGraph = filter filteredGraph2 by obj is not null;
+"""
+
 if groupResults:
-    pigScript += """rdfGraphHashed = FOREACH rdfGraph GENERATE $longHash(rdfGraph.sub), $longHash(rdfGraph.obj);
+    pigScript += """rdfGraphHashed = FOREACH filteredGraph GENERATE $longHash(sub), $longHash(obj);
 rdfGraphGrouped = GROUP rdfGraphHashed BY $0;
 rewrittenGraph = FOREACH rdfGraphGrouped GENERATE group, 1, rdfGraphHashed.$1;
 
 rmf $outputFile
 STORE rewrittenGraph INTO '$outputFile' USING PigStorage();"""
 else:
-    pigScript += """rewrittenGraph = FOREACH rdfGraph GENERATE $longHash(sub), 1, $longHash(obj)"""
+    pigScript += """rewrittenGraph = FOREACH filteredGraph GENERATE $longHash(sub), 1, $longHash(obj)"""
 
 
 pigScript += """
