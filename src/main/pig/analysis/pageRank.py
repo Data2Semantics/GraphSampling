@@ -33,7 +33,7 @@ new_pagerank =
         ( COGROUP outbound_pagerank BY to_url, previous_pagerank BY url INNER )
     GENERATE 
         group AS url, 
-        ( 1 - $d ) + $d * SUM ( outbound_pagerank.pagerank ) AS pagerank, 
+        ( 1 - $d ) + $d * SUM ((IsEmpty(outbound_pagerank.pagerank)? {0F}: outbound_pagerank.pagerank)) AS pagerank, 
         FLATTEN ( previous_pagerank.links ) AS links,
         FLATTEN ( previous_pagerank.pagerank ) AS previous_pagerank;
 /**
