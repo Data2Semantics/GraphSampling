@@ -28,32 +28,29 @@ Creates:
 1.0, <http://www.w3.org/2004/02/skos/core#exactMatch>
 */
 
+cogrpd = cogroup outbound_pagerank by to_url, previous_pagerank by url;
+/**
+creates:
+<http://rdf.chemspider.com/3442>, {}, {(<http://rdf.chemspider.com/3442>, 1.0, {(<http://www.w3.org/2004/02/skos/core#exactMatch>), (<http://bla>)})}
+*/                   
+                      
 new_pagerank = 
     FOREACH 
-        ( COGROUP outbound_pagerank BY to_url, previous_pagerank BY url INNER )
+       cogrpd
     GENERATE 
         group AS url, 
-        ( 1 - $d ) + $d * SUM ((IsEmpty(outbound_pagerank.pagerank)? {0F}: outbound_pagerank.pagerank)) AS pagerank, 
+        ( 1 - $d ) + $d * SUM (outbound_pagerank.pagerank) AS pagerank, 
         FLATTEN ( previous_pagerank.links ) AS links,
         FLATTEN ( previous_pagerank.pagerank ) AS previous_pagerank;
-/**
-The COGROUP part creates:
-<http://rdf.chemspider.com/3442>, {}, {(<http://rdf.chemspider.com/3442>, 1.0, {(<http://www.w3.org/2004/02/skos/core#exactMatch>), (<http://bla>)})}
-*/
-
-pagerank_diff = FOREACH new_pagerank GENERATE ABS ( previous_pagerank - pagerank );
-
-max_diff = 
-    FOREACH 
-        ( GROUP pagerank_diff ALL )
-    GENERATE
-        MAX ( pagerank_diff );
-
 STORE new_pagerank 
     INTO '$docs_out';
+nonulls = filter new_pagerank by previous_pagerank is not null and pagerank is not null;
+pagerank_diff = FOREACH nonulls GENERATE ABS ( previous_pagerank - pagerank );
 
-STORE max_diff 
-    INTO '$max_diff';
+grpall = group pagerank_diff all;
+max_diff = foreach grpall generate MAX (pagerank_diff);
+
+STORE max_diff INTO '$max_diff';
 
 """)
 
@@ -73,15 +70,21 @@ for i in range(10):
     print "    max_diff_value = " + str(max_diff_value)
     if max_diff_value < 0.01:
         print "done at iteration " + str(i) + ". Cleaning output"
-        docs_in = docs_out
-        formatted_out = out_dir + "pagerank_cleaned"
-        Pig.fs("rmr " + formatted_out)
-        pigClean = Pig.compile("""
-pagerank = LOAD '$docs_in' AS ( url: chararray, pagerank: float, links:{ link: ( url: chararray ) } );
-cleanedRankedResources = FOREACH pagerank GENERATE url, pagerank;
-STORE cleanedRankedResources INTO '$formatted_out';
-        """)
-        pigClean.bind().runSingle()
+#        docs_in = docs_out
+#        formatted_out = out_dir + "pagerank_cleaned"
+#        Pig.fs("rmr " + formatted_out)
+#        pigClean = Pig.compile("""
+#pagerank = LOAD '$docs_in' AS ( url: chararray, pagerank: float, links:{ link: ( url: chararray ) } );
+#cleanedRankedResources = FOREACH pagerank GENERATE url, pagerank;
+#STORE cleanedRankedResources INTO '$formatted_out';
+#        """)
+#        pigClean.bind().runSingle()
         break
+    #max_diff of previous iterations never used, so clean it up
+    Pig.fs("rmr " + max_diff) 
+    if i > 1:
+        #never for 1st iteration! (otherwise we delete original input...
+        Pig.fs("rmr " + docs_in)
+        
     docs_in = docs_out
 
