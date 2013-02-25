@@ -59,10 +59,11 @@ STORE max_diff
 
 d = 0.5 #damping factor
 docs_in= "unweightedLitAsNodeGroupedHashed"
+out_dir = "pagerank/"
 inputType = "chararray" #use long if we have hashed urls
 for i in range(10):
-    docs_out = "pagerank/pagerank_data_" + str(i + 1)
-    max_diff = "pagerank/max_diff_" + str(i + 1)
+    docs_out = out_dir + "pagerank_data_" + str(i + 1)
+    max_diff = out_dir + "max_diff_" + str(i + 1)
     Pig.fs("rmr " + docs_out)
     Pig.fs("rmr " + max_diff)
     stats = P.bind().runSingle()
@@ -71,7 +72,16 @@ for i in range(10):
     max_diff_value = float(str(stats.result("max_diff").iterator().next().get(0)))
     print "    max_diff_value = " + str(max_diff_value)
     if max_diff_value < 0.01:
-        print "done at iteration " + str(i)
+        print "done at iteration " + str(i) + ". Cleaning output"
+        docs_in = docs_out
+        formatted_out = out_dir + "pagerank_cleaned"
+        Pig.fs("rmr " + formatted_out)
+        pigClean = Pig.compile("""
+pagerank = LOAD '$docs_in' AS ( url: chararray, pagerank: float, links:{ link: ( url: chararray ) } );
+cleanedRankedResources = FOREACH pagerank GENERATE url, pagerank;
+STORE cleanedRankedResources INTO '$formatted_out';
+        """)
+        pigClean.bind().runSingle()
         break
     docs_in = docs_out
 

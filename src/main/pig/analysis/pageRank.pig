@@ -21,7 +21,7 @@ new_pagerank =
         ( COGROUP outbound_pagerank BY to_url, previous_pagerank BY url INNER )
     GENERATE 
         group AS url, 
-        ( 1 - $d ) + $d * SUM ((IsEmpty(outbound_pagerank.pagerank)? {0F}: outbound_pagerank.pagerank)) AS pagerank,
+        ( 1 - 0.5 ) + 0.5 * SUM ((IsEmpty(outbound_pagerank.pagerank)? {0F}: outbound_pagerank.pagerank)) AS pagerank,
         FLATTEN ( previous_pagerank.links ) AS links,
         FLATTEN ( previous_pagerank.pagerank ) AS previous_pagerank;
 /**
@@ -36,9 +36,9 @@ max_diff =
         ( GROUP pagerank_diff ALL )
     GENERATE
         MAX ( pagerank_diff );
-rmr pagerank/pagerank_data_1
+rm pagerank/pagerank_data_1
 STORE new_pagerank 
     INTO 'pagerank/pagerank_data_1';
-rmr pagerank/max_diff_1
+rm pagerank/max_diff_1
 STORE max_diff 
     INTO 'pagerank/max_diff_1';
