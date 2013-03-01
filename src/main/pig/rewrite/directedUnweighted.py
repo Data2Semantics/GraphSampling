@@ -7,7 +7,7 @@ outputFile = "unweightedLitAsNode"
 sampleGraphOutput = ""
 sample = "0.1" #0.0000001: 76 items, 0.0001: 75745 items
 groupResults = True
-useLongHash = FALSE
+useLongHash = False
 if groupResults:
     outputFile += "Grouped"
 if useLongHash:
@@ -26,7 +26,7 @@ if int(float(sample)) == 1:
     pigScript += """rdfGraph = LOAD '$inputFile' USING NtLoader() AS (sub:chararray, pred:chararray, obj:chararray);
     """
 else:
-    sampleGraphOutput = outputFile + "_sample_" + string(sample)
+    sampleGraphOutput = outputFile + "_sample_" + str(sample)
     pigScript += """inputGraph = LOAD '$inputFile' USING NtLoader() AS (sub:chararray, pred:chararray, obj:chararray);
     rdfGraph = SAMPLE inputGraph $sample;
     rmf $sampleGraphOutput
