@@ -70,15 +70,6 @@ for i in range(10):
     print "    max_diff_value = " + str(max_diff_value)
     if max_diff_value < 0.01:
         print "done at iteration " + str(i) + ". Cleaning output"
-#        docs_in = docs_out
-#        formatted_out = out_dir + "pagerank_cleaned"
-#        Pig.fs("rmr " + formatted_out)
-#        pigClean = Pig.compile("""
-#pagerank = LOAD '$docs_in' AS ( url: chararray, pagerank: float, links:{ link: ( url: chararray ) } );
-#cleanedRankedResources = FOREACH pagerank GENERATE url, pagerank;
-#STORE cleanedRankedResources INTO '$formatted_out';
-#        """)
-#        pigClean.bind().runSingle()
         break
     #max_diff of previous iterations never used, so clean it up
     Pig.fs("rmr " + max_diff) 
