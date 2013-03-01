@@ -26,7 +26,7 @@ if int(float(sample)) == 1:
     pigScript += """rdfGraph = LOAD '$inputFile' USING NtLoader() AS (sub:chararray, pred:chararray, obj:chararray);
     """
 else:
-    sampleGraphOutput = outputFile + "_sample_" + str(sample)
+    sampleGraphOutput = inputFile + "_sample_" + str(sample)
     pigScript += """inputGraph = LOAD '$inputFile' USING NtLoader() AS (sub:chararray, pred:chararray, obj:chararray);
     rdfGraph = SAMPLE inputGraph $sample;
     rmf $sampleGraphOutput
