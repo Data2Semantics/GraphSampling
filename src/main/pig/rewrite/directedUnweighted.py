@@ -4,9 +4,10 @@ from org.apache.pig.scripting import Pig
 
 inputFile = "openphacts.nt"
 outputFile = "unweightedLitAsNode"
-sample = "1" #0.0000001: 76 items, 0.0001: 75745 items
+sampleGraphOutput = ""
+sample = "0.1" #0.0000001: 76 items, 0.0001: 75745 items
 groupResults = True
-useLongHash = True
+useLongHash = FALSE
 if groupResults:
     outputFile += "Grouped"
 if useLongHash:
@@ -25,8 +26,11 @@ if int(float(sample)) == 1:
     pigScript += """rdfGraph = LOAD '$inputFile' USING NtLoader() AS (sub:chararray, pred:chararray, obj:chararray);
     """
 else:
+    sampleGraphOutput = outputFile + "_sample_" + string(sample)
     pigScript += """inputGraph = LOAD '$inputFile' USING NtLoader() AS (sub:chararray, pred:chararray, obj:chararray);
     rdfGraph = SAMPLE inputGraph $sample;
+    rmf $sampleGraphOutput
+    STORE rdfGraph INTO '$sampleGraphOutput' USING PigStorage();
     """
 #
 #pigScript += """
