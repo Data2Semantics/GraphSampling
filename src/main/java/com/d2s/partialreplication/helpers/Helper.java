@@ -11,7 +11,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import com.d2s.partialreplication.patientgenerator.CleanTurtle;
 
 public class Helper {
 	private static String HEADER_CONTENT = "application/x-www-form-urlencoded";

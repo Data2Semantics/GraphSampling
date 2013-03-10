@@ -1,4 +1,4 @@
-package com.d2s.partialreplication.patientgenerator;
+package com.d2s.partialreplication.helpers;
 
 public interface CleanTurtle {
 	
