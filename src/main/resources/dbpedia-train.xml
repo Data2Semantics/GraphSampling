@@ -26247,6 +26247,7 @@
 		<string>
 			Who wrote the book The pillars of the Earth?
 		</string>
+		<!--Laurens: removed double PREFIX rdfs: declaration-->
 		<query>
 			PREFIX rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt;
 			PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
@@ -26275,6 +26276,7 @@
 		<string>
 			How many films did Leonardo DiCaprio star in?
 		</string>
+		<!--Changed "COUNT(?film) to (COUNT(?film) AS ?count), in answers as well-->
 		<query>
 			PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
 			PREFIX foaf: &lt;http://xmlns.com/foaf/0.1/&gt;
@@ -26289,9 +26291,9 @@
 		</query>
 		<answers>
 			<answer>
-				<number>
+				<count>
 					23
-				</number>
+				</count>
 			</answer>
 		</answers>
 	</question>
