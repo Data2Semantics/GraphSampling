@@ -6,11 +6,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Iterator;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.query.TupleQueryResult;
+
+import com.hp.hpl.jena.query.ResultSet;
 
 public class Helper {
 	private static String HEADER_CONTENT = "application/x-www-form-urlencoded";
@@ -115,5 +121,21 @@ public class Helper {
             }
         }
 	}
-
+	
+	public static int getResultSize(ResultSet resultSet) {
+		int result = 0;
+		while (resultSet.hasNext()) {
+			resultSet.next();
+			result++;
+		}
+		return result;
+	}
+	public static int getResultSize(TupleQueryResult resultSet) throws QueryEvaluationException {
+		int result = 0;
+		while (resultSet.hasNext()) {
+			resultSet.next();
+			result++;
+		}
+		return result;
+	}
 }
