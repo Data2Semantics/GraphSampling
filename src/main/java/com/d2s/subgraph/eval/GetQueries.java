@@ -1,4 +1,4 @@
-package com.d2s.partialreplication.eval;
+package com.d2s.subgraph.eval;
 
 import java.util.ArrayList;
 

@@ -1,4 +1,4 @@
-package com.d2s.partialreplication.eval.dbpedia;
+package com.d2s.subgraph.eval.dbpedia;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,8 +13,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.d2s.partialreplication.eval.EvalQuery;
-import com.d2s.partialreplication.eval.GetQueries;
+import com.d2s.subgraph.eval.EvalQuery;
+import com.d2s.subgraph.eval.GetQueries;
 
 
 public class GetDbPediaQueries implements GetQueries {

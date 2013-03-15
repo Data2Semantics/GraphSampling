@@ -1,4 +1,4 @@
-package com.d2s.partialreplication.eval.evaluate;
+package com.d2s.subgraph.eval.evaluate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,10 +14,10 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.http.HTTPRepository;
 
-import com.d2s.partialreplication.eval.EvalQuery;
-import com.d2s.partialreplication.eval.GetQueries;
-import com.d2s.partialreplication.eval.dbpedia.GetDbPediaQueries;
-import com.d2s.partialreplication.helpers.Helper;
+import com.d2s.subgraph.eval.EvalQuery;
+import com.d2s.subgraph.eval.GetQueries;
+import com.d2s.subgraph.eval.dbpedia.GetDbPediaQueries;
+import com.d2s.subgraph.helpers.Helper;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;

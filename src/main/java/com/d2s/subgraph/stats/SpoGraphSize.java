@@ -1,4 +1,4 @@
-package com.d2s.partialreplication.stats;
+package com.d2s.subgraph.stats;
 
 import java.io.BufferedReader;
 import java.io.File;

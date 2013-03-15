@@ -1,4 +1,4 @@
-package com.d2s.partialreplication.helpers;
+package com.d2s.subgraph.helpers;
 
 
 public class Prefixes {

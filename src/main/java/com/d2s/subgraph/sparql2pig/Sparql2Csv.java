@@ -1,4 +1,4 @@
-package com.d2s.partialreplication.sparql2pig;
+package com.d2s.subgraph.sparql2pig;
 
 import java.io.FileWriter;
 import java.io.IOException;
