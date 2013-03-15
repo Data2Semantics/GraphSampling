@@ -6473,8 +6473,10 @@
 		<string>
 			Which software has been developed by organizations founded in California?
 		</string>
+		<!--Laurens: added missing prefix declaration-->
 		<query>
 			PREFIX rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt;
+			PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
 			PREFIX onto: &lt;http://dbpedia.org/ontology/&gt;
 			PREFIX res: &lt;http://dbpedia.org/resource/&gt;
 			SELECT ?uri ?string
@@ -7085,7 +7087,9 @@
 		<string>
 			Is Christian Bale starring in Batman Begins?
 		</string>
+		<!-- Laurens: added missing rdfs prefix -->
 		<query>
+			PREFIX rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt;
 			PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
 			PREFIX foaf: &lt;http://xmlns.com/foaf/0.1/&gt;
 			PREFIX onto: &lt;http://dbpedia.org/ontology/&gt;
@@ -20360,8 +20364,10 @@
 		<string>
 			Which companies are located in California, USA?
 		</string>
+		<!-- Laurens: Added missing rdf prefix -->
 		<query>
 			PREFIX rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt;
+			PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
 			PREFIX onto: &lt;http://dbpedia.org/ontology/&gt;
 			PREFIX res: &lt;http://dbpedia.org/resource/&gt;
 			SELECT DISTINCT ?uri ?string
