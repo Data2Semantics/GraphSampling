@@ -1,4 +1,4 @@
-package com.d2s.partialreplication.queries;
+package com.d2s.partialreplication.eval;
 
 
 import java.util.ArrayList;
@@ -10,7 +10,7 @@ public class EvalQuery {
 	private boolean isSelect = true;
 	private boolean isAsk = false;
 	private String query;
-	private HashMap<String, String> answers = new HashMap<String, String>();
+	private ArrayList<HashMap<String, String>> answers = new ArrayList<HashMap<String, String>>();
 	private static String SELECT_REGEX = ".*SELECT.*";
 	private static String ASK_REGEX = ".*ASK.*";
 	public EvalQuery(String query) {
@@ -44,11 +44,11 @@ public class EvalQuery {
 		return "It is " + (isSelect()? "": "not ") + "a select query, and it is " + (isAsk()? "": "not ") + "an ask query"; 
 	}
 	
-	public HashMap<String, String> getAnswers() {
+	public ArrayList<HashMap<String, String>> getAnswers() {
 		return answers;
 	}
 
-	public void setAnswers(HashMap<String, String> answers) {
+	public void setAnswers(ArrayList<HashMap<String, String>> answers) {
 		this.answers = answers;
 	}
 	public static void main(String[] args)  {
@@ -66,4 +66,6 @@ public class EvalQuery {
 		System.out.println(evalQuery.toString());
 		
 	}
+	
+	
 }

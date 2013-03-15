@@ -1,6 +1,8 @@
-package com.d2s.partialreplication.queries.evaluate;
+package com.d2s.partialreplication.eval.evaluate;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Set;
 
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
@@ -12,10 +14,10 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.http.HTTPRepository;
 
+import com.d2s.partialreplication.eval.EvalQuery;
+import com.d2s.partialreplication.eval.GetQueries;
+import com.d2s.partialreplication.eval.dbpedia.GetDbPediaQueries;
 import com.d2s.partialreplication.helpers.Helper;
-import com.d2s.partialreplication.queries.EvalQuery;
-import com.d2s.partialreplication.queries.GetQueries;
-import com.d2s.partialreplication.queries.dbpedia.GetDbPediaQueries;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -43,6 +45,11 @@ public class Evaluate {
 				if (Helper.getResultSize(goldenStandardResults) == 0) {
 					System.out.println(evalQuery.getQuery());
 					return;
+				} else if (Helper.getResultSize(goldenStandardResults) != evalQuery.getAnswers().size()) {
+					System.out.println(evalQuery.getQuery());
+					return;
+				} else {
+					System.out.println("ok");
 				}
 //				TupleQueryResult subgraphResults = runSelectUsingSesame(LOCAL_SESAME_REPO, subgraphEndpoint, evalQuery.getQuery());
 //				double precision = getPrecision(goldenStandardResults, subgraphResults);
@@ -57,19 +64,38 @@ public class Evaluate {
 			}
 		}
 	}
+	public double getPrecision(TupleQueryResult subGraph, EvalQuery evalQuery) throws QueryEvaluationException {
+		int falsePositives = 0;
+		int truePositives = 0;
+		while (subGraph.hasNext()) {
+			BindingSet binding = subGraph.next();
+			if (bindingFoundInAnswerSet(binding, evalQuery)) {
+				truePositives++;
+			} else {
+				falsePositives++;
+			}
+		}
+		double precision = 0;
+		if ((truePositives + falsePositives) != 0) precision =  truePositives / (truePositives + falsePositives);
+		return precision;
+	}
+
+
 	//Precision is the number of relevant documents a search retrieves divided by the total number of documents retrieved
 	public double getPrecision(TupleQueryResult goldenStandard, TupleQueryResult subgraph) throws QueryEvaluationException {
 		int falsePositives = 0;
 		int truePositives = 0;
 		while (subgraph.hasNext()) {
-			BindingSet binding = goldenStandard.next();
+			BindingSet binding = subgraph.next();
 			if (bindingFoundInQueryResult(binding, goldenStandard)) {
 				truePositives++;
 			} else {
 				falsePositives++;
 			}
 		}
-		return truePositives / (truePositives + falsePositives);
+		double precision = 0;
+		if ((truePositives + falsePositives) != 0) precision =  truePositives / (truePositives + falsePositives);
+		return precision;
 	}
 	//while recall is the number of relevant documents retrieved divided by the total number of existing relevant documents that should have been retrieved.
 	public double getRecall(TupleQueryResult goldenStandard, TupleQueryResult subgraph) throws QueryEvaluationException {
@@ -83,7 +109,9 @@ public class Evaluate {
 				falseNegatives++;
 			}
 		}
-		return truePositives / (truePositives + falseNegatives);
+		double recall = 0;
+		if ((truePositives + falseNegatives) != 0) recall = truePositives / (truePositives + falseNegatives);
+		return recall;
 	}
 	
 	private boolean bindingFoundInQueryResult(BindingSet binding, TupleQueryResult queryResult) throws QueryEvaluationException {
@@ -96,6 +124,33 @@ public class Evaluate {
 		}
 		return found;
 	}
+	
+	private boolean bindingFoundInAnswerSet(BindingSet binding, EvalQuery evalQuery) {
+		boolean found = false;
+		ArrayList<HashMap<String,String>> goldenAnswers = evalQuery.getAnswers();
+		for(HashMap<String,String> answerSet: goldenAnswers) {
+			Set<String> bindingNames = binding.getBindingNames();
+			boolean allMatch = true;
+			for(String bindingName:bindingNames) {
+				if (answerSet.containsKey(bindingName)) {
+					if (answerSet.get(bindingName).equals(binding.getBinding(bindingName).toString())) {
+						//this one is fine. check rest of answers
+					}
+				} else {
+					allMatch = false;
+					break;
+				}
+			}
+			if (allMatch) {
+				found = true;
+				break;
+			}
+			
+			
+		}
+		return found;
+	}
+	
 	
 	public static ResultSet runSelecUsingJena(String endpoint, String queryString) throws RepositoryException, MalformedQueryException, QueryEvaluationException {
 		Query query = QueryFactory.create(queryString);
@@ -120,7 +175,7 @@ public class Evaluate {
 	
 	
 	public static void main(String[] args)  {
-		String goldenStandard = "dbpedia";
+		String goldenStandard = "dbp";
 		String subgraph = "subgraph";
 		try {
 			Evaluate evaluate = new Evaluate(new GetDbPediaQueries(), goldenStandard, subgraph);

@@ -1,4 +1,4 @@
-package com.d2s.partialreplication.queries;
+package com.d2s.partialreplication.eval;
 
 import java.util.ArrayList;
 
