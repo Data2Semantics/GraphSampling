@@ -6,7 +6,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -17,6 +19,7 @@ import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.TupleQueryResult;
 
 import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.sparql.resultset.ResultSetRewindable;
 
 public class Helper {
 	private static String HEADER_CONTENT = "application/x-www-form-urlencoded";
@@ -122,7 +125,8 @@ public class Helper {
         }
 	}
 	
-	public static int getResultSize(ResultSet resultSet) {
+	public static int getResultSize(ResultSetRewindable resultSet) {
+		resultSet.reset();
 		int result = 0;
 		while (resultSet.hasNext()) {
 			resultSet.next();
@@ -138,4 +142,5 @@ public class Helper {
 		}
 		return result;
 	}
+
 }

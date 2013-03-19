@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryFactory;
+
 public class EvalQuery {
 	private boolean isSelect = true;
 	private boolean isAsk = false;
@@ -38,6 +41,12 @@ public class EvalQuery {
 	
 	public String getQuery() {
 		return this.query;
+	}
+	
+	public String getQuery(String fromGraph) {
+		Query query = QueryFactory.create(this.query);
+		query.addGraphURI(fromGraph);
+		return query.toString();
 	}
 	
 	public String toString() {
