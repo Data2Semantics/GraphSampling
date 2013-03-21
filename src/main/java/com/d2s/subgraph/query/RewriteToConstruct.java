@@ -8,7 +8,7 @@ import java.util.Iterator;
 import au.com.bytecode.opencsv.CSVWriter;
 
 import com.d2s.subgraph.eval.EvalQuery;
-import com.d2s.subgraph.eval.dbpedia.Qald1DbpQueries;
+import com.d2s.subgraph.eval.dbpedia.QaldDbpQueries;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
@@ -58,7 +58,7 @@ public class RewriteToConstruct {
 	public static void main(String[] args)  {
 		
 		try {
-			Qald1DbpQueries getQueries = new Qald1DbpQueries();
+			QaldDbpQueries getQueries = new QaldDbpQueries(QaldDbpQueries.QALD_1_QUERIES);
 			ArrayList<EvalQuery> queries = getQueries.getQueries();
 			
 			File csvFile = new File("queries.csv");

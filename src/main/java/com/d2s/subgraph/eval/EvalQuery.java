@@ -12,17 +12,18 @@ import com.hp.hpl.jena.query.QueryFactory;
 public class EvalQuery {
 	private boolean isSelect = true;
 	private boolean isAsk = false;
+	private boolean aggregation;
+	private boolean onlyDbo;
+	private String answerType; 
 	private String query;
 	private ArrayList<HashMap<String, String>> answers = new ArrayList<HashMap<String, String>>();
 	private static String SELECT_REGEX = ".*SELECT.*";
 	private static String ASK_REGEX = ".*ASK.*";
 	public EvalQuery(String query) {
-		this.query = query;
-		isSelect = evalRegex(query, SELECT_REGEX, Pattern.MULTILINE);
-		isAsk = evalRegex(query, ASK_REGEX, Pattern.MULTILINE);
-		if (!(isSelect ^ isAsk)) {
-			throw new RuntimeException("Unable to detect whether query is select or ask. Select: " + (isSelect? "yes":"no") + ", ASK: " + (isAsk? "yes": "no") + ". Query: " + query);
-		}
+		setQuery(query);
+	}
+	public EvalQuery() {
+		
 	}
 	
 	private boolean evalRegex(String string, String regexString, int modifiers) {
@@ -47,6 +48,15 @@ public class EvalQuery {
 		Query query = QueryFactory.create(this.query);
 		query.addGraphURI(fromGraph);
 		return query.toString();
+	}
+	
+	public void setQuery(String query) {
+		this.query = query;
+		isSelect = evalRegex(query, SELECT_REGEX, Pattern.MULTILINE);
+		isAsk = evalRegex(query, ASK_REGEX, Pattern.MULTILINE);
+		if (!(isSelect ^ isAsk)) {
+			throw new RuntimeException("Unable to detect whether query is select or ask. Select: " + (isSelect? "yes":"no") + ", ASK: " + (isAsk? "yes": "no") + ". Query: " + query);
+		}
 	}
 	
 	public String toString() {
@@ -74,6 +84,24 @@ public class EvalQuery {
 		EvalQuery evalQuery = new EvalQuery(query);
 		System.out.println(evalQuery.toString());
 		
+	}
+	public boolean isAggregation() {
+		return aggregation;
+	}
+	public void setAggregation(boolean aggregation) {
+		this.aggregation = aggregation;
+	}
+	public String getAnswerType() {
+		return answerType;
+	}
+	public void setAnswerType(String answerType) {
+		this.answerType = answerType;
+	}
+	public boolean isOnlyDbo() {
+		return onlyDbo;
+	}
+	public void setOnlyDbo(boolean onlyDbo) {
+		this.onlyDbo = onlyDbo;
 	}
 	
 	

@@ -15,13 +15,14 @@ import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.http.HTTPRepository;
 import com.d2s.subgraph.eval.EvalQuery;
 import com.d2s.subgraph.eval.GetQueries;
-import com.d2s.subgraph.eval.dbpedia.Qald1DbpQueries;
+import com.d2s.subgraph.eval.dbpedia.QaldDbpQueries;
 import com.d2s.subgraph.helpers.Helper;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.ResultSetFactory;
+import com.hp.hpl.jena.query.ResultSetFormatter;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
@@ -64,6 +65,11 @@ public class Evaluate {
 				} else {
 					double precision = getPrecision(goldenStandardResults, subgraphResults);
 					double recall = getRecall(goldenStandardResults, subgraphResults);
+					if (precision == 1.0) {
+						ResultSetFormatter.out(goldenStandardResults);
+						ResultSetFormatter.out(subgraphResults);
+						System.exit(1);
+					}
 					System.out.println("precision: " + precision + ", recall: " + recall );
 //					Result result = new Result();
 //					result.setQuery(evalQuery.getQuery());
@@ -206,7 +212,7 @@ public class Evaluate {
 		String goldenStandardGraph = "http://dbpedia.org";
 		String subgraph = "htpp://dbpediasubgraph.org";
 		try {
-			Evaluate evaluate = new Evaluate(new Qald1DbpQueries(), Evaluate.OPS_VIRTUOSO, goldenStandardGraph, subgraph);
+			Evaluate evaluate = new Evaluate(new QaldDbpQueries(QaldDbpQueries.QALD_2_QUERIES), Evaluate.OPS_VIRTUOSO, goldenStandardGraph, subgraph);
 			evaluate.run();
 		} catch (Exception e) {
 			e.printStackTrace();

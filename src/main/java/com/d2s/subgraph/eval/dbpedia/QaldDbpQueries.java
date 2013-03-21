@@ -1,6 +1,8 @@
 package com.d2s.subgraph.eval.dbpedia;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,6 +11,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -17,16 +20,24 @@ import com.d2s.subgraph.eval.EvalQuery;
 import com.d2s.subgraph.eval.GetQueries;
 
 
-public class Qald2And3DbpQueries implements GetQueries {
+public class QaldDbpQueries implements GetQueries {
+	public static String QALD_1_QUERIES = "src/main/resources/qald1-dbpedia-train.xml";
+	public static String QALD_2_QUERIES = "src/main/resources/qald2-dbpedia-train.xml";
+	public static String QALD_3_QUERIES = "src/main/resources/qald3-dbpedia-train.xml";
 	ArrayList<EvalQuery> queries = new ArrayList<EvalQuery>();
-	private static String QALD_2_QUERIES = "src/main/resources/qald2-dbpedia-train.xml";
-	private static String QALD_3_QUERIES = "src/main/resources/qald3-dbpedia-train.xml";
-	public Qald2And3DbpQueries() throws Exception {
-		parseXml(new File(QALD_2_QUERIES));
+	private boolean onlyDbo = true;
+	
+	public QaldDbpQueries(String xmlFile, boolean onlyDbo) throws SAXException, IOException, ParserConfigurationException {
+		this.onlyDbo  = onlyDbo;
+		parseXml(new File(xmlFile));
+	}
+
+	public QaldDbpQueries(String xmlFile) throws SAXException, IOException, ParserConfigurationException {
+		this(xmlFile, false);
 	}
 	
 	
-	public void parseXml(File xmlFile) throws SAXException, IOException, ParserConfigurationException {
+	private void parseXml(File xmlFile) throws SAXException, IOException, ParserConfigurationException {
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 		Document doc = dBuilder.parse(xmlFile);
@@ -40,19 +51,30 @@ public class Qald2And3DbpQueries implements GetQueries {
 		for (int i = 0; i < nList.getLength(); i++) {
 			Node nNode = nList.item(i);
 			if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-				storeQuery((Element) nNode);
+				EvalQuery evalQuery = new EvalQuery();
+				NamedNodeMap map = nNode.getAttributes();
 				
+				Node aggregation = map.getNamedItem("aggregation");
+				if (aggregation != null) evalQuery.setAggregation(aggregation.getTextContent().trim().equals("true"));
 				
+				Node answerType = map.getNamedItem("answertype");
+				if (answerType != null) evalQuery.setAnswerType(answerType.getTextContent().trim());
+				
+				Node onlyDbo = map.getNamedItem("onlydbo");
+				if (onlyDbo != null) evalQuery.setOnlyDbo(onlyDbo.getTextContent().trim().equals("true"));
+				if (!this.onlyDbo || evalQuery.isOnlyDbo()) { //55 out of 100 are onlydbo
+					storeQuery(evalQuery, (Element) nNode);
+				}
 			}
 		}
 		
 		
 	}
 	
-	private void storeQuery(Element element) {
+	private void storeQuery(EvalQuery evalQuery, Element element) {
 		Node queryNode = element.getElementsByTagName("query").item(0);
-		if (queryNode != null) {
-			EvalQuery evalQuery = new EvalQuery(queryNode.getTextContent());
+		if (queryNode != null && queryNode.getTextContent().trim().length() > 0) {
+			evalQuery.setQuery(queryNode.getTextContent());
 			evalQuery.setAnswers(getAnswersList(element));
 			queries.add(evalQuery);
 		}
@@ -102,7 +124,42 @@ public class Qald2And3DbpQueries implements GetQueries {
 	public static void main(String[] args)  {
 		
 		try {
-			Qald2And3DbpQueries getQueries = new Qald2And3DbpQueries();
+			QaldDbpQueries qaldQueries = new QaldDbpQueries(QALD_2_QUERIES);
+			ArrayList<EvalQuery> queries = qaldQueries.getQueries();
+			try  
+			{
+			    FileWriter fstream = new FileWriter("qald2.txt", true); //true tells to append data.
+			    BufferedWriter out = new BufferedWriter(fstream);
+				for (EvalQuery query: queries) {
+					    out.write("\n" + query.getQuery());
+					}
+				out.close();
+					
+				}
+			catch (Exception e)
+			{
+			    System.err.println("Error: " + e.getMessage());
+			}
+			
+			
+			qaldQueries = new QaldDbpQueries(QALD_3_QUERIES);
+			queries = qaldQueries.getQueries();
+			try  
+			{
+			    FileWriter fstream = new FileWriter("qald3.txt", true); //true tells to append data.
+			    BufferedWriter out = new BufferedWriter(fstream);
+				for (EvalQuery query: queries) {
+					    out.write("\n" + query.getQuery());
+					}
+				out.close();
+					
+				}
+			catch (Exception e)
+			{
+			    System.err.println("Error: " + e.getMessage());
+			}
+			
+//			System.out.println(qaldQueries.getQueries().size());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
