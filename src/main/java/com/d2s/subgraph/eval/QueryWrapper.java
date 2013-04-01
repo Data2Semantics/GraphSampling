@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 
-public class EvalQuery {
+public class QueryWrapper {
 	private boolean isSelect = true;
 	private boolean isAsk = false;
 	private boolean aggregation;
@@ -19,10 +19,10 @@ public class EvalQuery {
 	private ArrayList<HashMap<String, String>> answers = new ArrayList<HashMap<String, String>>();
 	private static String SELECT_REGEX = ".*SELECT.*";
 	private static String ASK_REGEX = ".*ASK.*";
-	public EvalQuery(String query) {
+	public QueryWrapper(String query) {
 		setQuery(query);
 	}
-	public EvalQuery() {
+	public QueryWrapper() {
 		
 	}
 	
@@ -81,7 +81,7 @@ public class EvalQuery {
 				"			?software rdfs:label ?name .\n" + 
 				"			FILTER (regex(?name, 'Battle Chess'))\n" + 
 				"			}";
-		EvalQuery evalQuery = new EvalQuery(query);
+		QueryWrapper evalQuery = new QueryWrapper(query);
 		System.out.println(evalQuery.toString());
 		
 	}

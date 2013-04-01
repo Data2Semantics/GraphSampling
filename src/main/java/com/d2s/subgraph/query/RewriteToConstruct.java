@@ -7,7 +7,7 @@ import java.util.Iterator;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
-import com.d2s.subgraph.eval.EvalQuery;
+import com.d2s.subgraph.eval.QueryWrapper;
 import com.d2s.subgraph.eval.dbpedia.QaldDbpQueries;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
@@ -59,7 +59,7 @@ public class RewriteToConstruct {
 		
 		try {
 			QaldDbpQueries getQueries = new QaldDbpQueries(QaldDbpQueries.QALD_1_QUERIES);
-			ArrayList<EvalQuery> queries = getQueries.getQueries();
+			ArrayList<QueryWrapper> queries = getQueries.getQueries();
 			
 			File csvFile = new File("queries.csv");
 			CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ',');
@@ -68,13 +68,10 @@ public class RewriteToConstruct {
 				System.out.println("no queries retrieved");
 				System.exit(1);
 			}
-			ArrayList<EvalQuery> failedQueries = new ArrayList<EvalQuery>();
-			for (EvalQuery query: queries) {
+			ArrayList<QueryWrapper> failedQueries = new ArrayList<QueryWrapper>();
+			for (QueryWrapper query: queries) {
 				try {
-//					System.out.println(query.getQuery());
 					RewriteToConstruct rewrite = new RewriteToConstruct(query.getQuery());
-					
-//					System.out.println(rewrite.getConstructQuery());
 					writer.writeNext(new String[]{query.getQuery(), rewrite.getConstructQuery()});
 				} catch (Exception e) {
 					System.out.println(query.getQuery());

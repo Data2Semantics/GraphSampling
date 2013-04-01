@@ -4,5 +4,5 @@ import java.util.ArrayList;
 
 public interface GetQueries {
 	
-	public ArrayList<EvalQuery> getQueries();
+	public ArrayList<QueryWrapper> getQueries();
 }

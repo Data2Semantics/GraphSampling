@@ -1,4 +1,4 @@
-package com.d2s.subgraph.eval.evaluate;
+package com.d2s.subgraph.eval.batch;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,7 +13,7 @@ import org.openrdf.query.TupleQueryResult;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.http.HTTPRepository;
-import com.d2s.subgraph.eval.EvalQuery;
+import com.d2s.subgraph.eval.QueryWrapper;
 import com.d2s.subgraph.eval.GetQueries;
 import com.d2s.subgraph.eval.dbpedia.QaldDbpQueries;
 import com.d2s.subgraph.helpers.Helper;
@@ -22,21 +22,22 @@ import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.ResultSetFactory;
-import com.hp.hpl.jena.query.ResultSetFormatter;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 
-public class Evaluate {
+public class EvaluateSubgraph {
 //	private static String LOCAL_SESAME_REPO = "http://localhost:8080/openrdf-sesame";
-	private static String OPS_VIRTUOSO = "http://ops.few.vu.nl:8890/sparql";
-	private ArrayList<EvalQuery> queries = new ArrayList<EvalQuery>();
+	public static String OPS_VIRTUOSO = "http://ops.few.vu.nl:8890/sparql";
+	private ArrayList<QueryWrapper> queries = new ArrayList<QueryWrapper>();
 	private String goldenStandardGraph;
 	private String subGraph;
+	public int validCount = 0;
+	public int invalidCount = 0;
 	private String endpoint;
-	ArrayList<Result> results = new ArrayList<Result>();
-	public Evaluate(GetQueries getQueries, String endpoint, String goldenStandardGraph, String subGraph) {
+	Results results = new Results();
+	public EvaluateSubgraph(GetQueries getQueries, String endpoint, String goldenStandardGraph, String subGraph) {
 		queries = getQueries.getQueries();
 		this.endpoint = endpoint;
 		this.goldenStandardGraph = goldenStandardGraph;
@@ -44,46 +45,42 @@ public class Evaluate {
 	}
 	
 	public void run() throws RepositoryException, MalformedQueryException, QueryEvaluationException {
-		for (EvalQuery evalQuery: queries) {
+		for (QueryWrapper evalQuery: queries) {
 			if (evalQuery.isSelect()) {
+				
 				ResultSetRewindable goldenStandardResults;
 				ResultSetRewindable subgraphResults;
 				try {
 					goldenStandardResults = runSelectUsingJena(endpoint, evalQuery.getQuery(goldenStandardGraph));
 					subgraphResults = runSelectUsingJena(endpoint, evalQuery.getQuery(subGraph));
 				} catch (Exception e) {
-					System.out.println(e.getMessage());
+//					System.out.println(e.getMessage());
 					continue;
 				}
 				
 				if (Helper.getResultSize(goldenStandardResults) == 0) {
-					System.out.println("no results");
-//				} else if (Helper.getResultSize(goldenStandardResults) != evalQuery.getAnswers().size()) {
-//					System.out.println(evalQuery.getQuery());
-//					System.out.println("Not matching number of results, " + Helper.getResultSize(goldenStandardResults) + " vs " + evalQuery.getAnswers().size());
-//					return;
+					invalidCount++;
+					continue; //havent loaded complete dbpedia yet. might be missing things, so just skip this query
 				} else {
+					validCount++;
 					double precision = getPrecision(goldenStandardResults, subgraphResults);
 					double recall = getRecall(goldenStandardResults, subgraphResults);
-					if (precision == 1.0) {
-						ResultSetFormatter.out(goldenStandardResults);
-						ResultSetFormatter.out(subgraphResults);
-						System.exit(1);
-					}
-					System.out.println("precision: " + precision + ", recall: " + recall );
-//					Result result = new Result();
-//					result.setQuery(evalQuery.getQuery());
-//					result.setPrecision(precision);
-//					result.setRecall(recall);
-//					results.add(result);
+					System.out.println("golden: " + Helper.getResultSize(goldenStandardResults));
+					System.out.println("subgraph: " + Helper.getResultSize(subgraphResults));
+					Result result = new Result();
+					result.setQuery(evalQuery);
+					result.setPrecision(precision);
+					result.setRecall(recall);
+					results.add(result);
 				}
 			} else if (evalQuery.isAsk()) {
 				//todo
 			}
 		}
+		System.out.println("Invalids: " + Integer.toString(invalidCount) + ", valids: " + Integer.toString(validCount));
 	}
 	@SuppressWarnings("unused")
-	private double getPrecision(EvalQuery evalQuery, ResultSetRewindable subGraph) throws QueryEvaluationException {
+	private double getPrecision(QueryWrapper evalQuery, ResultSetRewindable subGraph) throws QueryEvaluationException {
 		int falsePositives = 0;
 		int truePositives = 0;
 		while (subGraph.hasNext()) {
@@ -139,6 +136,8 @@ public class Evaluate {
 		return recall;
 	}
 	
+	
+	
 	private boolean bindingFoundInQueryResult(Binding binding, ResultSetRewindable queryResult) throws QueryEvaluationException {
 		boolean found = false;
 		queryResult.reset();
@@ -151,7 +150,7 @@ public class Evaluate {
 		return found;
 	}
 	
-	private boolean bindingFoundInAnswerSet(Binding binding, EvalQuery evalQuery) {
+	private boolean bindingFoundInAnswerSet(Binding binding, QueryWrapper evalQuery) {
 		boolean found = false;
 		ArrayList<HashMap<String,String>> goldenAnswers = evalQuery.getAnswers();
 		for(HashMap<String,String> answerSet: goldenAnswers) {
@@ -208,12 +207,18 @@ public class Evaluate {
 	    return result;
 	}
 	
+	public Results getResults() {
+		return results;
+	}
+	
 	public static void main(String[] args)  {
-		String goldenStandardGraph = "http://dbpedia.org";
-		String subgraph = "htpp://dbpediasubgraph.org";
+		String goldenStandardGraph = "http://dbpo.org";
+		String subgraph = "htpp://subgraph.org";
 		try {
-			Evaluate evaluate = new Evaluate(new QaldDbpQueries(QaldDbpQueries.QALD_2_QUERIES), Evaluate.OPS_VIRTUOSO, goldenStandardGraph, subgraph);
+			EvaluateSubgraph evaluate = new EvaluateSubgraph(new QaldDbpQueries(QaldDbpQueries.QALD_2_QUERIES), EvaluateSubgraph.OPS_VIRTUOSO, goldenStandardGraph, subgraph);
 			evaluate.run();
+			System.out.println("valids: " + evaluate.validCount);
+			System.out.println("invalids: " + evaluate.invalidCount);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

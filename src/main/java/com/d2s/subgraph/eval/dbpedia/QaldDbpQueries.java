@@ -16,7 +16,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.d2s.subgraph.eval.EvalQuery;
+import com.d2s.subgraph.eval.QueryWrapper;
 import com.d2s.subgraph.eval.GetQueries;
 
 
@@ -24,7 +24,8 @@ public class QaldDbpQueries implements GetQueries {
 	public static String QALD_1_QUERIES = "src/main/resources/qald1-dbpedia-train.xml";
 	public static String QALD_2_QUERIES = "src/main/resources/qald2-dbpedia-train.xml";
 	public static String QALD_3_QUERIES = "src/main/resources/qald3-dbpedia-train.xml";
-	ArrayList<EvalQuery> queries = new ArrayList<EvalQuery>();
+	private static String IGNORE_QUERY_STRING = "OUT OF SCOPE";
+	ArrayList<QueryWrapper> queries = new ArrayList<QueryWrapper>();
 	private boolean onlyDbo = true;
 	
 	public QaldDbpQueries(String xmlFile, boolean onlyDbo) throws SAXException, IOException, ParserConfigurationException {
@@ -51,7 +52,7 @@ public class QaldDbpQueries implements GetQueries {
 		for (int i = 0; i < nList.getLength(); i++) {
 			Node nNode = nList.item(i);
 			if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-				EvalQuery evalQuery = new EvalQuery();
+				QueryWrapper evalQuery = new QueryWrapper();
 				NamedNodeMap map = nNode.getAttributes();
 				
 				Node aggregation = map.getNamedItem("aggregation");
@@ -71,9 +72,9 @@ public class QaldDbpQueries implements GetQueries {
 		
 	}
 	
-	private void storeQuery(EvalQuery evalQuery, Element element) {
+	private void storeQuery(QueryWrapper evalQuery, Element element) {
 		Node queryNode = element.getElementsByTagName("query").item(0);
-		if (queryNode != null && queryNode.getTextContent().trim().length() > 0) {
+		if (queryNode != null && queryNode.getTextContent().trim().length() > 0 && !queryNode.getTextContent().trim().equals(IGNORE_QUERY_STRING)) {
 			evalQuery.setQuery(queryNode.getTextContent());
 			evalQuery.setAnswers(getAnswersList(element));
 			queries.add(evalQuery);
@@ -116,7 +117,7 @@ public class QaldDbpQueries implements GetQueries {
 		return answers;
 	}
 
-	public ArrayList<EvalQuery> getQueries() {
+	public ArrayList<QueryWrapper> getQueries() {
 		return this.queries;
 	}
 	
@@ -125,12 +126,12 @@ public class QaldDbpQueries implements GetQueries {
 		
 		try {
 			QaldDbpQueries qaldQueries = new QaldDbpQueries(QALD_2_QUERIES);
-			ArrayList<EvalQuery> queries = qaldQueries.getQueries();
+			ArrayList<QueryWrapper> queries = qaldQueries.getQueries();
 			try  
 			{
 			    FileWriter fstream = new FileWriter("qald2.txt", true); //true tells to append data.
 			    BufferedWriter out = new BufferedWriter(fstream);
-				for (EvalQuery query: queries) {
+				for (QueryWrapper query: queries) {
 					    out.write("\n" + query.getQuery());
 					}
 				out.close();
@@ -148,7 +149,7 @@ public class QaldDbpQueries implements GetQueries {
 			{
 			    FileWriter fstream = new FileWriter("qald3.txt", true); //true tells to append data.
 			    BufferedWriter out = new BufferedWriter(fstream);
-				for (EvalQuery query: queries) {
+				for (QueryWrapper query: queries) {
 					    out.write("\n" + query.getQuery());
 					}
 				out.close();

@@ -1,16 +1,18 @@
-package com.d2s.subgraph.eval.evaluate;
+package com.d2s.subgraph.eval.batch;
+
+import com.d2s.subgraph.eval.QueryWrapper;
 
 
 
 public class Result {
-	private String query;
+	private QueryWrapper query;
 	private double precision;
 	private double recall;
-	public String getQuery() {
+	public QueryWrapper getQuery() {
 		return query;
 	}
-	public void setQuery(String query) {
-		this.query = query;
+	public void setQuery(QueryWrapper evalQuery) {
+		this.query = evalQuery;
 	}
 	public double getPrecision() {
 		return precision;

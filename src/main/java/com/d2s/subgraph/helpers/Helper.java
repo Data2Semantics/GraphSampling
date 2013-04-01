@@ -6,10 +6,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -17,8 +13,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.TupleQueryResult;
-
-import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.sparql.resultset.ResultSetRewindable;
 
 public class Helper {
@@ -141,6 +135,14 @@ public class Helper {
 			result++;
 		}
 		return result;
+	}
+
+	public static String boolAsString(boolean bool) {
+		if (bool) {
+			return "1";
+		} else {
+			return "0";
+		}
 	}
 
 }
