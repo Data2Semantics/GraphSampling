@@ -1,5 +1,6 @@
 package com.d2s.subgraph.eval.batch;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,12 +23,13 @@ import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.ResultSetFactory;
+import com.hp.hpl.jena.query.ResultSetFormatter;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 
-public class EvaluateSubgraph {
+public class EvaluateGraph {
 //	private static String LOCAL_SESAME_REPO = "http://localhost:8080/openrdf-sesame";
 	public static String OPS_VIRTUOSO = "http://ops.few.vu.nl:8890/sparql";
 	private ArrayList<QueryWrapper> queries = new ArrayList<QueryWrapper>();
@@ -37,24 +39,30 @@ public class EvaluateSubgraph {
 	public int invalidCount = 0;
 	private String endpoint;
 	Results results = new Results();
-	public EvaluateSubgraph(GetQueries getQueries, String endpoint, String goldenStandardGraph, String subGraph) {
+	public EvaluateGraph(GetQueries getQueries, String endpoint, String goldenStandardGraph, String subGraph) {
 		queries = getQueries.getQueries();
 		this.endpoint = endpoint;
 		this.goldenStandardGraph = goldenStandardGraph;
 		this.subGraph = subGraph;
 	}
 	
-	public void run() throws RepositoryException, MalformedQueryException, QueryEvaluationException {
+	public void run() throws RepositoryException, MalformedQueryException, QueryEvaluationException, IOException {
 		for (QueryWrapper evalQuery: queries) {
-			if (evalQuery.isSelect()) {
-				
+			if (evalQuery.isSelect() && evalQuery.isOnlyDbo()) {
+				evalQuery.removeProjectVar("string");
+//				if (!evalQuery.getQuery().contains("uri dbo:league res:Premier_Leag")) {
+//					continue;
+//				}
+//				System.out.println(evalQuery.getQuery());
 				ResultSetRewindable goldenStandardResults;
 				ResultSetRewindable subgraphResults;
 				try {
 					goldenStandardResults = runSelectUsingJena(endpoint, evalQuery.getQuery(goldenStandardGraph));
 					subgraphResults = runSelectUsingJena(endpoint, evalQuery.getQuery(subGraph));
+//					ResultSetFormatter.out(subgraphResults);
 				} catch (Exception e) {
 //					System.out.println(e.getMessage());
+					invalidCount++;
 					continue;
 				}
 				
@@ -65,8 +73,8 @@ public class EvaluateSubgraph {
 					validCount++;
 					double precision = getPrecision(goldenStandardResults, subgraphResults);
 					double recall = getRecall(goldenStandardResults, subgraphResults);
-					System.out.println("golden: " + Helper.getResultSize(goldenStandardResults));
-					System.out.println("subgraph: " + Helper.getResultSize(subgraphResults));
+					System.out.println("precision: " + precision);
+					System.out.println("recall: " + recall);
 					Result result = new Result();
 					result.setQuery(evalQuery);
 					result.setPrecision(precision);
@@ -77,7 +85,7 @@ public class EvaluateSubgraph {
 				//todo
 			}
 		}
-		System.out.println("Invalids: " + Integer.toString(invalidCount) + ", valids: " + Integer.toString(validCount));
+		System.out.println("Invalids (i.e. no results on golden standard, or sparql error on execution): " + Integer.toString(invalidCount) + ", valids: " + Integer.toString(validCount));
 	}
 	@SuppressWarnings("unused")
 	private double getPrecision(QueryWrapper evalQuery, ResultSetRewindable subGraph) throws QueryEvaluationException {
@@ -101,8 +109,8 @@ public class EvaluateSubgraph {
 	private double getPrecision(ResultSetRewindable goldenStandard, ResultSetRewindable subgraph) throws QueryEvaluationException {
 		goldenStandard.reset();
 		subgraph.reset();
-		int falsePositives = 0;
-		int truePositives = 0;
+		double falsePositives = 0;
+		double truePositives = 0;
 		while (subgraph.hasNext()) {
 			Binding binding = subgraph.nextBinding();
 			if (bindingFoundInQueryResult(binding, goldenStandard)) {
@@ -121,8 +129,8 @@ public class EvaluateSubgraph {
 	private double getRecall(ResultSetRewindable goldenStandard, ResultSetRewindable subgraph) throws QueryEvaluationException {
 		goldenStandard.reset();
 		subgraph.reset();
-		int falseNegatives = 0;
-		int truePositives = 0;
+		double falseNegatives = 0;
+		double truePositives = 0;
 		while (goldenStandard.hasNext()) {
 			Binding binding = goldenStandard.nextBinding();
 			if (bindingFoundInQueryResult(binding, subgraph)) {
@@ -131,6 +139,7 @@ public class EvaluateSubgraph {
 				falseNegatives++;
 			}
 		}
+		System.out.println("truePositives: " + truePositives + " falseNegatives: " + falseNegatives);
 		double recall = 0;
 		if ((truePositives + falseNegatives) != 0) recall = truePositives / (truePositives + falseNegatives);
 		return recall;
@@ -212,13 +221,25 @@ public class EvaluateSubgraph {
 	}
 	
 	public static void main(String[] args)  {
-		String goldenStandardGraph = "http://dbpo.org";
-		String subgraph = "htpp://subgraph.org";
+		
+		String goldenStandardGraph = "http://dbpo";
+		String subgraph = "http://dbp_s-o_unweighted_noLit_directed_outdegree_0.5.nt";
+//		String subgraph = "http://dbpo";
 		try {
-			EvaluateSubgraph evaluate = new EvaluateSubgraph(new QaldDbpQueries(QaldDbpQueries.QALD_2_QUERIES), EvaluateSubgraph.OPS_VIRTUOSO, goldenStandardGraph, subgraph);
+//			
+//			ArrayList<QueryWrapper> queries = new QaldDbpQueries(QaldDbpQueries.QALD_2_QUERIES).getQueries();
+//			System.out.println("total queries " + queries.size());
+//			int properQuery = 0;
+//			for(QueryWrapper query: queries) {
+//				if (query.isSelect() && query.isOnlyDbo()) {
+//					properQuery++;
+//				}
+//			}
+//			System.out.println("proper queries: " + properQuery);
+			
+			
+			EvaluateGraph evaluate = new EvaluateGraph(new QaldDbpQueries(QaldDbpQueries.QALD_2_QUERIES), EvaluateGraph.OPS_VIRTUOSO, goldenStandardGraph, subgraph);
 			evaluate.run();
-			System.out.println("valids: " + evaluate.validCount);
-			System.out.println("invalids: " + evaluate.invalidCount);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
