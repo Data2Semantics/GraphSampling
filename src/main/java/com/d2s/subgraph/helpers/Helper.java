@@ -6,6 +6,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Iterator;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -13,7 +15,16 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.TupleQueryResult;
+
+import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.sparql.core.BasicPattern;
+import com.hp.hpl.jena.sparql.core.TriplePath;
 import com.hp.hpl.jena.sparql.resultset.ResultSetRewindable;
+import com.hp.hpl.jena.sparql.syntax.Element;
+import com.hp.hpl.jena.sparql.syntax.ElementPathBlock;
+import com.hp.hpl.jena.sparql.syntax.ElementVisitorBase;
+import com.hp.hpl.jena.sparql.syntax.ElementWalker;
+import com.hp.hpl.jena.sparql.syntax.Template;
 
 public class Helper {
 	private static String HEADER_CONTENT = "application/x-www-form-urlencoded";
@@ -143,6 +154,25 @@ public class Helper {
 		} else {
 			return "0";
 		}
+	}
+	
+	public static Query getAsConstructQuery(Query origQuery) {
+		Query constructQuery = origQuery.cloneQuery();
+		constructQuery.setQueryConstructType();
+		
+		final BasicPattern constructBp = new BasicPattern();
+		
+		Element queryPattern = origQuery.getQueryPattern();
+		ElementWalker.walk(queryPattern, new ElementVisitorBase() {
+	        public void visit(ElementPathBlock el) {
+	            Iterator<TriplePath> triples = el.patternElts();
+	            while (triples.hasNext()) {
+	                constructBp.add(triples.next().asTriple());
+	            }
+	        }
+	    });
+		constructQuery.setConstructTemplate(new Template(constructBp));
+		return constructQuery;
 	}
 
 }
