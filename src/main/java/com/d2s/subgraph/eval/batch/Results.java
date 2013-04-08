@@ -24,10 +24,11 @@ public class Results {
 			csvFile.createNewFile();
 		}
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
-		writer.writeNext(new String[]{"query", "isAggregation", "isAsk", "isOnlyDbo", "isSelect", "precision", "recall"});
+		writer.writeNext(new String[]{"query", "constructQuery", "isAggregation", "isAsk", "isOnlyDbo", "isSelect", "precision", "recall"});
 		for (Result result: results) {
 			ArrayList<String> columns = new ArrayList<String>();
 			columns.add(result.getQuery().getQuery());
+			columns.add(result.getQuery().getAsConstructQuery());
 			columns.add(Helper.boolAsString(result.getQuery().isAggregation()));
 			columns.add(Helper.boolAsString(result.getQuery().isAsk()));
 			columns.add(Helper.boolAsString(result.getQuery().isOnlyDbo()));

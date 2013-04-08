@@ -1,66 +1,57 @@
 package com.d2s.subgraph.eval;
 
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.List;
+import java.util.Map;
 
+import com.d2s.subgraph.helpers.Helper;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.query.QueryParseException;
+import com.hp.hpl.jena.sparql.core.Var;
+import com.hp.hpl.jena.sparql.expr.Expr;
 
 public class QueryWrapper {
-	private boolean isSelect = true;
-	private boolean isAsk = false;
 	private boolean aggregation;
 	private boolean onlyDbo;
+	private Query query;
 	private String answerType; 
-	private String query;
 	private ArrayList<HashMap<String, String>> answers = new ArrayList<HashMap<String, String>>();
-	private static String SELECT_REGEX = ".*SELECT.*";
-	private static String ASK_REGEX = ".*ASK.*";
-	public QueryWrapper(String query) {
+	public QueryWrapper(String query) throws QueryParseException {
 		setQuery(query);
 	}
 	public QueryWrapper() {
 		
 	}
 	
-	private boolean evalRegex(String string, String regexString, int modifiers) {
-		Pattern regex = Pattern.compile(regexString, modifiers);
-		Matcher regexMatcher = regex.matcher(string);
-		return regexMatcher.find();
-	}
-	
 	public boolean isSelect() {
-		return isSelect;
+		return query.isSelectType();
 	}
 	
 	public boolean isAsk() {
-		return isAsk;
+		return query.isAskType();
 	}
 	
 	public String getQuery() {
-		return this.query;
+		return this.query.toString();
 	}
 	
 	public String getQuery(String fromGraph) {
-		Query query = QueryFactory.create(this.query);
-		query.addGraphURI(fromGraph);
-		return query.toString();
+		
+		Query queryWithFromClause = query.cloneQuery();
+		queryWithFromClause.addGraphURI(fromGraph);
+		return queryWithFromClause.toString();
 	}
 	
-	public void setQuery(String query) {
-		this.query = query;
-		isSelect = evalRegex(query, SELECT_REGEX, Pattern.MULTILINE);
-		isAsk = evalRegex(query, ASK_REGEX, Pattern.MULTILINE);
-		if (!(isSelect ^ isAsk)) {
-			throw new RuntimeException("Unable to detect whether query is select or ask. Select: " + (isSelect? "yes":"no") + ", ASK: " + (isAsk? "yes": "no") + ". Query: " + query);
-		}
+	public String getAsConstructQuery() {
+		return Helper.getAsConstructQuery(query).toString();
 	}
 	
-	public String toString() {
-		return "It is " + (isSelect()? "": "not ") + "a select query, and it is " + (isAsk()? "": "not ") + "an ask query"; 
+	public void setQuery(String query) throws QueryParseException {
+		this.query = QueryFactory.create(query);
 	}
 	
 	public ArrayList<HashMap<String, String>> getAnswers() {
@@ -70,21 +61,7 @@ public class QueryWrapper {
 	public void setAnswers(ArrayList<HashMap<String, String>> answers) {
 		this.answers = answers;
 	}
-	public static void main(String[] args)  {
-		String query = "			PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;\n" + 
-				"			PREFIX onto: &lt;http://dbpedia.org/ontology/&gt;\n" + 
-				"			PREFIX rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt;\n" + 
-				"			ASK\n" + 
-				"			WHERE\n" + 
-				"			{\n" + 
-				"			?software rdf:type onto:Software .\n" + 
-				"			?software rdfs:label ?name .\n" + 
-				"			FILTER (regex(?name, 'Battle Chess'))\n" + 
-				"			}";
-		QueryWrapper evalQuery = new QueryWrapper(query);
-		System.out.println(evalQuery.toString());
-		
-	}
+	
 	public boolean isAggregation() {
 		return aggregation;
 	}
@@ -104,5 +81,68 @@ public class QueryWrapper {
 		this.onlyDbo = onlyDbo;
 	}
 	
+	public void removeProjectVar(String varToRemove) throws IOException {
+		if (!query.isSelectType()) {
+			return;
+		}
+		List<String> resultVars = query.getResultVars();
+		if (resultVars.contains(varToRemove)) {
+			List<String> newResultVars = new ArrayList<String>();
+			
+			for (String var: resultVars) {
+				
+				if (var.equals(varToRemove)) {
+					//yes, we have it. don't add it to new project vars list!
+				} else {
+					newResultVars.add(var);
+				}
+			}
+			
+			//we cannot remove result vars from query... create new query object..
+			//copy all original properties:
+			Query newQuery = new Query(query.getPrologue());
+			
+			//prologue doesnt add prefix? (strange....) Add them manually
+			newQuery.setPrefixMapping(query.getPrefixMapping());
+			
+			newQuery.setQueryPattern(query.getQueryPattern());
+			newQuery.setDistinct(query.isDistinct());
+//			newQuery.setBaseURI(query.getBaseURI());
+			newQuery.setLimit(query.getLimit());
+			newQuery.setOffset(query.getOffset());
+			newQuery.setQuerySelectType();
+			Map<Var, Expr> groupByList = query.getGroupBy().getExprs();
+			for (Map.Entry<Var, Expr> entry : groupByList.entrySet()) {
+			    newQuery.addGroupBy(entry.getKey(), entry.getValue());
+			}
+			List<Expr> havingExpressions = query.getHavingExprs();
+			for (Expr havingExpr : havingExpressions) {
+				newQuery.addHavingCondition(havingExpr);
+			}
+			//set new result vars (where we removed one)
+			newQuery.addProjectVars(newResultVars);
+			query = newQuery;
+		}
+	}
+	
+	
+	public static void main(String[] args)  {
+		String query = "PREFIX : <http://bla>\n" +
+				"SELECT ?bla ?bla2\n" + 
+				"			WHERE\n" + 
+				"			{\n" + 
+				"			?bla ?v ?bla2 ." +
+				"			}";
+		QueryWrapper evalQuery = new QueryWrapper(query);
+		System.out.println(evalQuery.getQuery());
+		try {
+			evalQuery.removeProjectVar("bla2");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println(evalQuery.getAsConstructQuery());
+		
+	}
 	
 }

@@ -1,8 +1,6 @@
 package com.d2s.subgraph.eval.dbpedia;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,9 +13,9 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
 import com.d2s.subgraph.eval.QueryWrapper;
 import com.d2s.subgraph.eval.GetQueries;
+import com.hp.hpl.jena.query.QueryParseException;
 
 
 public class QaldDbpQueries implements GetQueries {
@@ -48,28 +46,38 @@ public class QaldDbpQueries implements GetQueries {
 	 
 	 
 		NodeList nList = doc.getElementsByTagName("question");
-		
+		int failedExtractQueries = 0;
 		for (int i = 0; i < nList.getLength(); i++) {
-			Node nNode = nList.item(i);
-			if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-				QueryWrapper evalQuery = new QueryWrapper();
-				NamedNodeMap map = nNode.getAttributes();
-				
-				Node aggregation = map.getNamedItem("aggregation");
-				if (aggregation != null) evalQuery.setAggregation(aggregation.getTextContent().trim().equals("true"));
-				
-				Node answerType = map.getNamedItem("answertype");
-				if (answerType != null) evalQuery.setAnswerType(answerType.getTextContent().trim());
-				
-				Node onlyDbo = map.getNamedItem("onlydbo");
-				if (onlyDbo != null) evalQuery.setOnlyDbo(onlyDbo.getTextContent().trim().equals("true"));
-				if (!this.onlyDbo || evalQuery.isOnlyDbo()) { //55 out of 100 are onlydbo
-					storeQuery(evalQuery, (Element) nNode);
-				}
+			try {
+				doMainLoop(nList.item(i));
+			} catch (QueryParseException e) {
+				//ok, so we failed to parse a query. lets just ignore for now
+				failedExtractQueries++;
 			}
 		}
+		if (failedExtractQueries > 0) {
+			System.out.println("Failed to extract " + failedExtractQueries + " queries from xml. Jena could not parse them");
+		}
 		
-		
+	}
+	
+	private void doMainLoop(Node nNode) {
+		if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+			QueryWrapper evalQuery = new QueryWrapper();
+			NamedNodeMap map = nNode.getAttributes();
+			
+			Node aggregation = map.getNamedItem("aggregation");
+			if (aggregation != null) evalQuery.setAggregation(aggregation.getTextContent().trim().equals("true"));
+			
+			Node answerType = map.getNamedItem("answertype");
+			if (answerType != null) evalQuery.setAnswerType(answerType.getTextContent().trim());
+			
+			Node onlyDbo = map.getNamedItem("onlydbo");
+			if (onlyDbo != null) evalQuery.setOnlyDbo(onlyDbo.getTextContent().trim().equals("true"));
+			if (!this.onlyDbo || evalQuery.isOnlyDbo()) { //55 out of 100 are onlydbo
+				storeQuery(evalQuery, (Element) nNode);
+			}
+		}
 	}
 	
 	private void storeQuery(QueryWrapper evalQuery, Element element) {
@@ -125,43 +133,39 @@ public class QaldDbpQueries implements GetQueries {
 	public static void main(String[] args)  {
 		
 		try {
+			
 			QaldDbpQueries qaldQueries = new QaldDbpQueries(QALD_2_QUERIES);
 			ArrayList<QueryWrapper> queries = qaldQueries.getQueries();
-			try  
-			{
-			    FileWriter fstream = new FileWriter("qald2.txt", true); //true tells to append data.
-			    BufferedWriter out = new BufferedWriter(fstream);
-				for (QueryWrapper query: queries) {
-					    out.write("\n" + query.getQuery());
-					}
-				out.close();
-					
+			for (QueryWrapper query: queries) {
+				String origQuery = query.getQuery();
+				query.removeProjectVar("stringggg");
+				String newQuery = query.getQuery();
+				if (!origQuery.equals(newQuery)) {
+					System.out.println(origQuery);
+					System.out.println(newQuery);
 				}
-			catch (Exception e)
-			{
-			    System.err.println("Error: " + e.getMessage());
 			}
 			
-			
-			qaldQueries = new QaldDbpQueries(QALD_3_QUERIES);
-			queries = qaldQueries.getQueries();
-			try  
-			{
-			    FileWriter fstream = new FileWriter("qald3.txt", true); //true tells to append data.
-			    BufferedWriter out = new BufferedWriter(fstream);
-				for (QueryWrapper query: queries) {
-					    out.write("\n" + query.getQuery());
-					}
-				out.close();
-					
-				}
-			catch (Exception e)
-			{
-			    System.err.println("Error: " + e.getMessage());
-			}
+//			qaldQueries = new QaldDbpQueries(QALD_3_QUERIES);
+//			queries = qaldQueries.getQueries();
+//			try  
+//			{
+//			    FileWriter fstream = new FileWriter("qald3.txt", true); //true tells to append data.
+//			    BufferedWriter out = new BufferedWriter(fstream);
+//				for (QueryWrapper query: queries) {
+//					    out.write("\n" + query.getQuery());
+//					}
+//				out.close();
+//					
+//				}
+//			catch (Exception e)
+//			{
+//			    System.err.println("Error: " + e.getMessage());
+//			}
 			
 //			System.out.println(qaldQueries.getQueries().size());
 		} catch (Exception e) {
+			System.out.println("bla");
 			e.printStackTrace();
 		}
 	}

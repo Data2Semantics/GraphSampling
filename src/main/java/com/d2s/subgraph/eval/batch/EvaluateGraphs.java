@@ -30,21 +30,23 @@ public class EvaluateGraphs {
 	}
 	
 	public void run() throws RepositoryException, MalformedQueryException, QueryEvaluationException, SAXException, IOException, ParserConfigurationException {
-		ArrayList<String> graphs = getGraphsToEvaluate();
+//		ArrayList<String> graphs = getGraphsToEvaluate();
+		ArrayList<String> graphs = new ArrayList<String>();
+		graphs.add("http://dbp_s-o_unweighted_litAsNode_directed_indegree_0.5.nt");
 		QaldDbpQueries queries = new QaldDbpQueries(QaldDbpQueries.QALD_2_QUERIES);
-		int count = 0;
 		for (String graph: graphs) {
-			EvaluateSubgraph eval = new EvaluateSubgraph(queries, EvaluateSubgraph.OPS_VIRTUOSO, GOLDEN_STANDARD_GRAPH, graph);
+			System.out.println("evaluating for graph " + graph);
+			EvaluateGraph eval = new EvaluateGraph(queries, EvaluateGraph.OPS_VIRTUOSO, GOLDEN_STANDARD_GRAPH, graph);
 			eval.run();
 			Results results = eval.getResults();
-			results.writeAsCsv(resultsDir.getAbsolutePath() + "/" + Integer.toString(count) + ".csv", true);
-			count++;
+			String filename = graph.substring(7);//remove http://
+			results.writeAsCsv(resultsDir.getAbsolutePath() + "/" + filename + ".csv", true);
 		}
 	}
 	
 	private ArrayList<String> getGraphsToEvaluate() {
 		ArrayList<String> graphs = new ArrayList<String>();
-		
+		System.out.println("retrieving graphs");
 		String queryString = "SELECT DISTINCT ?graph\n" + 
 				"WHERE {\n" + 
 				"  GRAPH ?graph {\n" + 
@@ -52,21 +54,23 @@ public class EvaluateGraphs {
 				"  }\n" + 
 				"}";
 		Query query = QueryFactory.create(queryString);
-		QueryExecution queryExecution = QueryExecutionFactory.sparqlService(EvaluateSubgraph.OPS_VIRTUOSO, query);
+		QueryExecution queryExecution = QueryExecutionFactory.sparqlService(EvaluateGraph.OPS_VIRTUOSO, query);
 		ResultSetRewindable queryResults =  ResultSetFactory.copyResults(queryExecution.execSelect());
 		while (queryResults.hasNext()) {
 			QuerySolution solution = queryResults.next();
 			String graph = solution.get("graph").toString();
-			if (graph.startsWith("htpp://dbp_")) {
+			if (graph.startsWith("http://dbp_") && graph.endsWith("0.5.nt")) {
 				graphs.add(solution.get("graph").toString());
 			}
+			
 		}
+		System.out.println(graphs.size() + " graphs retrieved");
 		return graphs;
 	}
 
 	public static void main(String[] args)  {
 		try {
-			EvaluateGraphs evaluate = new EvaluateGraphs(".");
+			EvaluateGraphs evaluate = new EvaluateGraphs("results");
 			evaluate.run();
 		} catch (Exception e) {
 			e.printStackTrace();
