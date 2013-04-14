@@ -1,4 +1,4 @@
-package com.d2s.subgraph.eval.dbpedia;
+package com.d2s.subgraph.queries;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,7 +14,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import com.d2s.subgraph.eval.QueryWrapper;
-import com.d2s.subgraph.eval.GetQueries;
 import com.hp.hpl.jena.query.QueryParseException;
 
 
@@ -71,6 +70,9 @@ public class QaldDbpQueries implements GetQueries {
 			
 			Node answerType = map.getNamedItem("answertype");
 			if (answerType != null) evalQuery.setAnswerType(answerType.getTextContent().trim());
+			
+			Node id = map.getNamedItem("id");
+			if (id != null) evalQuery.setQueryId(Integer.parseInt(id.getTextContent().trim()));
 			
 			Node onlyDbo = map.getNamedItem("onlydbo");
 			if (onlyDbo != null) evalQuery.setOnlyDbo(onlyDbo.getTextContent().trim().equals("true"));
@@ -137,13 +139,7 @@ public class QaldDbpQueries implements GetQueries {
 			QaldDbpQueries qaldQueries = new QaldDbpQueries(QALD_2_QUERIES);
 			ArrayList<QueryWrapper> queries = qaldQueries.getQueries();
 			for (QueryWrapper query: queries) {
-				String origQuery = query.getQuery();
-				query.removeProjectVar("stringggg");
-				String newQuery = query.getQuery();
-				if (!origQuery.equals(newQuery)) {
-					System.out.println(origQuery);
-					System.out.println(newQuery);
-				}
+				System.out.println(Integer.toString(query.getQueryId()));
 			}
 			
 //			qaldQueries = new QaldDbpQueries(QALD_3_QUERIES);

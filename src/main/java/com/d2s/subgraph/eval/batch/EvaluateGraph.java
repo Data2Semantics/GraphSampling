@@ -15,15 +15,14 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.http.HTTPRepository;
 import com.d2s.subgraph.eval.QueryWrapper;
-import com.d2s.subgraph.eval.GetQueries;
-import com.d2s.subgraph.eval.dbpedia.QaldDbpQueries;
 import com.d2s.subgraph.helpers.Helper;
+import com.d2s.subgraph.queries.GetQueries;
+import com.d2s.subgraph.queries.QaldDbpQueries;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.ResultSetFactory;
-import com.hp.hpl.jena.query.ResultSetFormatter;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
@@ -44,6 +43,7 @@ public class EvaluateGraph {
 		this.endpoint = endpoint;
 		this.goldenStandardGraph = goldenStandardGraph;
 		this.subGraph = subGraph;
+		results.setGraphName(subGraph);
 	}
 	
 	public void run() throws RepositoryException, MalformedQueryException, QueryEvaluationException, IOException {
@@ -57,8 +57,8 @@ public class EvaluateGraph {
 				ResultSetRewindable goldenStandardResults;
 				ResultSetRewindable subgraphResults;
 				try {
-					goldenStandardResults = runSelectUsingJena(endpoint, evalQuery.getQuery(goldenStandardGraph));
-					subgraphResults = runSelectUsingJena(endpoint, evalQuery.getQuery(subGraph));
+					goldenStandardResults = runSelectUsingJena(endpoint, evalQuery.getQueryString(goldenStandardGraph));
+					subgraphResults = runSelectUsingJena(endpoint, evalQuery.getQueryString(subGraph));
 //					ResultSetFormatter.out(subgraphResults);
 				} catch (Exception e) {
 //					System.out.println(e.getMessage());
@@ -67,6 +67,7 @@ public class EvaluateGraph {
 				}
 				
 				if (Helper.getResultSize(goldenStandardResults) == 0) {
+//					System.out.println("no results retrieved for query " + evalQuery.getQuery(goldenStandardGraph));
 					invalidCount++;
 					continue; //havent loaded complete dbpedia yet. might be missing things, so just skip this query
 				} else {
@@ -80,6 +81,7 @@ public class EvaluateGraph {
 					result.setPrecision(precision);
 					result.setRecall(recall);
 					results.add(result);
+					System.out.println(result.toString());
 				}
 			} else if (evalQuery.isAsk()) {
 				//todo
@@ -240,6 +242,8 @@ public class EvaluateGraph {
 			
 			EvaluateGraph evaluate = new EvaluateGraph(new QaldDbpQueries(QaldDbpQueries.QALD_2_QUERIES), EvaluateGraph.OPS_VIRTUOSO, goldenStandardGraph, subgraph);
 			evaluate.run();
+			System.out.println(evaluate.getResults().getQueryIds());
+			System.out.println(evaluate.getResults().get(2));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

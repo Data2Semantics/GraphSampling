@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.apache.http.HttpResponse;
@@ -174,5 +175,12 @@ public class Helper {
 		constructQuery.setConstructTemplate(new Template(constructBp));
 		return constructQuery;
 	}
-
+	
+	public static ArrayList<String> getIntAsString(ArrayList<Integer> intArrayList) {
+		ArrayList<String> stringArrayList = new ArrayList<String>();
+		for (Integer integer: intArrayList) {
+			stringArrayList.add(Integer.toString(integer));
+		}
+		return stringArrayList;
+	}
 }
