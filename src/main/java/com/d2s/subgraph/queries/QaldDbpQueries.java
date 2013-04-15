@@ -65,8 +65,6 @@ public class QaldDbpQueries implements GetQueries {
 			QueryWrapper evalQuery = new QueryWrapper();
 			NamedNodeMap map = nNode.getAttributes();
 			
-			Node aggregation = map.getNamedItem("aggregation");
-			if (aggregation != null) evalQuery.setAggregation(aggregation.getTextContent().trim().equals("true"));
 			
 			Node answerType = map.getNamedItem("answertype");
 			if (answerType != null) evalQuery.setAnswerType(answerType.getTextContent().trim());

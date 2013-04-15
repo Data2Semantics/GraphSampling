@@ -9,15 +9,11 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-
 import au.com.bytecode.opencsv.CSVWriter;
-
 import com.d2s.subgraph.eval.QueryWrapper;
 import com.d2s.subgraph.queries.filters.DescribeFilter;
 import com.d2s.subgraph.queries.filters.QueryFilter;
 import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
-import com.hp.hpl.jena.mem.StoreTripleIterator;
-import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QueryParseException;
 

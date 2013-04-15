@@ -64,10 +64,8 @@ public class QueryWrapper {
 	}
 	
 	public boolean isAggregation() {
-		return aggregation;
-	}
-	public void setAggregation(boolean aggregation) {
-		this.aggregation = aggregation;
+		return query.hasAggregators();
+		
 	}
 	public String getAnswerType() {
 		return answerType;

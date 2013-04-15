@@ -49,19 +49,13 @@ public class EvaluateGraph {
 	public void run() throws RepositoryException, MalformedQueryException, QueryEvaluationException, IOException {
 		for (QueryWrapper evalQuery: queries) {
 			if (evalQuery.isSelect() && evalQuery.isOnlyDbo()) {
-				evalQuery.removeProjectVar("string");
-//				if (!evalQuery.getQuery().contains("uri dbo:league res:Premier_Leag")) {
-//					continue;
-//				}
-//				System.out.println(evalQuery.getQuery());
+//				evalQuery.removeProjectVar("string");
 				ResultSetRewindable goldenStandardResults;
 				ResultSetRewindable subgraphResults;
 				try {
 					goldenStandardResults = runSelectUsingJena(endpoint, evalQuery.getQueryString(goldenStandardGraph));
 					subgraphResults = runSelectUsingJena(endpoint, evalQuery.getQueryString(subGraph));
-//					ResultSetFormatter.out(subgraphResults);
 				} catch (Exception e) {
-//					System.out.println(e.getMessage());
 					invalidCount++;
 					continue;
 				}
@@ -228,18 +222,6 @@ public class EvaluateGraph {
 		String subgraph = "http://dbp_s-o_unweighted_noLit_directed_outdegree_0.5.nt";
 //		String subgraph = "http://dbpo";
 		try {
-//			
-//			ArrayList<QueryWrapper> queries = new QaldDbpQueries(QaldDbpQueries.QALD_2_QUERIES).getQueries();
-//			System.out.println("total queries " + queries.size());
-//			int properQuery = 0;
-//			for(QueryWrapper query: queries) {
-//				if (query.isSelect() && query.isOnlyDbo()) {
-//					properQuery++;
-//				}
-//			}
-//			System.out.println("proper queries: " + properQuery);
-			
-			
 			EvaluateGraph evaluate = new EvaluateGraph(new QaldDbpQueries(QaldDbpQueries.QALD_2_QUERIES), EvaluateGraph.OPS_VIRTUOSO, goldenStandardGraph, subgraph);
 			evaluate.run();
 			System.out.println(evaluate.getResults().getQueryIds());
