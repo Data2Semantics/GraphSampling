@@ -24,7 +24,7 @@ if [ -z "$numRuns" ];then
 fi
 for (( run=1; run<=$numRuns; run++ )); do
 	for sample in "${samples[@]}"; do
-		outputPath="$dataset/roundtrip/
+		outputPath="$dataset/roundtrip/"
 		outputFile="$dataset"
 		outputFile+="_"
 		outputFile+="sample-$run"
