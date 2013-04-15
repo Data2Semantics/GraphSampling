@@ -15,6 +15,8 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.http.HTTPRepository;
 import com.d2s.subgraph.eval.QueryWrapper;
+import com.d2s.subgraph.eval.results.GraphResults;
+import com.d2s.subgraph.eval.results.QueryResults;
 import com.d2s.subgraph.helpers.Helper;
 import com.d2s.subgraph.queries.GetQueries;
 import com.d2s.subgraph.queries.QaldDbpQueries;
@@ -37,7 +39,7 @@ public class EvaluateGraph {
 	public int validCount = 0;
 	public int invalidCount = 0;
 	private String endpoint;
-	Results results = new Results();
+	GraphResults results = new GraphResults();
 	public EvaluateGraph(GetQueries getQueries, String endpoint, String goldenStandardGraph, String subGraph) {
 		queries = getQueries.getQueries();
 		this.endpoint = endpoint;
@@ -48,7 +50,7 @@ public class EvaluateGraph {
 	
 	public void run() throws RepositoryException, MalformedQueryException, QueryEvaluationException, IOException {
 		for (QueryWrapper evalQuery: queries) {
-			if (evalQuery.isSelect() && evalQuery.isOnlyDbo()) {
+			if (evalQuery.isSelect()) {
 //				evalQuery.removeProjectVar("string");
 				ResultSetRewindable goldenStandardResults;
 				ResultSetRewindable subgraphResults;
@@ -70,7 +72,7 @@ public class EvaluateGraph {
 					double recall = getRecall(goldenStandardResults, subgraphResults);
 					System.out.println("precision: " + precision);
 					System.out.println("recall: " + recall);
-					Result result = new Result();
+					QueryResults result = new QueryResults();
 					result.setQuery(evalQuery);
 					result.setPrecision(precision);
 					result.setRecall(recall);
@@ -212,7 +214,7 @@ public class EvaluateGraph {
 	    return result;
 	}
 	
-	public Results getResults() {
+	public GraphResults getResults() {
 		return results;
 	}
 	

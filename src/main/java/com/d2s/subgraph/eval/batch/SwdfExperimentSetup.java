@@ -10,13 +10,15 @@ import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
 
 
 public class SwdfExperimentSetup implements ExperimentSetup {
-	private static String GOLDEN_STANDARD_GRAPH = "http://swdf";
+	public static String GOLDEN_STANDARD_GRAPH = "http://swdf";
 	private static String GRAPH_PREFIX = "df_";
 	private static String RESULTS_DIR = "swdfResults";
+	private static int MAX_NUM_QUERIES = 100;
 	private GetQueries queries;
 	
 	public SwdfExperimentSetup() throws IOException {
-		queries = new SwdfQueries(new DescribeFilter(), new SimpleBgpFilter());
+		queries = new SwdfQueries(true, new DescribeFilter(), new SimpleBgpFilter());
+		queries.setMaxNQueries(MAX_NUM_QUERIES);
 	}
 	
 	public String getGoldenStandardGraph() {
@@ -28,9 +30,12 @@ public class SwdfExperimentSetup implements ExperimentSetup {
 	public GetQueries getQueries() {
 		return queries;
 	}
+	
 
 	public String getResultsDir() {
 		return RESULTS_DIR;
 	}
-
+	public int getMaxNumQueries() {
+		return MAX_NUM_QUERIES;
+	}
 }

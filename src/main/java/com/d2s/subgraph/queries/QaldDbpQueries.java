@@ -14,6 +14,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import com.d2s.subgraph.eval.QueryWrapper;
+import com.d2s.subgraph.queries.filters.QueryFilter;
 import com.hp.hpl.jena.query.QueryParseException;
 
 
@@ -23,15 +24,20 @@ public class QaldDbpQueries implements GetQueries {
 	public static String QALD_3_QUERIES = "src/main/resources/qald3-dbpedia-train.xml";
 	private static String IGNORE_QUERY_STRING = "OUT OF SCOPE";
 	ArrayList<QueryWrapper> queries = new ArrayList<QueryWrapper>();
-	private boolean onlyDbo = true;
+	private int maxNumQueries = 0;
+	private QueryFilter[] filters;
+	private int filteredQueries = 0;
+	private int validQueries = 0;
+	private int invalidQueries = 0;
 	
-	public QaldDbpQueries(String xmlFile, boolean onlyDbo) throws SAXException, IOException, ParserConfigurationException {
-		this.onlyDbo  = onlyDbo;
+	
+	public QaldDbpQueries(String xmlFile, QueryFilter... filters) throws SAXException, IOException, ParserConfigurationException {
 		parseXml(new File(xmlFile));
+		this.filters = filters;
 	}
 
 	public QaldDbpQueries(String xmlFile) throws SAXException, IOException, ParserConfigurationException {
-		this(xmlFile, false);
+		this(xmlFile, new QueryFilter[]{});
 	}
 	
 	
@@ -74,19 +80,54 @@ public class QaldDbpQueries implements GetQueries {
 			
 			Node onlyDbo = map.getNamedItem("onlydbo");
 			if (onlyDbo != null) evalQuery.setOnlyDbo(onlyDbo.getTextContent().trim().equals("true"));
-			if (!this.onlyDbo || evalQuery.isOnlyDbo()) { //55 out of 100 are onlydbo
-				storeQuery(evalQuery, (Element) nNode);
-			}
+			storeQuery(evalQuery, (Element) nNode);
 		}
 	}
 	
 	private void storeQuery(QueryWrapper evalQuery, Element element) {
 		Node queryNode = element.getElementsByTagName("query").item(0);
 		if (queryNode != null && queryNode.getTextContent().trim().length() > 0 && !queryNode.getTextContent().trim().equals(IGNORE_QUERY_STRING)) {
-			evalQuery.setQuery(queryNode.getTextContent());
+			try {
+				evalQuery.setQuery(queryNode.getTextContent());
+			} catch (Exception e) {
+				invalidQueries++;
+				return;
+			}
 			evalQuery.setAnswers(getAnswersList(element));
-			queries.add(evalQuery);
+			filterAndStoreQuery(evalQuery);
 		}
+	}
+	
+	private void filterAndStoreQuery(QueryWrapper query) {
+		if (checkFilters(query)) {
+			validQueries++;
+			queries.add(query);
+		} else {
+			filteredQueries++;
+		}
+			
+	}
+
+	/**
+	 * 
+	 * @param query
+	 * @return True if this query passed through all the filters, false if one of the filters matches
+	 */
+	private boolean checkFilters(QueryWrapper query) {
+		boolean passed = true;
+		try {
+			for (QueryFilter filter: filters) {
+				if (filter.filter(query)) {
+					passed = false;
+					break;
+				}
+			}
+		} catch (Exception e) {
+			System.out.println(query.toString());
+			e.printStackTrace();
+			System.exit(1);
+		}
+		return passed;
 	}
 	
 	private Element getNodeAsElement(Node node) {
@@ -124,9 +165,21 @@ public class QaldDbpQueries implements GetQueries {
 		}
 		return answers;
 	}
+	public void setMaxNQueries(int maxNum) {
+		this.maxNumQueries  = maxNum;
+	}
 
 	public ArrayList<QueryWrapper> getQueries() {
-		return this.queries;
+		if (maxNumQueries > 0) {
+			maxNumQueries = Math.min(maxNumQueries,  queries.size());
+			return new ArrayList<QueryWrapper>(this.queries.subList(0, maxNumQueries));
+		} else {
+			return this.queries;
+		}
+	}
+	
+	public String toString() {
+		return "valids: " + validQueries + " invalids: " + invalidQueries + " filtered: " + filteredQueries ;
 	}
 	
 	
@@ -163,5 +216,4 @@ public class QaldDbpQueries implements GetQueries {
 			e.printStackTrace();
 		}
 	}
-
 }

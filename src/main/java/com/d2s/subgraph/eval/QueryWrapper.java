@@ -16,7 +16,6 @@ import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.expr.Expr;
 
 public class QueryWrapper {
-	private boolean aggregation;
 	private boolean onlyDbo;
 	private Query query;
 	private String answerType; 

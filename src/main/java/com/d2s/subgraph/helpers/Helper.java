@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -17,6 +18,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.TupleQueryResult;
 
+import com.d2s.subgraph.eval.batch.EvaluateGraphs;
+import com.d2s.subgraph.eval.batch.SwdfExperimentSetup;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
 import com.hp.hpl.jena.sparql.core.TriplePath;
@@ -182,5 +185,35 @@ public class Helper {
 			stringArrayList.add(Integer.toString(integer));
 		}
 		return stringArrayList;
+	}
+	
+	public static String getAsRoundedString(double value, int precision) {
+        //formatting numbers upto 3 decimal places in Java
+		String decimalFormat = "#,###,##0.";
+		for (int i = 0; i < precision; i++) {
+			decimalFormat += "0";
+		}
+		DecimalFormat df = new DecimalFormat(decimalFormat);
+        return df.format(value);
+	}
+	
+	public static void main(String[] args)  {
+		System.out.println(Helper.getAsRoundedString(0.0149, 4));
+	}
+
+	public static String getDoubleAsFormattedString(double value) {
+		String doubleString = Helper.getAsRoundedString(value, 3);
+		if (value == 0.0) {
+			doubleString = "<span style='color:red;font-weight:bold;'>" + doubleString + "</span>";
+		} else if (value == 1.0) {
+			doubleString = "<span style='color:green;font-weight:bold;'>" + doubleString + "</span>";
+		} else if (value < 0.5) {
+			doubleString = "<span style='color:red;'>" + doubleString + "</span>";
+		} else {
+			doubleString = "<span style='color:green;'>" + doubleString + "</span>";
+		}
+		
+		return doubleString;
+		
 	}
 }

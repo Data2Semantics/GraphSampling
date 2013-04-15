@@ -11,4 +11,5 @@ public interface ExperimentSetup {
 	public String getGraphPrefix();
 	public GetQueries getQueries();
 	public String getResultsDir();
+	public int getMaxNumQueries();
 }
