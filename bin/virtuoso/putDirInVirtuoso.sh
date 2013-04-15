@@ -21,5 +21,5 @@ echo "clearing graph";
 clearVirtuosoGraph.sh $graphname;
 
 
-removeDirFromLdList.sh $dirPath;
+delDirFromLdList.sh $dirPath;
 addDirToVirtuoso.sh $dirPath;
