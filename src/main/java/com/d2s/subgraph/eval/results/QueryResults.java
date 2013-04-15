@@ -1,10 +1,10 @@
-package com.d2s.subgraph.eval.batch;
+package com.d2s.subgraph.eval.results;
 
 import com.d2s.subgraph.eval.QueryWrapper;
 
 
 
-public class Result {
+public class QueryResults {
 	private QueryWrapper query;
 	private double precision;
 	private double recall;

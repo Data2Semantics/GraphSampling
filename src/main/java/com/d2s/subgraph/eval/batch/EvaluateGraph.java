@@ -15,6 +15,8 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.http.HTTPRepository;
 import com.d2s.subgraph.eval.QueryWrapper;
+import com.d2s.subgraph.eval.results.GraphResults;
+import com.d2s.subgraph.eval.results.QueryResults;
 import com.d2s.subgraph.helpers.Helper;
 import com.d2s.subgraph.queries.GetQueries;
 import com.d2s.subgraph.queries.QaldDbpQueries;
@@ -37,7 +39,7 @@ public class EvaluateGraph {
 	public int validCount = 0;
 	public int invalidCount = 0;
 	private String endpoint;
-	Results results = new Results();
+	GraphResults results = new GraphResults();
 	public EvaluateGraph(GetQueries getQueries, String endpoint, String goldenStandardGraph, String subGraph) {
 		queries = getQueries.getQueries();
 		this.endpoint = endpoint;
@@ -48,20 +50,14 @@ public class EvaluateGraph {
 	
 	public void run() throws RepositoryException, MalformedQueryException, QueryEvaluationException, IOException {
 		for (QueryWrapper evalQuery: queries) {
-			if (evalQuery.isSelect() && evalQuery.isOnlyDbo()) {
-				evalQuery.removeProjectVar("string");
-//				if (!evalQuery.getQuery().contains("uri dbo:league res:Premier_Leag")) {
-//					continue;
-//				}
-//				System.out.println(evalQuery.getQuery());
+			if (evalQuery.isSelect()) {
+//				evalQuery.removeProjectVar("string");
 				ResultSetRewindable goldenStandardResults;
 				ResultSetRewindable subgraphResults;
 				try {
 					goldenStandardResults = runSelectUsingJena(endpoint, evalQuery.getQueryString(goldenStandardGraph));
 					subgraphResults = runSelectUsingJena(endpoint, evalQuery.getQueryString(subGraph));
-//					ResultSetFormatter.out(subgraphResults);
 				} catch (Exception e) {
-//					System.out.println(e.getMessage());
 					invalidCount++;
 					continue;
 				}
@@ -76,7 +72,7 @@ public class EvaluateGraph {
 					double recall = getRecall(goldenStandardResults, subgraphResults);
 					System.out.println("precision: " + precision);
 					System.out.println("recall: " + recall);
-					Result result = new Result();
+					QueryResults result = new QueryResults();
 					result.setQuery(evalQuery);
 					result.setPrecision(precision);
 					result.setRecall(recall);
@@ -218,7 +214,7 @@ public class EvaluateGraph {
 	    return result;
 	}
 	
-	public Results getResults() {
+	public GraphResults getResults() {
 		return results;
 	}
 	
@@ -228,18 +224,6 @@ public class EvaluateGraph {
 		String subgraph = "http://dbp_s-o_unweighted_noLit_directed_outdegree_0.5.nt";
 //		String subgraph = "http://dbpo";
 		try {
-//			
-//			ArrayList<QueryWrapper> queries = new QaldDbpQueries(QaldDbpQueries.QALD_2_QUERIES).getQueries();
-//			System.out.println("total queries " + queries.size());
-//			int properQuery = 0;
-//			for(QueryWrapper query: queries) {
-//				if (query.isSelect() && query.isOnlyDbo()) {
-//					properQuery++;
-//				}
-//			}
-//			System.out.println("proper queries: " + properQuery);
-			
-			
 			EvaluateGraph evaluate = new EvaluateGraph(new QaldDbpQueries(QaldDbpQueries.QALD_2_QUERIES), EvaluateGraph.OPS_VIRTUOSO, goldenStandardGraph, subgraph);
 			evaluate.run();
 			System.out.println(evaluate.getResults().getQueryIds());

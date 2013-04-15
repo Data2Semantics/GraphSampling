@@ -16,7 +16,6 @@ import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.expr.Expr;
 
 public class QueryWrapper {
-	private boolean aggregation;
 	private boolean onlyDbo;
 	private Query query;
 	private String answerType; 
@@ -64,10 +63,8 @@ public class QueryWrapper {
 	}
 	
 	public boolean isAggregation() {
-		return aggregation;
-	}
-	public void setAggregation(boolean aggregation) {
-		this.aggregation = aggregation;
+		return query.hasAggregators();
+		
 	}
 	public String getAnswerType() {
 		return answerType;
