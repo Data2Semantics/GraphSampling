@@ -24,19 +24,22 @@ if [ -z "$numRuns" ];then
 fi
 for (( run=1; run<=$numRuns; run++ )); do
 	for sample in "${samples[@]}"; do
-		outputFile="$dataset/roundtrip/$dataset"
+		outputPath="$dataset/roundtrip/
+		outputFile="$dataset"
 		outputFile+="_"
 		outputFile+="sample-$run"
 		outputFile+="_"
 		outputFile+="$sample.nt"
-		pig pigAnalysis/stats/sample.py $dataset/$dataset.nt $dataset/roundtrip/$dataset $outputFile $sample;
+		outputPath+="$outputFile"
+		
+		pig pigAnalysis/stats/sample.py $dataset/$dataset.nt $outputPath $sample;
 		
 		localTargetDir="load/subgraphs/$outputFile"
 		if [ ! -d "$localTargetDir" ]; then
                 echo "dir $localTargetDir does not exist. making"
                 mkdir $localTargetDir
         fi
-		hadoop fs -cat $outputFile/part* > $localTargetDir/$outputFile;
+		hadoop fs -cat $outputPath/part* > $localTargetDir/$outputFile;
 		putDirInVirtuoso.sh $localTargetDir;
 	done
 done
