@@ -1,110 +1,34 @@
 package com.d2s.subgraph.eval.results;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-
-import com.d2s.subgraph.helpers.Helper;
-
-import au.com.bytecode.opencsv.CSVWriter;
 
 
 
-public class GraphResults {
-	private HashMap<Integer, QueryResults> results = new HashMap<Integer, QueryResults>();
-	private String graphName;
-	public void add(QueryResults result) {
-		results.put(result.getQuery().getQueryId(), result);
-	}
+public interface GraphResults {
+	public void add(QueryResultsRegular result);
 	
-	public QueryResults get(int queryId) {
-		return results.get(queryId);
-	}
+	public QueryResultsRegular get(int queryId);
 	
-	public boolean queryIdExists(int queryId) {
-		return results.containsKey(queryId);
-	}
+	public boolean queryIdExists(int queryId);
 	
-	public void writeAsCsv(String path, boolean overwrite) throws IOException {
-		File csvFile = new File(path);
-		if (csvFile.exists() == false || overwrite) {
-			csvFile.createNewFile();
-		}
-		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
-		writer.writeNext(new String[]{"queryId", "isAggregation", "isAsk", "isOnlyDbo", "isSelect", "recall", "query"});
-		for (QueryResults result: results.values()) {
-			ArrayList<String> columns = new ArrayList<String>();
-			columns.add(Integer.toString(result.getQuery().getQueryId()));
-			columns.add(Helper.boolAsString(result.getQuery().isAggregation()));
-			columns.add(Helper.boolAsString(result.getQuery().isAsk()));
-			columns.add(Helper.boolAsString(result.getQuery().isOnlyDbo()));
-			columns.add(Helper.boolAsString(result.getQuery().isSelect()));
-			columns.add(Double.toString(result.getRecall()));
-			columns.add(result.getQuery().toString());
-			writer.writeNext(columns.toArray(new String[columns.size()]));
-		}
-	    
-		writer.close();
-	}
+	public void writeAsCsv(String path) throws IOException;
 	
-	public double getAveragePrecision() {
-		double totalPrecision = 0.0;
-		for (QueryResults result: results.values()) {
-			totalPrecision += result.getPrecision();
-		}
-		return totalPrecision / (double)results.size();
-	}
+	public double getAveragePrecision();
 	
 	
-	public double getAverageRecall() {
-		double totalRecall = 0.0;
-		for (QueryResults result: results.values()) {
-			totalRecall += result.getRecall();
-		}
-		return totalRecall / (double)results.size();
-	}
+	public double getAverageRecall();
 	
-	public int getMaxQueryId() {
-		int max = 0;
-		for (QueryResults result: results.values()) {
-			if (result.getQuery().getQueryId() > max) {
-				max = result.getQuery().getQueryId();
-			}
-		}
-		return max;
-	}
 
-	public String getGraphName() {
-		return graphName;
-	}
+	public String getGraphName();
 
-	public void setGraphName(String name) {
-		this.graphName = name;
-	}
+	public void setGraphName(String name);
 	
-	public HashMap<Integer, QueryResults> getAsHashMap() {
-		return results;
-	}
+	public HashMap<Integer, QueryResultsRegular> getAsHashMap();
 	
-	public ArrayList<QueryResults> getAsArrayList() {
-		return new ArrayList<QueryResults>(results.values());
-	}
-	@SuppressWarnings("unchecked")
-	public ArrayList<Integer> getQueryIds() {
-		ArrayList<Integer> queryIds = new ArrayList<Integer>();
-		for (QueryResults result: results.values()) {
-			queryIds.add(result.getQuery().getQueryId());
-		}
-		//remove duplicates
-		@SuppressWarnings("rawtypes")
-		HashSet hs = new HashSet();
-		hs.addAll(queryIds);
-		queryIds.clear();
-		queryIds.addAll(hs);
-		return queryIds;
-	}
+	public ArrayList<QueryResultsRegular> getAsArrayList();
+	
+	public ArrayList<Integer> getQueryIds();
 	
 }
