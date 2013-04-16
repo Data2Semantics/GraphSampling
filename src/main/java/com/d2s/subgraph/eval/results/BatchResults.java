@@ -5,6 +5,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import au.com.bytecode.opencsv.CSVWriter;
@@ -12,8 +14,9 @@ import com.d2s.subgraph.eval.QueryWrapper;
 import com.d2s.subgraph.eval.batch.EvaluateGraph;
 import com.d2s.subgraph.eval.batch.ExperimentSetup;
 import com.d2s.subgraph.eval.results.GraphResults;
-import com.d2s.subgraph.eval.results.QueryResults;
+import com.d2s.subgraph.eval.results.QueryResultsRegular;
 import com.d2s.subgraph.helpers.Helper;
+import com.d2s.subgraph.helpers.RHelper;
 import com.d2s.subgraph.queries.GetQueries;
 
 public class BatchResults {
@@ -21,6 +24,11 @@ public class BatchResults {
 	private ArrayList<GraphResults> batchResults = new ArrayList<GraphResults>();
 	private GetQueries queries;
 	private ExperimentSetup experimentSetup;
+	private static String FILE_CSV_SUMMARY = "summary.csv";
+	private static String FILE_HTML_SUMMARY = "results.html";
+	private static String FILE_CSV_FULL_LIST = "list.csv";
+	private static String FILE_CSV_FLAT_FULL_LIST = "flatlist.csv";
+	private static String FILE_PDF_BOXPLOTS = "boxplots.pdf";
 	
 	public BatchResults(ExperimentSetup experimentSetup, GetQueries queries) {
 		this.experimentSetup = experimentSetup;
@@ -30,13 +38,30 @@ public class BatchResults {
 			resultsDir.mkdir();
 		}
 	}
+	public void writeOutput() throws IOException, InterruptedException {
+		writeSummaryCsv();
+		String[] modesToRunIn = new String[]{"0.2", "0.5"};
+		for (String mode: modesToRunIn) {
+			outputAsHtmlTable(mode);
+			outputAsCsvTable(mode);
+			outputAsCsvFlatList(mode);
+			plotBoxPlots(mode);
+		}
+	}
 	
 	public void add(GraphResults graphResults) {
 		this.batchResults.add(graphResults);
 	}
 	
-	public void writeSummaryCsv() throws IOException {
-		File csvFile = new File(resultsDir.getAbsolutePath() + "/summary.csv");
+	private void plotBoxPlots(String onlyGraphsContaining) throws IOException, InterruptedException {
+		File pdfFile = new File(resultsDir.getAbsolutePath() + "/" + onlyGraphsContaining + "_" + FILE_PDF_BOXPLOTS);
+		File inputFile = new File(resultsDir.getAbsolutePath() + "/" + onlyGraphsContaining + "_" + FILE_CSV_FLAT_FULL_LIST);
+		RHelper rHelper = new RHelper();
+		rHelper.plotRecallBoxPlots(inputFile, pdfFile);
+		
+	}
+	private void writeSummaryCsv() throws IOException {
+		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + FILE_CSV_SUMMARY);
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
 		writer.writeNext(new String[]{"graph", "avgRecall"});
 		for (GraphResults graphResults: batchResults) {
@@ -45,9 +70,71 @@ public class BatchResults {
 		writer.close();
 	}
 	
+	/**
+	 * table with graph evaluations as columns, and queries per row (with query id as row header)
+	 * @throws IOException 
+	 */
+	private void outputAsCsvTable(String onlyGraphsContaining) throws IOException {
+		HashMap<Integer, ArrayList<String>> table = new HashMap<Integer, ArrayList<String>>();
+		for (QueryWrapper query: queries.getQueries()) {
+			int queryId = query.getQueryId();
+			
+			ArrayList<String> row = new ArrayList<String>();
+			row.add(Integer.toString(queryId));
+			table.put(queryId, row);
+		}
+		
+		for (GraphResults graphResults: batchResults) {
+			if (onlyGraphsContaining.length() == 0 || graphResults.getGraphName().contains(onlyGraphsContaining)) {
+				for (QueryWrapper query: queries.getQueries()) {
+					QueryResultsRegular queryResults = graphResults.get(query.getQueryId());
+					ArrayList<String> row = table.get(query.getQueryId());
+					row.add(Double.toString(queryResults.getRecall()));
+				}
+			}
+		}
+		
+		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + onlyGraphsContaining + "_" + FILE_CSV_FULL_LIST);
+		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
+		ArrayList<String> header = new ArrayList<String>();
+		header.add("queryId");
+		for (GraphResults graphResults: batchResults) {
+			if (onlyGraphsContaining.length() == 0 || graphResults.getGraphName().contains(onlyGraphsContaining)) {
+				header.add(graphResults.getGraphName());
+			}
+			
+		}
+		writer.writeNext(header.toArray(new String[header.size()]));
+		for (ArrayList<String> row: table.values()) {
+			writer.writeNext(row.toArray(new String[row.size()]));
+		}
+		writer.close();
+	}
 	
+	/**
+	 * table with graph evaluations as columns, and queries per row (with query id as row header)
+	 * @throws IOException 
+	 */
+	private void outputAsCsvFlatList(String onlyGraphsContaining) throws IOException {
+		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + onlyGraphsContaining + "_"+ FILE_CSV_FLAT_FULL_LIST);
+		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
+		writer.writeNext(new String[]{"queryId", "graph", "recall"});
+		
+		for (GraphResults graphResults: batchResults) {
+			if (onlyGraphsContaining.length() == 0 || graphResults.getGraphName().contains(onlyGraphsContaining)) {
+				for (QueryWrapper query: queries.getQueries()) {
+					writer.writeNext(new String[]{Integer.toString(query.getQueryId()), graphResults.getGraphName(), Double.toString(graphResults.get(query.getQueryId()).getRecall())});
+				}
+			}
+		}
+		writer.close();
+	}
 	
-	public void outputAsHtmlTable() throws IOException {
+	/**
+	 * html table with graph evalutations as columns, and queries per row
+	 * @throws IOException
+	 */
+	private void outputAsHtmlTable(String onlyGraphsContaining) throws IOException {
 		String encodedEndpoint = URLEncoder.encode(EvaluateGraph.OPS_VIRTUOSO, "UTF-8"); 
 		String html = "<html><head>\n" +
 				"<link rel='stylesheet' href='../static/style.css' type='text/css' />\n" +
@@ -58,53 +145,51 @@ public class BatchResults {
 				"</head>" +
 				"\n<body>" +
 				"\n<table id='myTable' class='tablesorter'>\n";
-		ArrayList<ArrayList<String>> table = new ArrayList<ArrayList<String>>();
+		HashMap<Integer, ArrayList<String>> table = new HashMap<Integer, ArrayList<String>>();
 		
 		
 		//fill first col of table (avg for this query)
 		for (QueryWrapper query: queries.getQueries()) {
+			int queryId = query.getQueryId();
+			
 			ArrayList<String> row = new ArrayList<String>();
 			double totalRecall = 0.0;// totalrecall!
+			int numGraphs = 0;
 			for (GraphResults results: batchResults) {
-				int queryId = query.getQueryId();
-				QueryResults queryResults = results.get(queryId);
-				totalRecall += queryResults.getRecall();
+				if (onlyGraphsContaining.length() == 0 || results.getGraphName().contains(onlyGraphsContaining)) {
+					QueryResultsRegular queryResults = results.get(queryId);
+					totalRecall += queryResults.getRecall();
+					numGraphs++;
+				}
 			}
 			
-			double avgRecall = totalRecall / (double)batchResults.size();
-			System.out.println("total recall: " + totalRecall + " size: " + batchResults.size() + " avg: " + avgRecall);
-			row.add("<td>" + Helper.getDoubleAsFormattedString(avgRecall) + "</td>");
-			table.add(row);
+			double avgRecall = totalRecall / (double)numGraphs;
+			row.add("<td title='queryId: "+ queryId +"'>" + Helper.getDoubleAsFormattedString(avgRecall) + "</td>");
+			table.put(queryId, row);
 		}
 		
 		
 		html += "<thead>\n<tr>";
 		html += "<th>avg</th>";
 		
-		for (int colIndex = 0; colIndex < batchResults.size(); colIndex++) {
-			GraphResults graphResults = batchResults.get(colIndex);
-			html += "\n<th>" + graphResults.getGraphName().substring("http://".length()).replace('_', '-') + "<br>(avg: " + Helper.getDoubleAsFormattedString(graphResults.getAverageRecall()) + ")</th>";
-			ArrayList<QueryResults> queryResultsArrayList = graphResults.getAsArrayList();
-			
-			for (int rowIndex = 0; rowIndex < queryResultsArrayList.size(); rowIndex++) {
-				QueryResults queryResults = queryResultsArrayList.get(rowIndex);
-				ArrayList<String> row;
-				if (rowIndex < table.size()) {
-					row = table.get(rowIndex);
-				} else {
-					row = new ArrayList<String>();
-					table.add(row);
+		for (GraphResults graphResults: batchResults) {
+			if (onlyGraphsContaining.length() == 0 || graphResults.getGraphName().contains(onlyGraphsContaining)) {
+				html += "\n<th>" + graphResults.getGraphName().substring("http://".length()).replace('_', '-') + "<br>(avg: " + Helper.getDoubleAsFormattedString(graphResults.getAverageRecall()) + ")</th>";
+				for (QueryWrapper query: queries.getQueries()) {
+					QueryResultsRegular queryResults = graphResults.get(query.getQueryId());
+					ArrayList<String> row;
+					row = table.get(query.getQueryId());
+					String encodedQuery = URLEncoder.encode(queryResults.getQuery().getQueryString(graphResults.getGraphName()), "UTF-8");
+					String url = "http://yasgui.laurensrietveld.nl?endpoint=" + encodedEndpoint + "&query=" + encodedQuery + "&tabTitle=" + queryResults.getQuery().getQueryId();
+					String title = StringEscapeUtils.escapeHtml(queryResults.getQuery().getQueryString(graphResults.getGraphName()));
+					String cell = "<td title='" + title + "'><a href='" + url + "' target='_blank'>" + Helper.getDoubleAsFormattedString(queryResults.getRecall()) + "</a></td>";
+					row.add(cell);
 				}
-				String encodedQuery = URLEncoder.encode(queryResults.getQuery().getQueryString(graphResults.getGraphName()), "UTF-8");
-				String url = "http://yasgui.laurensrietveld.nl?endpoint=" + encodedEndpoint + "&query=" + encodedQuery + "&tabTitle=" + queryResults.getQuery().getQueryId();
-				String title = StringEscapeUtils.escapeHtml(queryResults.getQuery().getQueryString(graphResults.getGraphName()));
-				String cell = "<td title='" + title + "'><a href='" + url + "' target='_blank'>" + Helper.getDoubleAsFormattedString(queryResults.getRecall()) + "</a></td>";
-				row.add(cell);
 			}
 		}
 		
 		html += "</tr></thead><tbody>\n";
-		for (ArrayList<String> row: table) {
+		for (ArrayList<String> row: table.values()) {
 			html += "\n<tr>";
 			for (String cell: row) {
 				html += cell;
@@ -112,10 +197,10 @@ public class BatchResults {
 			html += "</tr>";
 		}
 		html += "\n</tbody> </table></body></html>";
-		FileUtils.writeStringToFile(new File(experimentSetup.getResultsDir() + "/results.html"), html);
+		FileUtils.writeStringToFile(new File(experimentSetup.getResultsDir() + "/" + onlyGraphsContaining + "_" + FILE_HTML_SUMMARY), html);
 	}
 	
-	
+
 	
 
 	public static void main(String[] args)  {

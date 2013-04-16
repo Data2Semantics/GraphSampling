@@ -13,6 +13,8 @@ import org.openrdf.repository.RepositoryException;
 import org.xml.sax.SAXException;
 import com.d2s.subgraph.eval.results.BatchResults;
 import com.d2s.subgraph.eval.results.GraphResults;
+import com.d2s.subgraph.eval.results.GraphResults;
+import com.d2s.subgraph.eval.results.GraphResultsSample;
 import com.d2s.subgraph.queries.GetQueries;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
@@ -29,6 +31,7 @@ public class EvaluateGraphs {
 	private BatchResults batchResults;
 	private GetQueries queries;
 	private ArrayList<String> graphs;
+	private ArrayList<String> sampleGraphs;
 	public EvaluateGraphs(ExperimentSetup experimentSetup) {
 		queries = experimentSetup.getQueries();
 		batchResults = new BatchResults(experimentSetup, queries);
@@ -41,7 +44,7 @@ public class EvaluateGraphs {
 	
 	public void run() throws RepositoryException, MalformedQueryException, QueryEvaluationException, SAXException, IOException, ParserConfigurationException, InterruptedException {
 //		ArrayList<String> graphs = getGraphsToEvaluateViaSparql();
-		graphs = getGraphsToEvaluateViaSsh();
+		getGraphsToEvaluateViaSsh();
 //		graphs = new ArrayList<String>();
 //		graphs.add("http://df_s-o-litAsNode_unweighted_directed_indegree_0.2.nt");
 //		graphs.add("http://df_s-o-litAsNode_unweighted_directed_outdegree_0.2.nt");
@@ -53,10 +56,20 @@ public class EvaluateGraphs {
 			GraphResults results = eval.getResults();
 			batchResults.add(results);
 			String filename = graph.substring(7);//remove http://
-			results.writeAsCsv(resultsDir.getAbsolutePath() + "/" + filename + ".csv", true);
+			results.writeAsCsv(resultsDir.getAbsolutePath() + "/" + filename + ".csv");
 		}
-		batchResults.writeSummaryCsv();
-		batchResults.outputAsHtmlTable();
+		if (sampleGraphs.size() > 0) {
+			System.out.println("evaluating for " + sampleGraphs.size() + " samplegraphs");
+			GraphResultsSample sampleGraphResultsCombined = new GraphResultsSample();
+			ArrayList<GraphResults> individualSampleResults = new ArrayList<GraphResults>();
+			for (String sampleGraph: sampleGraphs) {
+				EvaluateGraph eval = new EvaluateGraph(queries, EvaluateGraph.OPS_VIRTUOSO, experimentSetup.getGoldenStandardGraph(), sampleGraph);
+				eval.run();
+				individualSampleResults.add(eval.getResults());
+			}
+			sampleGraphResultsCombined.add(individualSampleResults);
+		}
+		batchResults.writeOutput();
 	}
 	
 	
@@ -99,12 +112,16 @@ public class EvaluateGraphs {
 		Process pr = ps.start();
 		BufferedReader in = new BufferedReader(new
 		InputStreamReader(pr.getInputStream()));
-		ArrayList<String> graphs = new ArrayList<String>();
+		graphs = new ArrayList<String>();
 		String line;
 		while ((line = in.readLine()) != null) {
 			line = line.trim();
 			if (line.startsWith("http://" + experimentSetup.getGraphPrefix())) {
-				graphs.add(line);
+				if (line.contains("sample")) {
+					sampleGraphs.add(line);
+				} else {
+					graphs.add(line);
+				}
 			}
 		}
 		pr.waitFor();
@@ -114,7 +131,7 @@ public class EvaluateGraphs {
 			System.out.println("No graphs retrieved from OPS via SSH. Maybe virtuoso down?");
 			System.exit(1);
 		}
-			
+		Collections.sort(sampleGraphs);
 		Collections.sort(graphs);
 		return graphs;
 	}
