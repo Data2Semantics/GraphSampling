@@ -7,7 +7,7 @@ fi
 #last one is strange: it's actually: half the graph, and only retrieve weights...
 topKVariants=(0.5 0.2 100n "0.5w")
 pigRoundtripDir="$HOME/pigAnalysis/roundtrip"
-analysisFile=$1
+analysisFile=$(readlink -f $1)
 analysisBasename=`basename $analysisFile`;
 rewriteDir1=`dirname $analysisFile`;
 rewriteDir=`dirname $rewriteDir1`;#quick and ugly
@@ -21,7 +21,6 @@ rewriteMethod=${delimited[1]}
 targetFilename=$rewriteBasename
 targetFilename+="_"
 targetFilename+=$analysisBasename
-
 localSubgraphDir="$HOME/load/subgraphs/"
 statsDir="$HOME/stats/100n/triples/"
 tripleWeightsDir="$HOME/stats/tripleWeights"
