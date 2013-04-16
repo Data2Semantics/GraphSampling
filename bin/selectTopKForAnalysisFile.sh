@@ -6,7 +6,7 @@ if [ -z "$1" ];then
 fi
 #last one is strange: it's actually: half the graph, and only retrieve weights...
 topKVariants=(0.2 0.5 100n "0.5w")
-analysisFile=$1
+analysisFile=$(readlink -f $1)
 pigRoundtripDir="$HOME/pigAnalysis/roundtrip"
 analysisBasename=`basename $analysisFile`;
 rewriteDir1=`dirname $analysisFile`;
