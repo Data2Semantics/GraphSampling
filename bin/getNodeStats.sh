@@ -8,7 +8,10 @@ scriptsFile="$HOME/rProject/scripts/getNodeStats.R"
 rDir="$HOME/rProject"
 top1000Dir="$HOME/stats/top1000/nodes"
 plotsDir="$HOME/stats/plots/nodeWeightDist"
-outputRunScript="$HOME/.rRunScript.R"
+outputRunScript="$HOME/tmp/rRunScript.R"
+logFile="$HOME/logs/getNodeStats_"
+logFile+=`date +"%Y%m%d"`
+logFile+=".log"
 for rewriteDir in "$@"; do
 	rewriteMethod=`basename $rewriteDir`
     echo "getting stats for rewrite method $rewriteDir";
@@ -24,6 +27,6 @@ for rewriteDir in "$@"; do
         echo "outputTop1000 <- \"$top1000Dir/$targetFile\"" >> $runScript;
         echo "outputPdf <- \"$plotsDir/$targetFile.pdf\"" >> $runScript;
         cat $scriptsFile >> $runScript;
-        R -f $runScript &
+        R -f $runScript > $logFile &
     done <<< "$analysisFiles"
 done
