@@ -27,6 +27,6 @@ for rewriteDir in "$@"; do
         echo "outputTop1000 <- \"$top1000Dir/$targetFile\"" >> $runScript;
         echo "outputPdf <- \"$plotsDir/$targetFile.pdf\"" >> $runScript;
         cat $scriptsFile >> $runScript;
-        R -f $runScript > $logFile &
+        R -f $runScript >> $logFile &
     done <<< "$analysisFiles"
 done

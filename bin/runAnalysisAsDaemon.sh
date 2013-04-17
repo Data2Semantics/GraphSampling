@@ -6,14 +6,16 @@ if [ -z "$1" ];then
 fi
 rDir="${HOME}/rProject"
 scriptsFile="$rDir/scripts/runNewAlgs.R"
-outputRunScript="${HOME}/.rRunScript.R"
-
+logFile="$HOME/logs/runAnalysisAsDaemon_"
+logFile+=`date +"%Y%m%d"`
+logFile+=".log"
 for dir in "$@"; do
+	outputRunScript="${HOME}/tmp/rRunScript_$RANDOM.R"
 	if [ -d "$dir" ]; then
 	    echo "Running analysis for $dir";
 	    echo "setwd(\"$dir\")" > $outputRunScript;
 	    cat $scriptsFile >> $outputRunScript;
-	    R -f $outputRunScript &
+	    R -f $outputRunScript >> $logFile &
 	else
 		if [ -f "$dir" ]; then
 			echo "Pattern matches file $dir . This cant be right. exiting"
