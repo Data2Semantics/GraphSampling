@@ -2,18 +2,9 @@ package com.d2s.subgraph.eval.batch;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.TupleQueryResult;
-import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.http.HTTPRepository;
 import com.d2s.subgraph.eval.QueryWrapper;
 import com.d2s.subgraph.eval.results.GraphResults;
 import com.d2s.subgraph.eval.results.GraphResultsRegular;
@@ -27,7 +18,6 @@ import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.query.ResultSetRewindable;
-import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 
@@ -86,23 +76,6 @@ public class EvaluateGraph {
 		System.out.println();
 		System.out.println("Invalids (i.e. no results on golden standard, or sparql error on execution): " + Integer.toString(invalidCount) + ", valids: " + Integer.toString(validCount));
 	}
-	@SuppressWarnings("unused")
-	private double getPrecision(QueryWrapper evalQuery, ResultSetRewindable subGraph) throws QueryEvaluationException {
-		int falsePositives = 0;
-		int truePositives = 0;
-		while (subGraph.hasNext()) {
-			Binding binding = subGraph.nextBinding();
-			if (bindingFoundInAnswerSet(binding, evalQuery)) {
-				truePositives++;
-			} else {
-				falsePositives++;
-			}
-		}
-		double precision = 0;
-		if ((truePositives + falsePositives) != 0) precision =  truePositives / (truePositives + falsePositives);
-		return precision;
-	}
-
 
 	//Precision is the number of relevant documents a search retrieves divided by the total number of documents retrieved
 	private double getPrecision(ResultSetRewindable goldenStandard, ResultSetRewindable subgraph) throws QueryEvaluationException {
@@ -158,32 +131,6 @@ public class EvaluateGraph {
 		return found;
 	}
 	
-	private boolean bindingFoundInAnswerSet(Binding binding, QueryWrapper evalQuery) {
-		boolean found = false;
-		ArrayList<HashMap<String,String>> goldenAnswers = evalQuery.getAnswers();
-		for(HashMap<String,String> answerSet: goldenAnswers) {
-			Set<Var> vars = getVarIteratorAsStringSet(binding.vars());
-			boolean allMatch = true;
-			for(Var var:vars) {
-				if (answerSet.containsKey(var)) {
-					if (answerSet.get(var).equals(binding.get(var).toString())) {
-						//this one is fine. check rest of answers
-					}
-				} else {
-					allMatch = false;
-					break;
-				}
-			}
-			if (allMatch) {
-				found = true;
-				break;
-			}
-			
-			
-		}
-		return found;
-	}
-	
 	
 	private static ResultSetRewindable runSelectUsingJena(String endpoint, String queryString) throws RepositoryException, MalformedQueryException, QueryEvaluationException {
 		Query query = QueryFactory.create(queryString);
@@ -191,29 +138,6 @@ public class EvaluateGraph {
 		return ResultSetFactory.copyResults(queryExecution.execSelect());
 	}
 	
-	@SuppressWarnings("unused")
-	private static TupleQueryResult runSelectUsingSesame(String endpoint, String repo, String queryString) throws RepositoryException, QueryEvaluationException, MalformedQueryException {
-		HTTPRepository dbpediaEndpoint = new HTTPRepository(endpoint, repo);
-		dbpediaEndpoint.initialize();
-		RepositoryConnection conn =  dbpediaEndpoint.getConnection();
-		try {
-		  TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
-		  TupleQueryResult result = query.evaluate();
-		  return result;
-		 
-		}
-		finally {
-		  conn.close();
-		}
-	}
-	
-	private Set<Var> getVarIteratorAsStringSet(Iterator<Var> iterator){
-	    Set<Var> result = new HashSet<Var>();
-	    while (iterator.hasNext()) {
-	        result.add(iterator.next());
-	    }
-	    return result;
-	}
 	
 	public GraphResults getResults() {
 		return results;
