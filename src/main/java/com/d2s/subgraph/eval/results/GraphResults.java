@@ -7,10 +7,10 @@ import java.util.HashMap;
 
 
 public interface GraphResults {
-	public void add(QueryResultsRegular result);
+	public void add(QueryResults result);
 	
-	public QueryResultsRegular get(int queryId);
-	
+	public QueryResults get(int queryId);
+	public boolean contains(int queryId);
 	public boolean queryIdExists(int queryId);
 	
 	public void writeAsCsv(String path) throws IOException;
@@ -25,9 +25,9 @@ public interface GraphResults {
 
 	public void setGraphName(String name);
 	
-	public HashMap<Integer, QueryResultsRegular> getAsHashMap();
+	public HashMap<Integer, QueryResults> getAsHashMap();
 	
-	public ArrayList<QueryResultsRegular> getAsArrayList();
+	public ArrayList<QueryResults> getAsArrayList();
 	
 	public ArrayList<Integer> getQueryIds();
 	

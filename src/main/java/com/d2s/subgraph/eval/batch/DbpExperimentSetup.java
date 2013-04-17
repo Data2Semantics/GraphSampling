@@ -9,7 +9,7 @@ import com.d2s.subgraph.queries.filters.OnlyDboQueries;
 
 
 public class DbpExperimentSetup implements ExperimentSetup {
-	private static String GOLDEN_STANDARD_GRAPH = "http://dbpo";
+	public static String GOLDEN_STANDARD_GRAPH = "http://dbpo";
 	private static String GRAPH_PREFIX = "dbp_";
 	private static String RESULTS_DIR = "dbpResults";
 	private static int MAX_NUM_QUERIES = 0;//i.e. all

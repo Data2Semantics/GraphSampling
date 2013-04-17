@@ -14,7 +14,6 @@ import com.d2s.subgraph.eval.QueryWrapper;
 import com.d2s.subgraph.eval.batch.EvaluateGraph;
 import com.d2s.subgraph.eval.batch.ExperimentSetup;
 import com.d2s.subgraph.eval.results.GraphResults;
-import com.d2s.subgraph.eval.results.QueryResultsRegular;
 import com.d2s.subgraph.helpers.Helper;
 import com.d2s.subgraph.helpers.RHelper;
 import com.d2s.subgraph.queries.GetQueries;
@@ -29,6 +28,7 @@ public class BatchResults {
 	private static String FILE_CSV_FULL_LIST = "list.csv";
 	private static String FILE_CSV_FLAT_FULL_LIST = "flatlist.csv";
 	private static String FILE_PDF_BOXPLOTS = "boxplots.pdf";
+	private HashMap<String, Boolean> modesImported = new HashMap<String, Boolean>();
 	
 	public BatchResults(ExperimentSetup experimentSetup, GetQueries queries) {
 		this.experimentSetup = experimentSetup;
@@ -39,17 +39,25 @@ public class BatchResults {
 		}
 	}
 	public void writeOutput() throws IOException, InterruptedException {
-		writeSummaryCsv();
-		String[] modesToRunIn = new String[]{"0.2", "0.5"};
-		for (String mode: modesToRunIn) {
-			outputAsHtmlTable(mode);
-			outputAsCsvTable(mode);
-			outputAsCsvFlatList(mode);
-			plotBoxPlots(mode);
+		if (batchResults.size() > 0) {
+			writeSummaryCsv();
+			String[] modesToRunIn = new String[]{"0.2", "0.5"};
+			for (String mode: modesToRunIn) {
+				if (modesImported.containsKey(mode) && modesImported.get(mode)) {
+					outputAsHtmlTable(mode);
+					outputAsCsvTable(mode);
+					outputAsCsvFlatList(mode);
+					plotBoxPlots(mode);
+				}
+			}
+		} else {
+			System.out.println("no results to write output for");
 		}
 	}
 	
 	public void add(GraphResults graphResults) {
+		if (graphResults.getGraphName().contains("0.2")) modesImported.put("0.2", true);
+		if (graphResults.getGraphName().contains("0.5")) modesImported.put("0.5", true);
 		this.batchResults.add(graphResults);
 	}
 	
@@ -87,8 +95,8 @@ public class BatchResults {
 		for (GraphResults graphResults: batchResults) {
 			if (onlyGraphsContaining.length() == 0 || graphResults.getGraphName().contains(onlyGraphsContaining)) {
 				for (QueryWrapper query: queries.getQueries()) {
-					QueryResultsRegular queryResults = graphResults.get(query.getQueryId());
 					ArrayList<String> row = table.get(query.getQueryId());
+					QueryResults queryResults = graphResults.get(query.getQueryId());
 					row.add(Double.toString(queryResults.getRecall()));
 				}
 			}
@@ -157,7 +165,7 @@ public class BatchResults {
 			int numGraphs = 0;
 			for (GraphResults results: batchResults) {
 				if (onlyGraphsContaining.length() == 0 || results.getGraphName().contains(onlyGraphsContaining)) {
-					QueryResultsRegular queryResults = results.get(queryId);
+					QueryResults queryResults = results.get(queryId);
 					totalRecall += queryResults.getRecall();
 					numGraphs++;
 				}
@@ -176,9 +184,8 @@ public class BatchResults {
 			if (onlyGraphsContaining.length() == 0 || graphResults.getGraphName().contains(onlyGraphsContaining)) {
 				html += "\n<th>" + graphResults.getGraphName().substring("http://".length()).replace('_', '-') + "<br>(avg: " + Helper.getDoubleAsFormattedString(graphResults.getAverageRecall()) + ")</th>";
 				for (QueryWrapper query: queries.getQueries()) {
-					QueryResultsRegular queryResults = graphResults.get(query.getQueryId());
-					ArrayList<String> row;
-					row = table.get(query.getQueryId());
+					ArrayList<String> row = table.get(query.getQueryId());
+					QueryResults queryResults = graphResults.get(query.getQueryId());
 					String encodedQuery = URLEncoder.encode(queryResults.getQuery().getQueryString(graphResults.getGraphName()), "UTF-8");
 					String url = "http://yasgui.laurensrietveld.nl?endpoint=" + encodedEndpoint + "&query=" + encodedQuery + "&tabTitle=" + queryResults.getQuery().getQueryId();
 					String title = StringEscapeUtils.escapeHtml(queryResults.getQuery().getQueryString(graphResults.getGraphName()));

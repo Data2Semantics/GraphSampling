@@ -14,8 +14,17 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import com.d2s.subgraph.eval.QueryWrapper;
+import com.d2s.subgraph.eval.batch.DbpExperimentSetup;
+import com.d2s.subgraph.eval.batch.EvaluateGraph;
+import com.d2s.subgraph.helpers.Helper;
 import com.d2s.subgraph.queries.filters.QueryFilter;
+import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryExecution;
+import com.hp.hpl.jena.query.QueryExecutionFactory;
+import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QueryParseException;
+import com.hp.hpl.jena.query.ResultSetFactory;
+import com.hp.hpl.jena.query.ResultSetRewindable;
 
 
 public class QaldDbpQueries implements GetQueries {
@@ -32,15 +41,34 @@ public class QaldDbpQueries implements GetQueries {
 	
 	
 	public QaldDbpQueries(String xmlFile, QueryFilter... filters) throws SAXException, IOException, ParserConfigurationException {
-		parseXml(new File(xmlFile));
 		this.filters = filters;
+		parseXml(new File(xmlFile));
+		eraseEmptyresultQueries();
 	}
 
 	public QaldDbpQueries(String xmlFile) throws SAXException, IOException, ParserConfigurationException {
 		this(xmlFile, new QueryFilter[]{});
 	}
 	
-	
+	private void eraseEmptyresultQueries() {
+		ArrayList<QueryWrapper> validQueriesList = new ArrayList<QueryWrapper>();
+		int emptyQueries = 0;
+		for (QueryWrapper queryWrapper: queries) {
+			try {
+				Query query = QueryFactory.create(queryWrapper.getQueryString(DbpExperimentSetup.GOLDEN_STANDARD_GRAPH));
+				QueryExecution queryExecution = QueryExecutionFactory.sparqlService(EvaluateGraph.OPS_VIRTUOSO, query);
+				ResultSetRewindable result = ResultSetFactory.copyResults(queryExecution.execSelect());
+				if (Helper.getResultSize(result) > 0) {
+					validQueriesList.add(queryWrapper);
+				}
+			} catch (Exception e) {
+				// failed to execute. endpoint down, or incorrect query
+				emptyQueries++;
+			}
+		}
+		System.out.println("ignored " + emptyQueries + " from xml, as they returned empty results on our golden standard graph. wrong query? ops down?");
+		queries = validQueriesList;
+	}
 	private void parseXml(File xmlFile) throws SAXException, IOException, ParserConfigurationException {
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -89,6 +117,8 @@ public class QaldDbpQueries implements GetQueries {
 		if (queryNode != null && queryNode.getTextContent().trim().length() > 0 && !queryNode.getTextContent().trim().equals(IGNORE_QUERY_STRING)) {
 			try {
 				evalQuery.setQuery(queryNode.getTextContent());
+				System.out.println("WATCH OUT!!!!!!!!!!!! Removing a project var!!!");
+				evalQuery.removeProjectVar("string");
 			} catch (Exception e) {
 				invalidQueries++;
 				return;

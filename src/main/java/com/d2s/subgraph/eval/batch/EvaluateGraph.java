@@ -15,6 +15,7 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.http.HTTPRepository;
 import com.d2s.subgraph.eval.QueryWrapper;
+import com.d2s.subgraph.eval.results.GraphResults;
 import com.d2s.subgraph.eval.results.GraphResultsRegular;
 import com.d2s.subgraph.eval.results.QueryResultsRegular;
 import com.d2s.subgraph.helpers.Helper;
@@ -39,7 +40,7 @@ public class EvaluateGraph {
 	public int validCount = 0;
 	public int invalidCount = 0;
 	private String endpoint;
-	GraphResultsRegular results = new GraphResultsRegular();
+	GraphResults results = new GraphResultsRegular();
 	public EvaluateGraph(GetQueries getQueries, String endpoint, String goldenStandardGraph, String subGraph) {
 		queries = getQueries.getQueries();
 		this.endpoint = endpoint;
@@ -51,38 +52,38 @@ public class EvaluateGraph {
 	public void run() throws RepositoryException, MalformedQueryException, QueryEvaluationException, IOException {
 		for (QueryWrapper evalQuery: queries) {
 			if (evalQuery.isSelect()) {
-//				evalQuery.removeProjectVar("string");
 				ResultSetRewindable goldenStandardResults;
 				ResultSetRewindable subgraphResults;
 				try {
 					goldenStandardResults = runSelectUsingJena(endpoint, evalQuery.getQueryString(goldenStandardGraph));
 					subgraphResults = runSelectUsingJena(endpoint, evalQuery.getQueryString(subGraph));
 				} catch (Exception e) {
+//					e.printStackTrace();
 					invalidCount++;
 					continue;
 				}
 				
 				if (Helper.getResultSize(goldenStandardResults) == 0) {
-//					System.out.println("no results retrieved for query " + evalQuery.getQuery(goldenStandardGraph));
+//					System.out.println("no results retrieved for query " + evalQuery.getQueryString(goldenStandardGraph));
 					invalidCount++;
 					continue; //havent loaded complete dbpedia yet. might be missing things, so just skip this query
 				} else {
 					validCount++;
 					double precision = getPrecision(goldenStandardResults, subgraphResults);
 					double recall = getRecall(goldenStandardResults, subgraphResults);
-					System.out.println("precision: " + precision);
-					System.out.println("recall: " + recall);
 					QueryResultsRegular result = new QueryResultsRegular();
 					result.setQuery(evalQuery);
 					result.setPrecision(precision);
 					result.setRecall(recall);
 					results.add(result);
-					System.out.println(result.toString());
+//					System.out.println(result.toString());
+					System.out.print(recall + ":");
 				}
 			} else if (evalQuery.isAsk()) {
 				//todo
 			}
 		}
+		System.out.println();
 		System.out.println("Invalids (i.e. no results on golden standard, or sparql error on execution): " + Integer.toString(invalidCount) + ", valids: " + Integer.toString(validCount));
 	}
 	@SuppressWarnings("unused")
@@ -137,7 +138,7 @@ public class EvaluateGraph {
 				falseNegatives++;
 			}
 		}
-		System.out.println("truePositives: " + truePositives + " falseNegatives: " + falseNegatives);
+//		System.out.println("truePositives: " + truePositives + " falseNegatives: " + falseNegatives);
 		double recall = 0;
 		if ((truePositives + falseNegatives) != 0) recall = truePositives / (truePositives + falseNegatives);
 		return recall;
@@ -214,7 +215,7 @@ public class EvaluateGraph {
 	    return result;
 	}
 	
-	public GraphResultsRegular getResults() {
+	public GraphResults getResults() {
 		return results;
 	}
 	

@@ -6,13 +6,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.xml.parsers.ParserConfigurationException;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
 import org.xml.sax.SAXException;
 import com.d2s.subgraph.eval.results.BatchResults;
-import com.d2s.subgraph.eval.results.GraphResults;
 import com.d2s.subgraph.eval.results.GraphResults;
 import com.d2s.subgraph.eval.results.GraphResultsSample;
 import com.d2s.subgraph.queries.GetQueries;
@@ -30,8 +32,8 @@ public class EvaluateGraphs {
 	private ExperimentSetup experimentSetup;
 	private BatchResults batchResults;
 	private GetQueries queries;
-	private ArrayList<String> graphs;
-	private ArrayList<String> sampleGraphs;
+	private ArrayList<String> graphs = new ArrayList<String>();;
+	private HashMap<String,ArrayList<String>> sampleGraphs = new HashMap<String,ArrayList<String>>();
 	public EvaluateGraphs(ExperimentSetup experimentSetup) {
 		queries = experimentSetup.getQueries();
 		batchResults = new BatchResults(experimentSetup, queries);
@@ -55,19 +57,22 @@ public class EvaluateGraphs {
 			eval.run();
 			GraphResults results = eval.getResults();
 			batchResults.add(results);
-			String filename = graph.substring(7);//remove http://
-			results.writeAsCsv(resultsDir.getAbsolutePath() + "/" + filename + ".csv");
+			results.writeAsCsv(resultsDir.getAbsolutePath());
 		}
 		if (sampleGraphs.size() > 0) {
-			System.out.println("evaluating for " + sampleGraphs.size() + " samplegraphs");
-			GraphResultsSample sampleGraphResultsCombined = new GraphResultsSample();
-			ArrayList<GraphResults> individualSampleResults = new ArrayList<GraphResults>();
-			for (String sampleGraph: sampleGraphs) {
-				EvaluateGraph eval = new EvaluateGraph(queries, EvaluateGraph.OPS_VIRTUOSO, experimentSetup.getGoldenStandardGraph(), sampleGraph);
-				eval.run();
-				individualSampleResults.add(eval.getResults());
+			for (Map.Entry<String, ArrayList<String>> entry : sampleGraphs.entrySet()) {
+				System.out.println("evaluating for " + sampleGraphs.size() + " samplegraphs (" + entry.getKey() + ")");
+				GraphResultsSample sampleGraphResultsCombined = new GraphResultsSample();
+				ArrayList<GraphResults> sampleGraphResults = new ArrayList<GraphResults>();
+				for (String sampleGraph: entry.getValue()) {
+					EvaluateGraph eval = new EvaluateGraph(queries, EvaluateGraph.OPS_VIRTUOSO, experimentSetup.getGoldenStandardGraph(), sampleGraph);
+					eval.run();
+					sampleGraphResults.add(eval.getResults());
+				}
+				sampleGraphResultsCombined.add(sampleGraphResults);
+				sampleGraphResultsCombined.writeAsCsv(resultsDir.getAbsolutePath());
+				batchResults.add(sampleGraphResultsCombined);
 			}
-			sampleGraphResultsCombined.add(individualSampleResults);
 		}
 		batchResults.writeOutput();
 	}
@@ -112,13 +117,26 @@ public class EvaluateGraphs {
 		Process pr = ps.start();
 		BufferedReader in = new BufferedReader(new
 		InputStreamReader(pr.getInputStream()));
-		graphs = new ArrayList<String>();
 		String line;
 		while ((line = in.readLine()) != null) {
 			line = line.trim();
 			if (line.startsWith("http://" + experimentSetup.getGraphPrefix())) {
 				if (line.contains("sample")) {
-					sampleGraphs.add(line);
+					if (line.contains("0.2")) {
+						if (!sampleGraphs.containsKey("0.2")) {
+							sampleGraphs.put("0.2", new ArrayList<String>());
+						}
+						sampleGraphs.get("0.2").add(line);
+					} else if (line.contains("0.5")) {
+						if (!sampleGraphs.containsKey("0.5")) {
+							sampleGraphs.put("0.5", new ArrayList<String>());
+						}
+						sampleGraphs.get("0.5").add(line);
+					} else {
+						System.out.println("couldnt detect mode to run in for sample graph " + line);
+						System.exit(1);
+					}
+					
 				} else {
 					graphs.add(line);
 				}
@@ -127,19 +145,21 @@ public class EvaluateGraphs {
 		pr.waitFor();
 		in.close();
 		
-		if (graphs.size() == 0) {
+		if (graphs.size() == 0 && sampleGraphs.size() == 0) {
 			System.out.println("No graphs retrieved from OPS via SSH. Maybe virtuoso down?");
 			System.exit(1);
 		}
-		Collections.sort(sampleGraphs);
+		for (ArrayList<String> sampleGraphsArray: sampleGraphs.values()) {
+			Collections.sort(sampleGraphsArray);
+		}
 		Collections.sort(graphs);
 		return graphs;
 	}
 
 	public static void main(String[] args)  {
 		try {
-//			EvaluateGraphs evaluate = new EvaluateGraphs(new DbpExperimentSetup());
-			EvaluateGraphs evaluate = new EvaluateGraphs(new SwdfExperimentSetup());
+			EvaluateGraphs evaluate = new EvaluateGraphs(new DbpExperimentSetup());
+//			EvaluateGraphs evaluate = new EvaluateGraphs(new SwdfExperimentSetup());
 			evaluate.run();
 		} catch (Exception e) {
 			e.printStackTrace();
