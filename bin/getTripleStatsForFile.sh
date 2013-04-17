@@ -7,19 +7,24 @@ fi
 rDir="${HOME}/rProject"
 plotsDir="$HOME/stats/plots/tripleWeightDist"
 scriptsFile="$HOME/rProject/scripts/getTripleStats.R"
-outputRunScript="$HOME/temp/rRunScript.R"
-outputRunScript+=`date +%s%N`
+outputRunScript="$HOME/tmp/rRunScript_$RANDOM.R"
 logFile="$HOME/logs/getTripleStats_"
 logFile+=`date +"%Y%m%d"`
 logFile+=".log"
 
 for tripleWeightsFile in "$@"; do
-	basename=`basename $tripleWeightsFile`
+	if [ ! -f $tripleWeightsFile ]; then
+		echo "File $tripleWeightsFile not found"
+		exit;
+	fi
+	absFile=$(readlink -f $tripleWeightsFile)
+	basename=`basename $absFile`
+	echo "Plotting triple weights distribution for $basename"
 	targetFile="$plotsDir/$basename.pdf"
-	echo "filename <- \"$tripleWeightsFile\"" > $outputRunScript;
+	echo "filename <- \"$absFile\"" > $outputRunScript;
 	echo "outputPdf <- \"$targetFile\"" >> $outputRunScript;
 	cat $scriptsFile >> $outputRunScript;
-	R -f $outputRunScript > $logFile &
+	R -f $outputRunScript >> $logFile &
 done
 
 
