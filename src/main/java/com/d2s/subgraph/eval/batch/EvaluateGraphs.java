@@ -158,8 +158,8 @@ public class EvaluateGraphs {
 
 	public static void main(String[] args)  {
 		try {
-			EvaluateGraphs evaluate = new EvaluateGraphs(new DbpExperimentSetup());
-//			EvaluateGraphs evaluate = new EvaluateGraphs(new SwdfExperimentSetup());
+//			EvaluateGraphs evaluate = new EvaluateGraphs(new DbpExperimentSetup());
+			EvaluateGraphs evaluate = new EvaluateGraphs(new SwdfExperimentSetup());
 			evaluate.run();
 		} catch (Exception e) {
 			e.printStackTrace();

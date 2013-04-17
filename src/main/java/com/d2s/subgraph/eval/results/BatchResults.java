@@ -96,8 +96,12 @@ public class BatchResults {
 			if (onlyGraphsContaining.length() == 0 || graphResults.getGraphName().contains(onlyGraphsContaining)) {
 				for (QueryWrapper query: queries.getQueries()) {
 					ArrayList<String> row = table.get(query.getQueryId());
-					QueryResults queryResults = graphResults.get(query.getQueryId());
-					row.add(Double.toString(queryResults.getRecall()));
+					if (graphResults.contains(query.getQueryId())) {
+						QueryResults queryResults = graphResults.get(query.getQueryId());
+						row.add(Double.toString(queryResults.getRecall()));
+					} else {
+						row.add("N/A");
+					}
 				}
 			}
 		}
@@ -131,7 +135,9 @@ public class BatchResults {
 		for (GraphResults graphResults: batchResults) {
 			if (onlyGraphsContaining.length() == 0 || graphResults.getGraphName().contains(onlyGraphsContaining)) {
 				for (QueryWrapper query: queries.getQueries()) {
-					writer.writeNext(new String[]{Integer.toString(query.getQueryId()), graphResults.getGraphName(), Double.toString(graphResults.get(query.getQueryId()).getRecall())});
+					if (graphResults.contains(query.getQueryId())) {
+						writer.writeNext(new String[]{Integer.toString(query.getQueryId()), graphResults.getGraphName(), Double.toString(graphResults.get(query.getQueryId()).getRecall())});
+					}
 				}
 			}
 		}
@@ -147,9 +153,9 @@ public class BatchResults {
 		String html = "<html><head>\n" +
 				"<link rel='stylesheet' href='../static/style.css' type='text/css' />\n" +
 				"<script src='http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js'></script>\n" +
-				"<script src='../static/tablesorter/jquery.tablesorter.min.js'></script>\n" +
-				"<script src='../static/script.js'></script>\n" +
-				"<script src='../static/jquery.stickytableheaders.js'></script>\n" +
+				"<script src='http://www.few.vu.nl/~lrietveld/static/tablesorter/jquery.tablesorter.min.js'></script>\n" +
+				"<script src='http://www.few.vu.nl/~lrietveld/static/script.js'></script>\n" +
+				"<script src='http://www.few.vu.nl/~lrietveld/static/jquery.stickytableheaders.js'></script>\n" +
 				"</head>" +
 				"\n<body>" +
 				"\n<table id='myTable' class='tablesorter'>\n";
@@ -164,10 +170,12 @@ public class BatchResults {
 			double totalRecall = 0.0;// totalrecall!
 			int numGraphs = 0;
 			for (GraphResults results: batchResults) {
-				if (onlyGraphsContaining.length() == 0 || results.getGraphName().contains(onlyGraphsContaining)) {
-					QueryResults queryResults = results.get(queryId);
-					totalRecall += queryResults.getRecall();
-					numGraphs++;
+				if (results.contains(queryId)) {
+					if (onlyGraphsContaining.length() == 0 || results.getGraphName().contains(onlyGraphsContaining)) {
+						QueryResults queryResults = results.get(queryId);
+						totalRecall += queryResults.getRecall();
+						numGraphs++;
+					}
 				}
 			}
 			
@@ -181,16 +189,21 @@ public class BatchResults {
 		html += "<th>avg</th>";
 		
 		for (GraphResults graphResults: batchResults) {
+			
 			if (onlyGraphsContaining.length() == 0 || graphResults.getGraphName().contains(onlyGraphsContaining)) {
 				html += "\n<th>" + graphResults.getGraphName().substring("http://".length()).replace('_', '-') + "<br>(avg: " + Helper.getDoubleAsFormattedString(graphResults.getAverageRecall()) + ")</th>";
 				for (QueryWrapper query: queries.getQueries()) {
 					ArrayList<String> row = table.get(query.getQueryId());
-					QueryResults queryResults = graphResults.get(query.getQueryId());
-					String encodedQuery = URLEncoder.encode(queryResults.getQuery().getQueryString(graphResults.getGraphName()), "UTF-8");
-					String url = "http://yasgui.laurensrietveld.nl?endpoint=" + encodedEndpoint + "&query=" + encodedQuery + "&tabTitle=" + queryResults.getQuery().getQueryId();
-					String title = StringEscapeUtils.escapeHtml(queryResults.getQuery().getQueryString(graphResults.getGraphName()));
-					String cell = "<td title='" + title + "'><a href='" + url + "' target='_blank'>" + Helper.getDoubleAsFormattedString(queryResults.getRecall()) + "</a></td>";
-					row.add(cell);
+					if (graphResults.contains(query.getQueryId())) {
+						QueryResults queryResults = graphResults.get(query.getQueryId());
+						String encodedQuery = URLEncoder.encode(queryResults.getQuery().getQueryString(graphResults.getGraphName()), "UTF-8");
+						String url = "http://yasgui.laurensrietveld.nl?endpoint=" + encodedEndpoint + "&query=" + encodedQuery + "&tabTitle=" + queryResults.getQuery().getQueryId();
+						String title = StringEscapeUtils.escapeHtml(queryResults.getQuery().getQueryString(graphResults.getGraphName()));
+						String cell = "<td title='" + title + "'><a href='" + url + "' target='_blank'>" + Helper.getDoubleAsFormattedString(queryResults.getRecall()) + "</a></td>";
+						row.add(cell);
+					} else {
+						row.add("<td>N/A</td>");
+					}
 				}
 			}
 		}

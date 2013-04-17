@@ -52,7 +52,11 @@ public class QueryResultsSample implements QueryResults {
 	private double getMedianPrecision() {
 		DescriptiveStatistics stats = new DescriptiveStatistics();
 		for (QueryResults result: allQueryResults) {
-	        stats.addValue(result.getPrecision());
+			if (result != null) {
+				stats.addValue(result.getPrecision());
+			} else {
+				System.out.println("skipped a query result in the median calculation of precision. this specific query probably resulted in an error (e.g. virtuoso 4000 error).");
+			}
 		}
 		return stats.getPercentile(50);
 	}
@@ -60,7 +64,11 @@ public class QueryResultsSample implements QueryResults {
 	private double getMedianRecall() {
 		DescriptiveStatistics stats = new DescriptiveStatistics();
 		for (QueryResults result: allQueryResults) {
+			if (result != null) {
 		        stats.addValue(result.getRecall());
+			} else {
+				System.out.println("skipped a query result in the median calculation of recall. this specific query probably resulted in an error (e.g. virtuoso 4000 error).");
+			}
 		}
 		return stats.getPercentile(50);
 	}
