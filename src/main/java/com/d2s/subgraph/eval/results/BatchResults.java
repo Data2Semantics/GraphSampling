@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import au.com.bytecode.opencsv.CSVWriter;
@@ -27,7 +26,6 @@ public class BatchResults {
 	private static String FILE_HTML_SUMMARY = "results.html";
 	private static String FILE_CSV_FULL_LIST = "list.csv";
 	private static String FILE_CSV_FLAT_FULL_LIST = "flatlist.csv";
-	private static String FILE_PDF_BOXPLOTS = "boxplots.pdf";
 	private HashMap<String, Boolean> modesImported = new HashMap<String, Boolean>();
 	
 	public BatchResults(ExperimentSetup experimentSetup, GetQueries queries) {
@@ -47,9 +45,10 @@ public class BatchResults {
 					outputAsHtmlTable(mode);
 					outputAsCsvTable(mode);
 					outputAsCsvFlatList(mode);
-					plotBoxPlots(mode);
+//					plotBoxPlots(mode);
 				}
 			}
+			drawPlots();
 		} else {
 			System.out.println("no results to write output for");
 		}
@@ -61,19 +60,17 @@ public class BatchResults {
 		this.batchResults.add(graphResults);
 	}
 	
-	private void plotBoxPlots(String onlyGraphsContaining) throws IOException, InterruptedException {
-		File pdfFile = new File(resultsDir.getAbsolutePath() + "/" + onlyGraphsContaining + "_" + FILE_PDF_BOXPLOTS);
-		File inputFile = new File(resultsDir.getAbsolutePath() + "/" + onlyGraphsContaining + "_" + FILE_CSV_FLAT_FULL_LIST);
+	private void drawPlots() throws IOException, InterruptedException {
 		RHelper rHelper = new RHelper();
-		rHelper.plotRecallBoxPlots(inputFile, pdfFile);
-		
+		rHelper.drawPlots(resultsDir);
 	}
 	private void writeSummaryCsv() throws IOException {
+		
 		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + FILE_CSV_SUMMARY);
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
-		writer.writeNext(new String[]{"graph", "avgRecall"});
+		writer.writeNext(new String[]{"graph", "avg recall", "median recall", "std recall"});
 		for (GraphResults graphResults: batchResults) {
-			writer.writeNext(new String[]{graphResults.getGraphName(), Double.toString(graphResults.getAverageRecall())});
+			writer.writeNext(new String[]{graphResults.getGraphName(), Double.toString(graphResults.getAverageRecall()), Double.toString(graphResults.getMedianRecall()), Double.toString(graphResults.getStdRecall())});
 		}
 		writer.close();
 	}
@@ -162,7 +159,7 @@ public class BatchResults {
 		HashMap<Integer, ArrayList<String>> table = new HashMap<Integer, ArrayList<String>>();
 		
 		
-		//fill first col of table (avg for this query)
+		//fill first two col of table (queryId and avg for this query)
 		for (QueryWrapper query: queries.getQueries()) {
 			int queryId = query.getQueryId();
 			
@@ -180,13 +177,22 @@ public class BatchResults {
 			}
 			
 			double avgRecall = totalRecall / (double)numGraphs;
-			row.add("<td title='queryId: "+ queryId +"'>" + Helper.getDoubleAsFormattedString(avgRecall) + "</td>");
+			int goldenStandardSize = 0;
+			String url = "#";
+			if (batchResults.get(0).contains(queryId)) {
+				QueryWrapper queryWrapper = batchResults.get(0).get(queryId).getQuery();
+				goldenStandardSize = batchResults.get(0).get(queryId).getGoldenStandardSize();
+				String encodedQuery = URLEncoder.encode(queryWrapper.getQueryString(experimentSetup.getGoldenStandardGraph()), "UTF-8");
+				url = "http://yasgui.laurensrietveld.nl?endpoint=" + encodedEndpoint + "&query=" + encodedQuery + "&tabTitle=" + queryWrapper.getQueryId();
+			}
+			row.add("<td>" + queryId + "</td>");
+			row.add("<td><a href='" + url + "' target='_blank'>" + Helper.getDoubleAsFormattedString(avgRecall) + " (n:" + goldenStandardSize + ")</a></td>");
 			table.put(queryId, row);
 		}
 		
 		
 		html += "<thead>\n<tr>";
-		html += "<th>avg</th>";
+		html += "<th>queryId</th><th>avg</th>";
 		
 		for (GraphResults graphResults: batchResults) {
 			

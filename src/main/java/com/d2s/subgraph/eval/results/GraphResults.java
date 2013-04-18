@@ -19,7 +19,8 @@ public interface GraphResults {
 	
 	
 	public double getAverageRecall();
-	
+	public double getMedianRecall();
+	public double getStdRecall();
 
 	public String getGraphName();
 
@@ -30,5 +31,6 @@ public interface GraphResults {
 	public ArrayList<QueryResults> getAsArrayList();
 	
 	public ArrayList<Integer> getQueryIds();
+	
 	
 }

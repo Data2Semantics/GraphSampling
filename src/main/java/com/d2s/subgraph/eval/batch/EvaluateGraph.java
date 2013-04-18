@@ -81,6 +81,7 @@ public class EvaluateGraph {
 				result.setQuery(evalQuery);
 				result.setPrecision(precision);
 				result.setRecall(recall);
+				result.setGoldenStandardSize(Helper.getResultSize(goldenStandardResults));
 				results.add(result);
 				// System.out.println(result.toString());
 				System.out.print(recall + ":");
@@ -112,6 +113,7 @@ public class EvaluateGraph {
 
 	// while recall is the number of relevant documents retrieved divided by the total number of existing relevant documents that should
 	// have been retrieved.
+	@SuppressWarnings("unused")
 	private double getRecallOnBindings(ResultSetRewindable goldenStandard, ResultSetRewindable subgraph) throws QueryEvaluationException {
 		goldenStandard.reset();
 		subgraph.reset();

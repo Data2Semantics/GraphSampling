@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+
 import com.d2s.subgraph.helpers.Helper;
 import au.com.bytecode.opencsv.CSVWriter;
 
@@ -64,6 +67,20 @@ public class GraphResultsRegular implements GraphResults {
 			totalRecall += result.getRecall();
 		}
 		return totalRecall / (double)results.size();
+	}
+	public double getMedianRecall() {
+		DescriptiveStatistics recallStats = new DescriptiveStatistics();
+		for (QueryResults result: results.values()) {
+			recallStats.addValue(result.getRecall());
+		}
+		return recallStats.getPercentile(50);
+	}
+	public double getStdRecall() {
+		DescriptiveStatistics recallStats = new DescriptiveStatistics();
+		for (QueryResults result: results.values()) {
+			recallStats.addValue(result.getRecall());
+		}
+		return recallStats.getStandardDeviation();
 	}
 	
 	public int getMaxQueryId() {

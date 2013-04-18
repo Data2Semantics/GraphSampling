@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+
 import com.d2s.subgraph.helpers.Helper;
 
 import au.com.bytecode.opencsv.CSVWriter;
@@ -13,7 +16,7 @@ import au.com.bytecode.opencsv.CSVWriter;
 
 
 public class GraphResultsSample implements GraphResults{
-	private HashMap<Integer, QueryResults> results = new HashMap<Integer, QueryResults>();
+	private HashMap<Integer, QueryResultsSample> results = new HashMap<Integer, QueryResultsSample>();
 	private String graphName;
 	private ArrayList<GraphResults> allGraphResults = new ArrayList<GraphResults>();
 	
@@ -63,8 +66,8 @@ public class GraphResultsSample implements GraphResults{
 		path += "/" + getGraphName().substring(7) + ".csv";//remove http://
 		File csvFile = new File(path);
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
-		writer.writeNext(new String[]{"queryId", "isAggregation", "isAsk", "isOnlyDbo", "isSelect", "recall", "query"});
-		for (QueryResults result: results.values()) {
+		writer.writeNext(new String[]{"queryId", "isAggregation", "isAsk", "isOnlyDbo", "isSelect", "recall", "stdRecall", "query"});
+		for (QueryResultsSample result: results.values()) {
 			ArrayList<String> columns = new ArrayList<String>();
 			columns.add(Integer.toString(result.getQuery().getQueryId()));
 			columns.add(Helper.boolAsString(result.getQuery().isAggregation()));
@@ -72,11 +75,13 @@ public class GraphResultsSample implements GraphResults{
 			columns.add(Helper.boolAsString(result.getQuery().isOnlyDbo()));
 			columns.add(Helper.boolAsString(result.getQuery().isSelect()));
 			columns.add(Double.toString(result.getRecall()));
+			columns.add(Double.toString(result.getRecallDeviation()));
 			columns.add(result.getQuery().toString());
 			writer.writeNext(columns.toArray(new String[columns.size()]));
 		}
 	    
 		writer.close();
+		
 	}
 	
 	public double getAveragePrecision() {
@@ -95,6 +100,20 @@ public class GraphResultsSample implements GraphResults{
 		}
 		return totalRecall / (double)results.size();
 	}
+	public double getMedianRecall() {
+		DescriptiveStatistics recallStats = new DescriptiveStatistics();
+		for (QueryResults result: results.values()) {
+			recallStats.addValue(result.getRecall());
+		}
+		return recallStats.getPercentile(50);
+	}
+	public double getStdRecall() {
+		DescriptiveStatistics recallStats = new DescriptiveStatistics();
+		for (QueryResults result: results.values()) {
+			recallStats.addValue(result.getRecall());
+		}
+		return recallStats.getStandardDeviation();
+	}
 	
 	public int getMaxQueryId() {
 		return Collections.max(results.keySet());
@@ -109,7 +128,7 @@ public class GraphResultsSample implements GraphResults{
 	}
 	
 	public HashMap<Integer, QueryResults> getAsHashMap() {
-		return results;
+		return new HashMap<Integer, QueryResults>(results);
 	}
 	
 	public ArrayList<QueryResults> getAsArrayList() {

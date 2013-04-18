@@ -12,7 +12,8 @@ public interface QueryResults {
 	public void setPrecision(double precision);
 	public double getRecall();
 	public void setRecall(double recall);
-	
+	public void setGoldenStandardSize(int resultSize);
+	public int getGoldenStandardSize();
 	
 	public String toString();
 	

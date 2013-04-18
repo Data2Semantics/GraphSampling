@@ -7,6 +7,7 @@ import com.d2s.subgraph.eval.QueryWrapper;
 public class QueryResultsRegular implements QueryResults {
 	private QueryWrapper query;
 	private double precision;
+	private int goldenStandardSize;
 	private double recall;
 	public QueryWrapper getQuery() {
 		return query;
@@ -30,6 +31,13 @@ public class QueryResultsRegular implements QueryResults {
 	
 	public String toString() {
 		return "recall: " + Double.toString(recall) + " precision: " + Double.toString(precision);
+	}
+	public void setGoldenStandardSize(int resultSize) {
+		this.goldenStandardSize = resultSize;
+		
+	}
+	public int getGoldenStandardSize() {
+		return goldenStandardSize;
 	}
 	
 }

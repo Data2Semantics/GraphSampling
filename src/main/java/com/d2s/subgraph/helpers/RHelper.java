@@ -11,7 +11,8 @@ import org.rosuda.JRI.Rengine;
 
 public class RHelper {
 	private static String TEMP_DIR = ".tmp";
-	private static String FILE_POSTFIX = "rScript.R";
+	private static String TMP_FILE_POSTFIX = "rScript.R";
+	private static String SCRIPT_DRAW_PLOTS = "src/main/resource/rScripts/drawPlots.R";
 	File tempDir;
 
 	public RHelper() {
@@ -22,12 +23,23 @@ public class RHelper {
 	}
 
 	private void execute(String script) throws IOException, InterruptedException {
-		File scriptFile = storeScriptInFile(script);
-		executeScript(scriptFile);
+		execute(script, null);
+	}
+	
+	private void execute(String script, File fileToAppendFrom) throws IOException, InterruptedException {
+		if (fileToAppendFrom != null) {
+			if (fileToAppendFrom.exists()) {
+				script += FileUtils.readFileToString(fileToAppendFrom);
+				File scriptFile = storeScriptInFile(script);
+				executeScript(scriptFile);
+			} else {
+				System.out.println("ERROR! could not find r script to read from. tried: " + fileToAppendFrom.getAbsolutePath());
+			}
+		}
 	}
 
 	private File storeScriptInFile(String script) throws IOException {
-		File file = new File(tempDir.getAbsolutePath() + "/" + RandomStringUtils.random(5, "abcdefghijklmnopqrstuvwxyz") + FILE_POSTFIX);
+		File file = new File(tempDir.getAbsolutePath() + "/" + RandomStringUtils.random(5, "abcdefghijklmnopqrstuvwxyz") + TMP_FILE_POSTFIX);
 		FileUtils.writeStringToFile(file, script);
 		return file;
 	}
@@ -52,6 +64,11 @@ public class RHelper {
 		rScript += "boxplot(recall~graph, data=input, main=\"Recall per graph\", xlab=\"Graphs\", ylab=\"Recall\", las=2);\n";
 		rScript += "dev.off()\n";
 		execute(rScript);
+	}
+	
+	public void drawPlots(File directory) throws IOException, InterruptedException {
+		String rScript = "setwd(\"" + directory.getAbsolutePath() + "\")\n";
+		execute(rScript, new File(SCRIPT_DRAW_PLOTS));
 	}
 
 	public static Rengine getEngine() throws InstantiationException {

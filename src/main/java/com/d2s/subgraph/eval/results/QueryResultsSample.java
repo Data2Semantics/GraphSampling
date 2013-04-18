@@ -13,14 +13,20 @@ public class QueryResultsSample implements QueryResults {
 	private ArrayList<QueryResults> allQueryResults = new ArrayList<QueryResults>();
 	private double precision;
 	private double recall;
-	
+	private DescriptiveStatistics recallStats;
+	private DescriptiveStatistics precisionStats;
+	private int goldenStandardSize;
 	public void add(ArrayList<QueryResults> allQueryResults) {
 		this.allQueryResults = allQueryResults;
 		aggregateToSingleObject();
 	}
 	
+
+	
 	private void aggregateToSingleObject() {
 		setQuery(allQueryResults.get(0).getQuery());
+		setGoldenStandardSize(allQueryResults.get(0).getGoldenStandardSize());
+		collectStats();
 		
 		//set precision
 		setPrecision(getMedianPrecision());
@@ -33,44 +39,41 @@ public class QueryResultsSample implements QueryResults {
 	
 	@SuppressWarnings("unused")
 	private double getAvgPrecision() {
-		DescriptiveStatistics stats = new DescriptiveStatistics();
-		for (QueryResults result: allQueryResults) {
-		        stats.addValue(result.getPrecision());
-		}
-		return stats.getMean();
+		return precisionStats.getMean();
 	}
 	
 	@SuppressWarnings("unused")
 	private double getAvgRecall() {
-		DescriptiveStatistics stats = new DescriptiveStatistics();
+		return recallStats.getMean();
+	}
+	
+	public double getRecallDeviation() {
+		return recallStats.getStandardDeviation();
+	}
+	
+	public double getPrecisionDeviation() {
+		return precisionStats.getStandardDeviation();
+	}
+	
+	private void collectStats() {
+		recallStats = new DescriptiveStatistics();
+		precisionStats = new DescriptiveStatistics();
 		for (QueryResults result: allQueryResults) {
-		        stats.addValue(result.getRecall());
+			if (result != null) {
+				precisionStats.addValue(result.getPrecision());
+				recallStats.addValue(result.getRecall());
+			} else {
+				System.out.println("skipped a query result in the stats calculation. this specific query probably resulted in an error (e.g. virtuoso 4000 error).");
+			}
 		}
-		return stats.getMean();
 	}
 	
 	private double getMedianPrecision() {
-		DescriptiveStatistics stats = new DescriptiveStatistics();
-		for (QueryResults result: allQueryResults) {
-			if (result != null) {
-				stats.addValue(result.getPrecision());
-			} else {
-				System.out.println("skipped a query result in the median calculation of precision. this specific query probably resulted in an error (e.g. virtuoso 4000 error).");
-			}
-		}
-		return stats.getPercentile(50);
+		return precisionStats.getPercentile(50);
 	}
 	
 	private double getMedianRecall() {
-		DescriptiveStatistics stats = new DescriptiveStatistics();
-		for (QueryResults result: allQueryResults) {
-			if (result != null) {
-		        stats.addValue(result.getRecall());
-			} else {
-				System.out.println("skipped a query result in the median calculation of recall. this specific query probably resulted in an error (e.g. virtuoso 4000 error).");
-			}
-		}
-		return stats.getPercentile(50);
+		return recallStats.getPercentile(50);
 	}
 	
 	public QueryWrapper getQuery() {
@@ -92,9 +95,15 @@ public class QueryResultsSample implements QueryResults {
 		this.recall = recall;
 	}
 	
-	
 	public String toString() {
 		return "recall: " + Double.toString(recall) + " precision: " + Double.toString(precision);
+	}
+	public void setGoldenStandardSize(int resultSize) {
+		this.goldenStandardSize = resultSize;
+		
+	}
+	public int getGoldenStandardSize() {
+		return goldenStandardSize;
 	}
 	
 }
