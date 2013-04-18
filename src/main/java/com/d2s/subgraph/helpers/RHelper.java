@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.RandomStringUtils;
+import org.rosuda.JRI.Rengine;
 
 public class RHelper {
 	private static String TEMP_DIR = ".tmp";
@@ -51,6 +52,14 @@ public class RHelper {
 		rScript += "boxplot(recall~graph, data=input, main=\"Recall per graph\", xlab=\"Graphs\", ylab=\"Recall\", las=2);\n";
 		rScript += "dev.off()\n";
 		execute(rScript);
+	}
+
+	public static Rengine getEngine() throws InstantiationException {
+		Rengine re = new Rengine(new String[] { "--vanilla" }, false, null);
+		if (!re.waitForR()) {
+			throw new InstantiationException("Unable to start R Engine");
+		}
+		return re;
 	}
 
 	public static void main(String[] args) throws IOException, InterruptedException {

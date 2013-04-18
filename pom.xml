@@ -57,12 +57,46 @@
 			<artifactId>commons-math3</artifactId>
 			<version>3.1.1</version>
 		</dependency>
-
+		<!-- <dependency>
+			<groupId>org.math.r</groupId>
+			<artifactId>RSession</artifactId>
+			<version>0.6.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.math.r</groupId>
+			<artifactId>REngine</artifactId>
+			<version>0.6.1</version>
+		</dependency>
+				<dependency>
+			<groupId>org.math.r</groupId>
+			<artifactId>RServe</artifactId>
+			<version>0.6.1</version>
+		</dependency>-->
+		<dependency>
+			<groupId>org.jri</groupId>
+			<artifactId>JRIEngine</artifactId>
+			<version>0.5.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jri</groupId>
+			<artifactId>JRI</artifactId>
+			<version>0.5.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jri</groupId>
+			<artifactId>REngine</artifactId>
+			<version>0.5.0</version>
+		</dependency>
 	</dependencies>
 	<repositories>
 		<repository>
 			<id>openrdfSesame</id>
 			<url>http://repo.aduna-software.org/maven2/releases/</url>
+		</repository>
+		<repository>
+			<id>subgraphselection.local</id>
+			<name>subgraphselection</name>
+			<url>file:${project.basedir}/repo</url>
 		</repository>
 	</repositories>
 	<build>
