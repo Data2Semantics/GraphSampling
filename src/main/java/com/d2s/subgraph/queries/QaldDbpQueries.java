@@ -53,6 +53,7 @@ public class QaldDbpQueries implements GetQueries {
 	private void eraseEmptyresultQueries() {
 		ArrayList<QueryWrapper> validQueriesList = new ArrayList<QueryWrapper>();
 		int emptyQueries = 0;
+		int failedQueries = 0;
 		for (QueryWrapper queryWrapper: queries) {
 			try {
 				Query query = QueryFactory.create(queryWrapper.getQueryString(DbpExperimentSetup.GOLDEN_STANDARD_GRAPH));
@@ -60,13 +61,16 @@ public class QaldDbpQueries implements GetQueries {
 				ResultSetRewindable result = ResultSetFactory.copyResults(queryExecution.execSelect());
 				if (Helper.getResultSize(result) > 0) {
 					validQueriesList.add(queryWrapper);
+				} else {
+					System.out.println(queryWrapper.getQueryString(DbpExperimentSetup.GOLDEN_STANDARD_GRAPH));
+					emptyQueries++;
 				}
 			} catch (Exception e) {
 				// failed to execute. endpoint down, or incorrect query
-				emptyQueries++;
+				failedQueries++;
 			}
 		}
-		System.out.println("ignored " + emptyQueries + " from xml, as they returned empty results on our golden standard graph. wrong query? ops down?");
+		System.out.println("ignored " + (emptyQueries + failedQueries) + " queries from xml. Empty queries: " + emptyQueries + ", failed queries: " + failedQueries);
 		queries = validQueriesList;
 	}
 	private void parseXml(File xmlFile) throws SAXException, IOException, ParserConfigurationException {

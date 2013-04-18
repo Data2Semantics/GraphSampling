@@ -21,8 +21,10 @@ import org.openrdf.query.TupleQueryResult;
 import com.d2s.subgraph.eval.batch.EvaluateGraphs;
 import com.d2s.subgraph.eval.batch.SwdfExperimentSetup;
 import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
 import com.hp.hpl.jena.sparql.core.TriplePath;
+import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.resultset.ResultSetRewindable;
 import com.hp.hpl.jena.sparql.syntax.Element;
 import com.hp.hpl.jena.sparql.syntax.ElementPathBlock;
@@ -215,5 +217,21 @@ public class Helper {
 		
 		return doubleString;
 		
+	}
+
+	public static ArrayList<QuerySolution> getAsSolutionArrayList(ResultSetRewindable resultSet) {
+		ArrayList<QuerySolution> arrayList = new ArrayList<QuerySolution>();
+		while (resultSet.hasNext()) {
+			arrayList.add(resultSet.next());
+		}
+		return arrayList;
+	}
+	
+	public static ArrayList<Binding> getAsBindingArrayList(ResultSetRewindable resultSet) {
+		ArrayList<Binding> arrayList = new ArrayList<Binding>();
+		while (resultSet.hasNext()) {
+			arrayList.add(resultSet.nextBinding());
+		}
+		return arrayList;
 	}
 }

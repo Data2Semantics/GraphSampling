@@ -2,7 +2,6 @@ package com.d2s.subgraph.eval.batch;
 
 import java.io.IOException;
 import java.util.ArrayList;
-
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
@@ -12,11 +11,14 @@ import com.d2s.subgraph.eval.results.GraphResultsRegular;
 import com.d2s.subgraph.eval.results.QueryResultsRegular;
 import com.d2s.subgraph.helpers.Helper;
 import com.d2s.subgraph.queries.GetQueries;
-import com.d2s.subgraph.queries.QaldDbpQueries;
+import com.d2s.subgraph.queries.SwdfQueries;
+import com.d2s.subgraph.queries.filters.DescribeFilter;
+import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
@@ -42,41 +44,50 @@ public class EvaluateGraph {
 
 	public void run() throws RepositoryException, MalformedQueryException, QueryEvaluationException, IOException {
 		for (QueryWrapper evalQuery : queries) {
-			if (evalQuery.isSelect()) {
-				ResultSetRewindable goldenStandardResults;
-				ResultSetRewindable subgraphResults;
-				try {
-					goldenStandardResults = runSelectUsingJena(endpoint, evalQuery.getQueryString(goldenStandardGraph));
-					subgraphResults = runSelectUsingJena(endpoint, evalQuery.getQueryString(subGraph));
-				} catch (Exception e) {
-					// e.printStackTrace();
-					invalidCount++;
-					continue;
-				}
-
-				if (Helper.getResultSize(goldenStandardResults) == 0) {
-					// System.out.println("no results retrieved for query " + evalQuery.getQueryString(goldenStandardGraph));
-					invalidCount++;
-					continue; // havent loaded complete dbpedia yet. might be missing things, so just skip this query
-				} else {
-					validCount++;
-					double precision = getPrecision(goldenStandardResults, subgraphResults);
-					double recall = getRecall(goldenStandardResults, subgraphResults);
-					QueryResultsRegular result = new QueryResultsRegular();
-					result.setQuery(evalQuery);
-					result.setPrecision(precision);
-					result.setRecall(recall);
-					results.add(result);
-					// System.out.println(result.toString());
-					System.out.print(recall + ":");
-				}
-			} else if (evalQuery.isAsk()) {
-				// todo
-			}
+			runForQuery(evalQuery);
 		}
 		System.out.println();
 		System.out.println("Invalids (i.e. no results on golden standard, or sparql error on execution): " + Integer.toString(invalidCount)
 				+ ", valids: " + Integer.toString(validCount));
+	}
+	
+	public void runForQuery(QueryWrapper evalQuery) throws QueryEvaluationException {
+		if (evalQuery.isSelect()) {
+			ResultSetRewindable goldenStandardResults;
+			ResultSetRewindable subgraphResults;
+			try {
+				goldenStandardResults = runSelectUsingJena(endpoint, evalQuery.getQueryString(goldenStandardGraph));
+				subgraphResults = runSelectUsingJena(endpoint, evalQuery.getQueryString(subGraph));
+			} catch (Exception e) {
+				e.printStackTrace();
+				invalidCount++;
+				return;
+			}
+
+			if (Helper.getResultSize(goldenStandardResults) == 0) {
+				System.out.println("no results retrieved for query " + evalQuery.getQueryString(goldenStandardGraph));
+				invalidCount++;
+				return; // havent loaded complete dbpedia yet. might be missing things, so just skip this query
+			} else {
+				validCount++;
+				double precision = getPrecision(goldenStandardResults, subgraphResults);
+//				double recall = getRecallOnBindings(goldenStandardResults, subgraphResults);
+				double recall = getRecallOnProjectionVars(goldenStandardResults, subgraphResults);
+//				if (recall <= 1.0 && recall > 0.0) {
+//					System.out.println(evalQuery.toString());
+//					System.exit(1);
+//				}
+				QueryResultsRegular result = new QueryResultsRegular();
+				result.setQuery(evalQuery);
+				result.setPrecision(precision);
+				result.setRecall(recall);
+				results.add(result);
+				// System.out.println(result.toString());
+				System.out.print(recall + ":");
+			}
+		} else if (evalQuery.isAsk()) {
+			// todo
+		}
 	}
 
 	// Precision is the number of relevant documents a search retrieves divided by the total number of documents retrieved
@@ -101,9 +112,11 @@ public class EvaluateGraph {
 
 	// while recall is the number of relevant documents retrieved divided by the total number of existing relevant documents that should
 	// have been retrieved.
-	private double getRecall(ResultSetRewindable goldenStandard, ResultSetRewindable subgraph) throws QueryEvaluationException {
+	private double getRecallOnBindings(ResultSetRewindable goldenStandard, ResultSetRewindable subgraph) throws QueryEvaluationException {
 		goldenStandard.reset();
 		subgraph.reset();
+//		ResultSetFormatter.out(goldenStandard);
+//		ResultSetFormatter.out(subgraph);
 		double falseNegatives = 0;
 		double truePositives = 0;
 		while (goldenStandard.hasNext()) {
@@ -121,12 +134,48 @@ public class EvaluateGraph {
 		return recall;
 	}
 
-	private double getCorrelation(ResultSetRewindable goldenStandard, ResultSetRewindable subgraph) {
-		double correlation = 0;
 
-		return correlation;
+	// while recall is the number of relevant documents retrieved divided by the total number of existing relevant documents that should
+	// have been retrieved.
+	private double getRecallOnProjectionVars(ResultSetRewindable goldenStandard, ResultSetRewindable subgraph) throws QueryEvaluationException {
+		goldenStandard.reset();
+		subgraph.reset();
+		double truePositives = 0;
+		ArrayList<String> projectionVars = new ArrayList<String>(goldenStandard.getResultVars());
+		
+		while (subgraph.hasNext()) {
+			double maxTruePositives = 0;
+			QuerySolution subgraphSolution = subgraph.next();
+			goldenStandard.reset();
+			while (goldenStandard.hasNext()) {
+				double truePositivesForBinding = 0.0;
+				QuerySolution goldenStandardSolution = goldenStandard.next();
+				double nullMatches = 0.0;
+				boolean regularMatches = false;
+				for (String projectionVar: projectionVars) {
+					if (!subgraphSolution.contains(projectionVar) && !goldenStandardSolution.contains(projectionVar)) {
+						//both are null
+						nullMatches++;
+					} else if (subgraphSolution.contains(projectionVar) && goldenStandardSolution.contains(projectionVar) &&
+							subgraphSolution.get(projectionVar).equals(goldenStandardSolution.get(projectionVar))) {
+						//both have a result var, and are the same
+						regularMatches = true;
+						truePositivesForBinding++;
+					}
+				}
+				if (regularMatches) truePositivesForBinding+=nullMatches;
+				if (truePositivesForBinding > maxTruePositives) {
+					maxTruePositives = truePositivesForBinding;
+				}
+			}
+			
+			truePositives+=maxTruePositives;
+		}
+		double recall = 0;
+		if ((Helper.getResultSize(goldenStandard) * projectionVars.size()) > 0)
+			recall = truePositives / (Helper.getResultSize(goldenStandard) * projectionVars.size());
+		return recall;
 	}
-
 
 	private boolean bindingFoundInQueryResult(Binding binding, ResultSetRewindable queryResult) throws QueryEvaluationException {
 		boolean found = false;
@@ -153,14 +202,25 @@ public class EvaluateGraph {
 
 	public static void main(String[] args) {
 
-		String goldenStandardGraph = "http://dbpo";
-		String subgraph = "http://dbp_s-o_unweighted_noLit_directed_outdegree_0.5.nt";
+		String goldenStandardGraph = "http://swdf";
+		String subgraph = "http://df_s-o-litAsNode_unweighted_directed_betweenness-4_0.2.nt";
 		try {
-			 EvaluateGraph evaluate = new EvaluateGraph(new QaldDbpQueries(QaldDbpQueries.QALD_2_QUERIES), EvaluateGraph.OPS_VIRTUOSO,
-			 goldenStandardGraph, subgraph);
-			 evaluate.run();
-			 System.out.println(evaluate.getResults().getQueryIds());
-			 System.out.println(evaluate.getResults().get(2));
+//			 EvaluateGraph evaluate = new EvaluateGraph(new QaldDbpQueries(QaldDbpQueries.QALD_2_QUERIES, new OnlyDboQueries()), EvaluateGraph.OPS_VIRTUOSO, goldenStandardGraph, subgraph);
+			 EvaluateGraph evaluate = new EvaluateGraph(new SwdfQueries(new DescribeFilter(), new SimpleBgpFilter()), EvaluateGraph.OPS_VIRTUOSO, goldenStandardGraph, subgraph);
+			 QueryWrapper query = new QueryWrapper("SELECT DISTINCT  ?b ?attrType\n" + 
+			 		"WHERE\n" + 
+			 		"  { ?a <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://swrc.ontoware.org/ontology#ConferenceEvent> .\n" + 
+			 		"    ?a ?b ?c\n" + 
+			 		"    OPTIONAL\n" + 
+			 		"      { ?b <http://www.w3.org/2000/01/rdf-schema#range> ?attrType }\n" + 
+			 		"    OPTIONAL\n" + 
+			 		"      { ?c <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?d }\n" + 
+			 		"    FILTER ( ! bound(?d) )\n" + 
+			 		"  }\n" + 
+			 		"\n" + 
+			 		"");
+			 System.out.println(query);
+			 evaluate.runForQuery(query);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
