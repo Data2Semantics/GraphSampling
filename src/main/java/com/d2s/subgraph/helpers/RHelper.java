@@ -12,7 +12,7 @@ import org.rosuda.JRI.Rengine;
 public class RHelper {
 	private static String TEMP_DIR = ".tmp";
 	private static String TMP_FILE_POSTFIX = "rScript.R";
-	private static String SCRIPT_DRAW_PLOTS = "src/main/resource/rScripts/drawPlots.R";
+	private static String SCRIPT_DRAW_PLOTS = "src/main/resources/rScripts/drawPlots.R";
 	File tempDir;
 
 	public RHelper() {
