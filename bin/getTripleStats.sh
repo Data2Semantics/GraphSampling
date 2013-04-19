@@ -4,7 +4,7 @@ if [ -z "$1" ];then
         exit;
 fi
 
-dataset=$1
+
 rDir="${HOME}/rProject"
 tripleWeightsDir="$HOME/stats/tripleWeights"
 plotsDir="$HOME/stats/plots/tripleWeightDist"

@@ -20,14 +20,12 @@ fi
 dataset=$1
 rDir="${HOME}/rProject"
 
-cmd="find $rDir -maxdepth 1 -type d -regex '^$rDir/$dataset.*'"
-rewriteDirs=`eval $cmd`
-while read -r rewriteDir; do
-        echo "adding analysis $rewriteDir";
-        analysisFiles=`find $rewriteDir/output/*`
+for dir in "$@"; do
+        echo "adding analysis $dir";
+        analysisFiles=`find $dir/output/*`
         while read -r analysisFile; do
                 roundtripForAnalysisFile.sh $analysisFile; 
         done <<< "$analysisFiles"
-done <<< "$rewriteDirs"
+done
 
-getTripleStats.sh $dataset;
+#getTripleStats.sh $dataset;

@@ -121,7 +121,7 @@ public class EvaluateGraphs {
 		while ((line = in.readLine()) != null) {
 			line = line.trim();
 			if (line.startsWith("http://" + experimentSetup.getGraphPrefix())) {
-				if (line.contains("sample")) {
+				if (line.toLowerCase().contains("sample")) {
 					if (line.contains("0.2")) {
 						if (!sampleGraphs.containsKey("0.2")) {
 							sampleGraphs.put("0.2", new ArrayList<String>());
@@ -139,8 +139,7 @@ public class EvaluateGraphs {
 					
 				} else {
 					graphs.add(line);
-				}
-			}
+				}=			}
 		}
 		pr.waitFor();
 		in.close();

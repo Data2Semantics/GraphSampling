@@ -29,20 +29,18 @@ public class QueryResultsSample implements QueryResults {
 		collectStats();
 		
 		//set precision
-		setPrecision(getMedianPrecision());
+		setPrecision(getAvgPrecision());
 		
 		//set recall
-		setRecall(getMedianRecall());
+		setRecall(getAvgRecall());
 		
 	}
 	
 	
-	@SuppressWarnings("unused")
 	private double getAvgPrecision() {
 		return precisionStats.getMean();
 	}
 	
-	@SuppressWarnings("unused")
 	private double getAvgRecall() {
 		return recallStats.getMean();
 	}
@@ -68,10 +66,12 @@ public class QueryResultsSample implements QueryResults {
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	private double getMedianPrecision() {
 		return precisionStats.getPercentile(50);
 	}
 	
+	@SuppressWarnings("unused")
 	private double getMedianRecall() {
 		return recallStats.getPercentile(50);
 	}

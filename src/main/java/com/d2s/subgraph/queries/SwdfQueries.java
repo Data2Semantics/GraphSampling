@@ -19,6 +19,7 @@ import com.d2s.subgraph.eval.batch.EvaluateGraph;
 import com.d2s.subgraph.eval.batch.SwdfExperimentSetup;
 import com.d2s.subgraph.helpers.Helper;
 import com.d2s.subgraph.queries.filters.DescribeFilter;
+import com.d2s.subgraph.queries.filters.GraphClauseFilter;
 import com.d2s.subgraph.queries.filters.QueryFilter;
 import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
 import com.hp.hpl.jena.query.Query;
@@ -213,7 +214,7 @@ public class SwdfQueries implements GetQueries {
 
 		try {
 
-			SwdfQueries swdfQueries = new SwdfQueries(new DescribeFilter(), new SimpleBgpFilter());
+			SwdfQueries swdfQueries = new SwdfQueries(false, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter());
 			System.out.println(swdfQueries.toString());
 			// ArrayList<QueryWrapper> queries = qaldQueries.getQueries();
 
