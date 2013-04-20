@@ -42,7 +42,7 @@ if [ ! -f $pigScriptFile ]; then
 fi
 pig $pigScriptFile $hadoopAnalysisFile;
 
-selectTopKForAnalysisFile.sh $analysisFile;
+selectMaxTopKForAnalysisFile.sh $analysisFile;
 
 checkpoint.sh;
 
