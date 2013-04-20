@@ -40,30 +40,41 @@ for topK in "${topKVariants[@]}"; do
 	topKFile+="max$topK.nt"
 	
 
-	tmpFile="$tmpDir/$targetFilename.tmp"
-        hadoop fs -cat $hadoopRoundtripDir/$topKFile/part* > $tmpFile;
-        newFileSize=`cat $tmpFile | wc -l`;
-	origFileSize=`hadoop fs -cat $hadoopRoundtripFile/part* | wc -l`
-	relSize=$(echo "($newFileSize/$origFileSize) * 100" | bc -l)
-	relSize=`printf %.0f $relSize`
-	if [ $relSize == 0 ]; then
-		echo "Relative size is 0?? $topKFile"
-		continue
-	fi
-	topKPercentage=$(echo "$topK * 100" | bc -l)
-	topKPercentage=`printf %.0f $topKPercentage`
-	targetTopKFilename="$targetFilename"
-	targetTopKFilename+="_"
-	targetTopKFilename+="max-$topKPercentage-$relSize.nt"
+	tmpFile="$tmpDir/$targetFilename"
+	tmpFile+="_"
+	tmpFile+="$topK.tmp"
+	hadoop fs -cat $hadoopRoundtripDir/$topKFile/part* > $tmpFile;
+	
+	
 	if [[ $topK =~ n$ ]];then
-		#hadoop fs -cat $hadoopRoundtripDir/$topKFile/part* > $statsDir/$topKFile;
+		targetTopKFilename="$targetFilename"
+		targetTopKFilename+="_"
+		targetTopKFilename+="$topK.nt"
+		
 		mv $tmpFile $statsDir/$targetTopKFilename;
 	elif [[ $topK =~ w$ ]];then
-		#hadoop fs -cat $hadoopRoundtripDir/$topKFile/part* > $tripleWeightsDir/$topKFile;
+		newFileSize=`cat $tmpFile | wc -l`;
+		origFileSize=`hadoop fs -cat $hadoopRoundtripFile/part* | wc -l`
+		relSize=$(echo "($newFileSize/$origFileSize) * 100" | bc -l)
+		relSize=`printf %.0f $relSize`
+		if [ $relSize == 0 ]; then
+			echo "Relative size is 0?? $topKFile"
+			continue
+		fi
+		topKPercentage=$(echo "$topK * 100" | bc -l)
+		topKPercentage=`printf %.0f $topKPercentage`
+		targetTopKFilename="$targetFilename"
+		targetTopKFilename+="_"
+		targetTopKFilename+="$topK.nt"
+		
 		mv $tmpFile $tripleWeightsDir/$targetTopKFilename;
 		echo "just catted a file with just the triple weights. Now plot them"
 		getTripleStatsForFile.sh $tripleWeightsDir/$targetTopKFilename;
 	else
+		targetTopKFilename="$targetFilename"
+		targetTopKFilename+="_"
+		targetTopKFilename+="max-$topKPercentage-$relSize.nt"
+		
 		localTargetDir="$localSubgraphDir/$targetTopKFilename";
 		localTargetFile="$localTargetDir/$targetTopKFilename";
 		if [ ! -d $localTargetDir ];then

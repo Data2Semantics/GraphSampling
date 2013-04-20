@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -39,12 +40,21 @@ public class BatchResults {
 	public void writeOutput() throws IOException, InterruptedException {
 		if (batchResults.size() > 0) {
 			writeSummaryCsv();
-			String[] modesToRunIn = new String[]{"0.2", "0.5"};
-			for (String mode: modesToRunIn) {
-				if (modesImported.containsKey(mode) && modesImported.get(mode)) {
-					outputAsHtmlTable(mode);
-					outputAsCsvTable(mode);
-					outputAsCsvFlatList(mode);
+			ArrayList<ArrayList<String>> modesToOutput = new ArrayList<ArrayList<String>>();
+			modesToOutput.add(new ArrayList<String>(Arrays.asList(new String[]{"max-20", "0.2"})));
+			modesToOutput.add(new ArrayList<String>(Arrays.asList(new String[]{"max-50", "0.5"})));
+			for (ArrayList<String> modes: modesToOutput) {
+				boolean outputThisMode = false;
+				for (String mode: modes) {
+					if (modesImported.containsKey(mode) && modesImported.get(mode)) {
+						outputThisMode = true;
+						break;
+					}
+				}
+				if (outputThisMode) {
+					outputAsHtmlTable(modes);
+					outputAsCsvTable(modes);
+					outputAsCsvFlatList(modes);
 //					plotBoxPlots(mode);
 				}
 			}
@@ -55,17 +65,20 @@ public class BatchResults {
 	}
 	
 	public void add(GraphResults graphResults) {
+		if (graphResults.getGraphName().contains("max-20")) modesImported.put("max-20", true);
 		if (graphResults.getGraphName().contains("0.2")) modesImported.put("0.2", true);
+		if (graphResults.getGraphName().contains("max-50")) modesImported.put("max-50", true);
 		if (graphResults.getGraphName().contains("0.5")) modesImported.put("0.5", true);
 		this.batchResults.add(graphResults);
 	}
 	
 	private void drawPlots() throws IOException, InterruptedException {
+		System.out.println("drawing plots");
 		RHelper rHelper = new RHelper();
 		rHelper.drawPlots(resultsDir);
 	}
 	private void writeSummaryCsv() throws IOException {
-		
+		System.out.println("writing summary CSV");
 		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + FILE_CSV_SUMMARY);
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
 		writer.writeNext(new String[]{"graph", "avg recall", "median recall", "std recall"});
@@ -79,7 +92,8 @@ public class BatchResults {
 	 * table with graph evaluations as columns, and queries per row (with query id as row header)
 	 * @throws IOException 
 	 */
-	private void outputAsCsvTable(String onlyGraphsContaining) throws IOException {
+	private void outputAsCsvTable(ArrayList<String> onlyGraphsContaining) throws IOException {
+		System.out.println("writing csv files for "  + onlyGraphsContaining);
 		HashMap<Integer, ArrayList<String>> table = new HashMap<Integer, ArrayList<String>>();
 		for (QueryWrapper query: queries.getQueries()) {
 			int queryId = query.getQueryId();
@@ -90,7 +104,7 @@ public class BatchResults {
 		}
 		
 		for (GraphResults graphResults: batchResults) {
-			if (onlyGraphsContaining.length() == 0 || graphResults.getGraphName().contains(onlyGraphsContaining)) {
+			if (Helper.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
 				for (QueryWrapper query: queries.getQueries()) {
 					ArrayList<String> row = table.get(query.getQueryId());
 					if (graphResults.contains(query.getQueryId())) {
@@ -108,7 +122,7 @@ public class BatchResults {
 		ArrayList<String> header = new ArrayList<String>();
 		header.add("queryId");
 		for (GraphResults graphResults: batchResults) {
-			if (onlyGraphsContaining.length() == 0 || graphResults.getGraphName().contains(onlyGraphsContaining)) {
+			if (Helper.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
 				header.add(graphResults.getGraphName());
 			}
 			
@@ -124,13 +138,14 @@ public class BatchResults {
 	 * table with graph evaluations as columns, and queries per row (with query id as row header)
 	 * @throws IOException 
 	 */
-	private void outputAsCsvFlatList(String onlyGraphsContaining) throws IOException {
+	private void outputAsCsvFlatList(ArrayList<String> onlyGraphsContaining) throws IOException {
+		System.out.println("writing csv flatlist for "  + onlyGraphsContaining);
 		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + onlyGraphsContaining + "_"+ FILE_CSV_FLAT_FULL_LIST);
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
 		writer.writeNext(new String[]{"queryId", "graph", "recall"});
 		
 		for (GraphResults graphResults: batchResults) {
-			if (onlyGraphsContaining.length() == 0 || graphResults.getGraphName().contains(onlyGraphsContaining)) {
+			if (Helper.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
 				for (QueryWrapper query: queries.getQueries()) {
 					if (graphResults.contains(query.getQueryId())) {
 						writer.writeNext(new String[]{Integer.toString(query.getQueryId()), graphResults.getGraphName(), Double.toString(graphResults.get(query.getQueryId()).getRecall())});
@@ -145,7 +160,8 @@ public class BatchResults {
 	 * html table with graph evalutations as columns, and queries per row
 	 * @throws IOException
 	 */
-	private void outputAsHtmlTable(String onlyGraphsContaining) throws IOException {
+	private void outputAsHtmlTable(ArrayList<String> onlyGraphsContaining) throws IOException {
+		System.out.println("writing html files for "  + onlyGraphsContaining);
 		String encodedEndpoint = URLEncoder.encode(EvaluateGraph.OPS_VIRTUOSO, "UTF-8"); 
 		String html = "<html><head>\n" +
 				"<link rel='stylesheet' href='../static/style.css' type='text/css' />\n" +
@@ -168,7 +184,8 @@ public class BatchResults {
 			int numGraphs = 0;
 			for (GraphResults results: batchResults) {
 				if (results.contains(queryId)) {
-					if (onlyGraphsContaining.length() == 0 || results.getGraphName().contains(onlyGraphsContaining)) {
+//					if (onlyGraphsContaining.length() == 0 || results.getGraphName().contains(onlyGraphsContaining)) {
+					if (Helper.partialStringMatch(results.getGraphName(), onlyGraphsContaining)) {
 						QueryResults queryResults = results.get(queryId);
 						totalRecall += queryResults.getRecall();
 						numGraphs++;
@@ -195,8 +212,7 @@ public class BatchResults {
 		html += "<th>queryId</th><th>avg</th>";
 		
 		for (GraphResults graphResults: batchResults) {
-			
-			if (onlyGraphsContaining.length() == 0 || graphResults.getGraphName().contains(onlyGraphsContaining)) {
+			if (Helper.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
 				html += "\n<th>" + graphResults.getGraphName().substring("http://".length()).replace('_', '-') + "<br>(avg: " + Helper.getDoubleAsFormattedString(graphResults.getAverageRecall()) + ")</th>";
 				for (QueryWrapper query: queries.getQueries()) {
 					ArrayList<String> row = table.get(query.getQueryId());

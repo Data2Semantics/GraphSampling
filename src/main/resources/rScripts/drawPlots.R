@@ -1,8 +1,8 @@
 library(ggplot2)
 
 # Dogfood
-flatlist_5 = read.csv("0.5_flatlist.csv",header=TRUE, sep=";")
-flatlist_2 = read.csv("0.2_flatlist.csv",header=TRUE, sep=";")
+flatlist_5 = read.csv("max-50_flatlist.csv",header=TRUE, sep=";")
+flatlist_2 = read.csv("max-20_flatlist.csv",header=TRUE, sep=";")
 summary = read.csv("summary.csv",header=TRUE, sep=";")
 
 
@@ -10,11 +10,11 @@ summary = read.csv("summary.csv",header=TRUE, sep=";")
 flatlist_all <- merge(flatlist_5,flatlist_2, all=TRUE)
 flatlist <- flatlist_5
 
-list <- read.csv("0.5_list.csv", header=TRUE, sep=";")
+list <- read.csv("max-50_list.csv", header=TRUE, sep=";")
 graph_list <- list
 graph_list$queryId <- NULL
 
-pdf("radar_plots_per_query_0.5.pdf")
+pdf("radar_plots_per_query_max-50.pdf")
 stars(graph_list, labels=list$queryId)
 dev.off()
 

@@ -234,4 +234,15 @@ public class Helper {
 		}
 		return arrayList;
 	}
+
+	public static boolean partialStringMatch(String haystack, ArrayList<String> needles) {
+		boolean foundMatch  = false;
+		for (String needle: needles) {
+			if (haystack.contains(needle)) {
+				foundMatch = true;
+				break;
+			}
+		}
+		return foundMatch;
+	}
 }

@@ -59,13 +59,13 @@ public class EvaluateGraph {
 				goldenStandardResults = runSelectUsingJena(endpoint, evalQuery.getQueryString(goldenStandardGraph));
 				subgraphResults = runSelectUsingJena(endpoint, evalQuery.getQueryString(subGraph));
 			} catch (Exception e) {
-				e.printStackTrace();
+//				e.printStackTrace();
 				invalidCount++;
 				return;
 			}
 
 			if (Helper.getResultSize(goldenStandardResults) == 0) {
-				System.out.println("no results retrieved for query " + evalQuery.getQueryString(goldenStandardGraph));
+//				System.out.println("no results retrieved for query " + evalQuery.getQueryString(goldenStandardGraph));
 				invalidCount++;
 				return; // havent loaded complete dbpedia yet. might be missing things, so just skip this query
 			} else {

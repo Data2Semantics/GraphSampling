@@ -14,6 +14,8 @@ import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
 import org.xml.sax.SAXException;
+
+import com.d2s.subgraph.eval.QueryWrapper;
 import com.d2s.subgraph.eval.results.BatchResults;
 import com.d2s.subgraph.eval.results.GraphResults;
 import com.d2s.subgraph.eval.results.GraphResultsSample;
@@ -48,7 +50,7 @@ public class EvaluateGraphs {
 //		ArrayList<String> graphs = getGraphsToEvaluateViaSparql();
 		getGraphsToEvaluateViaSsh();
 //		graphs = new ArrayList<String>();
-//		graphs.add("http://df_s-o-litAsNode_unweighted_directed_indegree_0.2.nt");
+//		graphs.add("http://df_s-o-litAsNode_unweighted_directed_betweenness-4_max-20-20.nt");
 //		graphs.add("http://df_s-o-litAsNode_unweighted_directed_outdegree_0.2.nt");
 		System.out.println("Running evaluation for graphs " + graphs.toString());
 		for (String graph: graphs) {
@@ -139,7 +141,8 @@ public class EvaluateGraphs {
 					
 				} else {
 					graphs.add(line);
-				}=			}
+				}
+			}
 		}
 		pr.waitFor();
 		in.close();
@@ -157,6 +160,10 @@ public class EvaluateGraphs {
 
 	public static void main(String[] args)  {
 		try {
+//			String queryString = "SELECT DISTINCT * FROM <http://df_s-o-litAsNode_unweighted_directed_betweenness-4_max-50-49.nt> WHERE {?x ?y ?z}";
+////			String queryString = "SELECT DISTINCT * FROM <http://df_s-o-litAsNode_unweighted_directed_betweenness-4_max-0.5-0.49.nt> WHERE {?x ?y ?z}";
+//			QueryWrapper query = new QueryWrapper(queryString);
+			
 //			EvaluateGraphs evaluate = new EvaluateGraphs(new DbpExperimentSetup());
 			EvaluateGraphs evaluate = new EvaluateGraphs(new SwdfExperimentSetup());
 			evaluate.run();
