@@ -160,7 +160,7 @@ public class EvaluateGraphs {
 
 	public static void main(String[] args)  {
 		try {
-//			String queryString = "SELECT DISTINCT * FROM <http://df_s-o-litAsNode_unweighted_directed_betweenness-4_max-50-49.nt> WHERE {?x ?y ?z}";
+//			String queryString = "SELECT DISTINCT * FROM <http://df_s-o-litAsLit_unweighted_directed_betweenness-5_max-20-exact-10.nt> WHERE {?x ?y ?z}";
 ////			String queryString = "SELECT DISTINCT * FROM <http://df_s-o-litAsNode_unweighted_directed_betweenness-4_max-0.5-0.49.nt> WHERE {?x ?y ?z}";
 //			QueryWrapper query = new QueryWrapper(queryString);
 			

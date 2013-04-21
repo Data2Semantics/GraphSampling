@@ -117,7 +117,7 @@ public class BatchResults {
 			}
 		}
 		
-		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + onlyGraphsContaining + "_" + FILE_CSV_FULL_LIST);
+		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + onlyGraphsContaining.get(0) + "_" + FILE_CSV_FULL_LIST);
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
 		ArrayList<String> header = new ArrayList<String>();
 		header.add("queryId");
@@ -140,7 +140,7 @@ public class BatchResults {
 	 */
 	private void outputAsCsvFlatList(ArrayList<String> onlyGraphsContaining) throws IOException {
 		System.out.println("writing csv flatlist for "  + onlyGraphsContaining);
-		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + onlyGraphsContaining + "_"+ FILE_CSV_FLAT_FULL_LIST);
+		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + onlyGraphsContaining.get(0) + "_"+ FILE_CSV_FLAT_FULL_LIST);
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
 		writer.writeNext(new String[]{"queryId", "graph", "recall"});
 		
@@ -239,7 +239,7 @@ public class BatchResults {
 			html += "</tr>";
 		}
 		html += "\n</tbody> </table></body></html>";
-		FileUtils.writeStringToFile(new File(experimentSetup.getResultsDir() + "/" + onlyGraphsContaining + "_" + FILE_HTML_SUMMARY), html);
+		FileUtils.writeStringToFile(new File(experimentSetup.getResultsDir() + "/" + onlyGraphsContaining.get(0) + "_" + FILE_HTML_SUMMARY), html);
 	}
 	
 
