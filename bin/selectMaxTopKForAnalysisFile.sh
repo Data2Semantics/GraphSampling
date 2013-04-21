@@ -30,6 +30,7 @@ tmpDir="$HOME/tmp"
 hadoopRoundtripFile="$hadoopRoundtripDir/$targetFilename"
 for topK in "${topKVariants[@]}"; do
 	echo "selecting top-k $topK"
+	#echo "pig $pigRoundtripDir/selectMaxTopK.py $hadoopRoundtripFile $topK;"
 	pig $pigRoundtripDir/selectMaxTopK.py $hadoopRoundtripFile $topK;
 	
 
@@ -53,24 +54,27 @@ for topK in "${topKVariants[@]}"; do
 		
 		mv $tmpFile $statsDir/$targetTopKFilename;
 	elif [[ $topK =~ w$ ]];then
-		newFileSize=`cat $tmpFile | wc -l`;
-		origFileSize=`hadoop fs -cat $hadoopRoundtripFile/part* | wc -l`
-		relSize=$(echo "($newFileSize/$origFileSize) * 100" | bc -l)
-		relSize=`printf %.0f $relSize`
-		if [ $relSize == 0 ]; then
-			echo "Relative size is 0?? $topKFile"
-			continue
-		fi
-		topKPercentage=$(echo "$topK * 100" | bc -l)
-		topKPercentage=`printf %.0f $topKPercentage`
-		targetTopKFilename="$targetFilename"
-		targetTopKFilename+="_"
-		targetTopKFilename+="$topK.nt"
-		
 		mv $tmpFile $tripleWeightsDir/$targetTopKFilename;
 		echo "just catted a file with just the triple weights. Now plot them"
 		getTripleStatsForFile.sh $tripleWeightsDir/$targetTopKFilename;
 	else
+		newFileSize=`cat $tmpFile | wc -l`;
+                origFileSize=`hadoop fs -cat $hadoopRoundtripFile/part* | wc -l`
+                relSize=$(echo "($newFileSize/$origFileSize) * 100" | bc -l)
+                relSize=`printf %.0f $relSize`
+                if [ $relSize == 0 ]; then
+                        echo "Relative size is 0?? $topKFile"
+                        continue
+                fi
+                topKPercentage=$(echo "$topK * 100" | bc -l)
+                topKPercentage=`printf %.0f $topKPercentage`
+		if [ "$topKPercentage" -gt "100" ]; then
+			echo "WRONG CALCULATION OF PERCENTAGE!!"
+			echo "precentage: $topKPercentage"
+			echo "new file size: $newFileSize"
+			echo "orig file size: $origFileSize"
+			exit;
+		fi
 		targetTopKFilename="$targetFilename"
 		targetTopKFilename+="_"
 		targetTopKFilename+="max-$topKPercentage-$relSize.nt"
@@ -81,7 +85,6 @@ for topK in "${topKVariants[@]}"; do
 			mkdir $localTargetDir;
 		fi
 		mv $tmpFile $localTargetFile;
-		#hadoop fs -cat $hadoopRoundtripDir/$topKFile/part* > $localTargetFile;
 		putDirInVirtuoso.sh $localTargetDir;
 	fi
 done
