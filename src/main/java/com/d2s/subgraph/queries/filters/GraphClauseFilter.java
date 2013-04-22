@@ -1,7 +1,7 @@
 package com.d2s.subgraph.queries.filters;
 
 
-import com.d2s.subgraph.eval.QueryWrapper;
+import com.d2s.subgraph.queries.QueryWrapper;
 import com.hp.hpl.jena.sparql.syntax.Element;
 import com.hp.hpl.jena.sparql.syntax.ElementNamedGraph;
 import com.hp.hpl.jena.sparql.syntax.ElementVisitorBase;

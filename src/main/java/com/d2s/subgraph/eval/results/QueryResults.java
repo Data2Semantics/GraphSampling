@@ -1,6 +1,6 @@
 package com.d2s.subgraph.eval.results;
 
-import com.d2s.subgraph.eval.QueryWrapper;
+import com.d2s.subgraph.queries.QueryWrapper;
 
 
 

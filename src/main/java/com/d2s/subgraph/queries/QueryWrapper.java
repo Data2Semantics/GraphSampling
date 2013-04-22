@@ -1,4 +1,4 @@
-package com.d2s.subgraph.eval;
+package com.d2s.subgraph.queries;
 
 
 import java.io.IOException;
@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
+import com.d2s.subgraph.helpers.Helper;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QueryParseException;
@@ -44,9 +45,7 @@ public class QueryWrapper {
 	}
 	
 	public String getQueryString(String fromGraph) {
-		Query queryWithFromClause = query.cloneQuery();
-		queryWithFromClause.addGraphURI(fromGraph);
-		return queryWithFromClause.toString();
+		return Helper.addFromClause(query, fromGraph).toString();
 	}
 	
 	

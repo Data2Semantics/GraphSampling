@@ -2,7 +2,7 @@ package com.d2s.subgraph.queries.filters;
 
 import java.util.Iterator;
 
-import com.d2s.subgraph.eval.QueryWrapper;
+import com.d2s.subgraph.queries.QueryWrapper;
 import com.hp.hpl.jena.sparql.core.TriplePath;
 import com.hp.hpl.jena.sparql.syntax.Element;
 import com.hp.hpl.jena.sparql.syntax.ElementPathBlock;

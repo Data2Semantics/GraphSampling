@@ -1,6 +1,6 @@
 package com.d2s.subgraph.queries.filters;
 
-import com.d2s.subgraph.eval.QueryWrapper;
+import com.d2s.subgraph.queries.QueryWrapper;
 
 public class OnlyDboQueries implements QueryFilter {
 	

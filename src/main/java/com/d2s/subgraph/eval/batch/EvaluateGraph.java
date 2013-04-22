@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
-import com.d2s.subgraph.eval.QueryWrapper;
 import com.d2s.subgraph.eval.results.GraphResults;
 import com.d2s.subgraph.eval.results.GraphResultsRegular;
 import com.d2s.subgraph.eval.results.QueryResultsRegular;
 import com.d2s.subgraph.helpers.Helper;
 import com.d2s.subgraph.queries.GetQueries;
+import com.d2s.subgraph.queries.QueryWrapper;
 import com.d2s.subgraph.queries.SwdfQueries;
 import com.d2s.subgraph.queries.filters.DescribeFilter;
 import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
@@ -56,8 +56,8 @@ public class EvaluateGraph {
 			ResultSetRewindable goldenStandardResults;
 			ResultSetRewindable subgraphResults;
 			try {
-				goldenStandardResults = runSelectUsingJena(endpoint, evalQuery.getQueryString(goldenStandardGraph));
-				subgraphResults = runSelectUsingJena(endpoint, evalQuery.getQueryString(subGraph));
+				goldenStandardResults = executeSelect(endpoint, evalQuery.getQueryString(goldenStandardGraph));
+				subgraphResults = executeSelect(endpoint, evalQuery.getQueryString(subGraph));
 			} catch (Exception e) {
 //				e.printStackTrace();
 				invalidCount++;
@@ -191,7 +191,7 @@ public class EvaluateGraph {
 		return found;
 	}
 
-	private static ResultSetRewindable runSelectUsingJena(String endpoint, String queryString) throws RepositoryException,
+	private static ResultSetRewindable executeSelect(String endpoint, String queryString) throws RepositoryException,
 			MalformedQueryException, QueryEvaluationException {
 		Query query = QueryFactory.create(queryString);
 		QueryExecution queryExecution = QueryExecutionFactory.sparqlService(endpoint, query);

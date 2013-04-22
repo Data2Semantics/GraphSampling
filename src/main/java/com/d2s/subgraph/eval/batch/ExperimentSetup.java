@@ -12,4 +12,5 @@ public interface ExperimentSetup {
 	public GetQueries getQueries();
 	public String getResultsDir();
 	public int getMaxNumQueries();
+	public String getEndpoint();
 }

@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
 import au.com.bytecode.opencsv.CSVWriter;
-import com.d2s.subgraph.eval.QueryWrapper;
 import com.d2s.subgraph.eval.batch.EvaluateGraph;
 import com.d2s.subgraph.eval.batch.SwdfExperimentSetup;
 import com.d2s.subgraph.helpers.Helper;

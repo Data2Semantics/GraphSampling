@@ -15,11 +15,11 @@ import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
 import org.xml.sax.SAXException;
 
-import com.d2s.subgraph.eval.QueryWrapper;
 import com.d2s.subgraph.eval.results.BatchResults;
 import com.d2s.subgraph.eval.results.GraphResults;
 import com.d2s.subgraph.eval.results.GraphResultsSample;
 import com.d2s.subgraph.queries.GetQueries;
+import com.d2s.subgraph.queries.QueryWrapper;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;

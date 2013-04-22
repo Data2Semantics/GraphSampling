@@ -35,6 +35,7 @@ public class DbpExperimentSetup implements ExperimentSetup {
 	public int getMaxNumQueries() {
 		return MAX_NUM_QUERIES;
 	}
-	
-
+	public String getEndpoint() {
+		return EvaluateGraph.OPS_VIRTUOSO;
+	}
 }

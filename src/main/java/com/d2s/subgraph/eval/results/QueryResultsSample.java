@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
-import com.d2s.subgraph.eval.QueryWrapper;
+import com.d2s.subgraph.queries.QueryWrapper;
 
 
 

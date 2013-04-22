@@ -15,13 +15,20 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.TupleQueryResult;
+import org.openrdf.repository.RepositoryException;
 
 import com.d2s.subgraph.eval.batch.EvaluateGraphs;
 import com.d2s.subgraph.eval.batch.SwdfExperimentSetup;
 import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryExecution;
+import com.hp.hpl.jena.query.QueryExecutionFactory;
+import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QuerySolution;
+import com.hp.hpl.jena.query.ResultSetFactory;
+import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
 import com.hp.hpl.jena.sparql.core.TriplePath;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
@@ -68,13 +75,14 @@ public class Helper {
 	}
 
 	public static void writeStreamToOutput(InputStream stream) throws IOException {
-		writeStreamToOutput(stream, new CleanTurtle(){
+		writeStreamToOutput(stream, new CleanTurtle() {
 
 			public String processLine(String input) {
 				return input;
-			}});
+			}
+		});
 	}
-	
+
 	public static void writeStreamToOutput(InputStream stream, CleanTurtle cleanTurtle) throws IOException {
 		BufferedReader rd = new BufferedReader(new InputStreamReader(stream));
 		String line;
@@ -84,13 +92,14 @@ public class Helper {
 	}
 
 	public static String getStreamAsString(InputStream stream) throws IOException {
-		return getStreamAsString(stream, new CleanTurtle(){
+		return getStreamAsString(stream, new CleanTurtle() {
 
 			public String processLine(String input) {
 				return input;
-			}});
+			}
+		});
 	}
-	
+
 	public static String getStreamAsString(InputStream stream, CleanTurtle cleanTurtle) throws IOException {
 		BufferedReader rd = new BufferedReader(new InputStreamReader(stream));
 		String line;
@@ -102,13 +111,14 @@ public class Helper {
 	}
 
 	public static void writeStreamToFile(InputStream stream, String fileLocation) throws IOException {
-		writeStreamToFile(stream, fileLocation, new CleanTurtle(){
+		writeStreamToFile(stream, fileLocation, new CleanTurtle() {
 
 			public String processLine(String input) {
 				return input;
-			}});
+			}
+		});
 	}
-	
+
 	public static void writeStreamToFile(InputStream stream, String fileLocation, CleanTurtle cleanTurtle) {
 		BufferedWriter writer = null;
 		try {
@@ -123,19 +133,19 @@ public class Helper {
 			System.out.println("New file created!");
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
-		}finally {
-            //Close the BufferedWriter
-            try {
-                if (writer != null) {
-                	writer.flush();
-                	writer.close();
-                }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        }
+		} finally {
+			// Close the BufferedWriter
+			try {
+				if (writer != null) {
+					writer.flush();
+					writer.close();
+				}
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+		}
 	}
-	
+
 	public static int getResultSize(ResultSetRewindable resultSet) {
 		resultSet.reset();
 		int result = 0;
@@ -145,6 +155,7 @@ public class Helper {
 		}
 		return result;
 	}
+
 	public static int getResultSize(TupleQueryResult resultSet) throws QueryEvaluationException {
 		int result = 0;
 		while (resultSet.hasNext()) {
@@ -161,45 +172,45 @@ public class Helper {
 			return "0";
 		}
 	}
-	
+
 	public static Query getAsConstructQuery(Query origQuery) {
 		Query constructQuery = origQuery.cloneQuery();
 		constructQuery.setQueryConstructType();
-		
+
 		final BasicPattern constructBp = new BasicPattern();
-		
+
 		Element queryPattern = origQuery.getQueryPattern();
 		ElementWalker.walk(queryPattern, new ElementVisitorBase() {
-	        public void visit(ElementPathBlock el) {
-	            Iterator<TriplePath> triples = el.patternElts();
-	            while (triples.hasNext()) {
-	                constructBp.add(triples.next().asTriple());
-	            }
-	        }
-	    });
+			public void visit(ElementPathBlock el) {
+				Iterator<TriplePath> triples = el.patternElts();
+				while (triples.hasNext()) {
+					constructBp.add(triples.next().asTriple());
+				}
+			}
+		});
 		constructQuery.setConstructTemplate(new Template(constructBp));
 		return constructQuery;
 	}
-	
+
 	public static ArrayList<String> getIntAsString(ArrayList<Integer> intArrayList) {
 		ArrayList<String> stringArrayList = new ArrayList<String>();
-		for (Integer integer: intArrayList) {
+		for (Integer integer : intArrayList) {
 			stringArrayList.add(Integer.toString(integer));
 		}
 		return stringArrayList;
 	}
-	
+
 	public static String getAsRoundedString(double value, int precision) {
-        //formatting numbers upto 3 decimal places in Java
+		// formatting numbers upto 3 decimal places in Java
 		String decimalFormat = "#,###,##0.";
 		for (int i = 0; i < precision; i++) {
 			decimalFormat += "0";
 		}
 		DecimalFormat df = new DecimalFormat(decimalFormat);
-        return df.format(value);
+		return df.format(value);
 	}
-	
-	public static void main(String[] args)  {
+
+	public static void main(String[] args) {
 		System.out.println(Helper.getAsRoundedString(0.0149, 4));
 	}
 
@@ -214,9 +225,9 @@ public class Helper {
 		} else {
 			doubleString = "<span style='color:green;'>" + doubleString + "</span>";
 		}
-		
+
 		return doubleString;
-		
+
 	}
 
 	public static ArrayList<QuerySolution> getAsSolutionArrayList(ResultSetRewindable resultSet) {
@@ -226,7 +237,7 @@ public class Helper {
 		}
 		return arrayList;
 	}
-	
+
 	public static ArrayList<Binding> getAsBindingArrayList(ResultSetRewindable resultSet) {
 		ArrayList<Binding> arrayList = new ArrayList<Binding>();
 		while (resultSet.hasNext()) {
@@ -236,13 +247,25 @@ public class Helper {
 	}
 
 	public static boolean partialStringMatch(String haystack, ArrayList<String> needles) {
-		boolean foundMatch  = false;
-		for (String needle: needles) {
+		boolean foundMatch = false;
+		for (String needle : needles) {
 			if (haystack.contains(needle)) {
 				foundMatch = true;
 				break;
 			}
 		}
 		return foundMatch;
+	}
+
+	public static Model executeConstruct(String endpoint, Query query) throws RepositoryException,
+			MalformedQueryException, QueryEvaluationException {
+		QueryExecution queryExecution = QueryExecutionFactory.sparqlService(endpoint, query);
+		return queryExecution.execConstruct();
+	}
+	
+	public static Query addFromClause(Query query, String fromGraph) {
+		Query queryWithFromClause = query.cloneQuery();
+		queryWithFromClause.addGraphURI(fromGraph);
+		return queryWithFromClause;
 	}
 }
