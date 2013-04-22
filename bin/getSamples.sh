@@ -13,7 +13,7 @@ function hadoopLs {
 
 #rewriteMethods=(spo-spo.py)
 if [ -z "$1" ];then
-	echo "at least 1 argument required (input). (second arg is number of runs)"
+	echo "at least 1 argument required (dataset). (second arg is number of runs)"
 	exit;
 fi
 dataset=$1

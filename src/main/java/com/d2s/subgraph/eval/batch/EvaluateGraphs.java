@@ -164,8 +164,8 @@ public class EvaluateGraphs {
 ////			String queryString = "SELECT DISTINCT * FROM <http://df_s-o-litAsNode_unweighted_directed_betweenness-4_max-0.5-0.49.nt> WHERE {?x ?y ?z}";
 //			QueryWrapper query = new QueryWrapper(queryString);
 			
-//			EvaluateGraphs evaluate = new EvaluateGraphs(new DbpExperimentSetup());
-			EvaluateGraphs evaluate = new EvaluateGraphs(new SwdfExperimentSetup());
+			EvaluateGraphs evaluate = new EvaluateGraphs(new DbpExperimentSetup());
+//			EvaluateGraphs evaluate = new EvaluateGraphs(new SwdfExperimentSetup());
 			evaluate.run();
 		} catch (Exception e) {
 			e.printStackTrace();

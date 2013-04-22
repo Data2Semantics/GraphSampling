@@ -5,4 +5,4 @@ if [ -z "$1" ];then
 fi
 input=$1
 output=$2
-sed 's/_:\([^ ]*\)/<http:\/\/\1>/g' $input > $output
+sed 's/[ ^]_:\([^ ]*\)/ <http:\/\/\1>/g' $input > $output
