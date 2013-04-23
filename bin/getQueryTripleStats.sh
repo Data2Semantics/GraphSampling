@@ -16,13 +16,9 @@ if [ -z "$1" ];then
 fi
 
 
-
-
-
-
 for dir in "$@"; do
 	dirBasename=`basename $dir`
-	IFS=_ read -a delimited <<< "$dir"
+	IFS=_ read -a delimited <<< "$dirBasename"
 	dataset=${delimited[0]}
 	hadoopLs $dataset/queryStatsInput/
 	if [ ${#hadoopLs[@]} == "0" ]; then
@@ -31,6 +27,6 @@ for dir in "$@"; do
 	fi
 	echo "running pig to get weights for query triples $dirBasename"
 	for queryFile in "${hadoopLs[@]}"; do
-		pig pigAnalysis/rewrite/getQueryTripleWeights.py $dataset/roundtrip/$dirBasename $queryFile;
+		pig pigAnalysis/stats/getQueryTripleWeights.py $dataset/roundtrip/$dirBasename $queryFile;
 	done
 done

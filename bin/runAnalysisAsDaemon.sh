@@ -5,7 +5,7 @@ if [ -z "$1" ];then
         exit;
 fi
 rDir="${HOME}/rProject"
-scriptsFile="$rDir/scripts/runNewAlgs.R"
+scriptsFile="$rDir/scripts/runAllAlgs.R"
 logFile="$HOME/logs/runAnalysisAsDaemon_"
 logFile+=`date +"%Y%m%d"`
 logFile+=".log"
