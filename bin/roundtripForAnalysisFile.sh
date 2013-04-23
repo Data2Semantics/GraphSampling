@@ -5,7 +5,8 @@ if [ -z "$1" ];then
 	exit;
 fi
 #last one is strange: it's actually: half the graph, and only retrieve weights...
-topKVariants=(0.5 0.2 100n "0.5w")
+aggregateMethods=(min max avg)
+skipAggregateFor="so-so"
 pigRoundtripDir="$HOME/pigAnalysis/roundtrip"
 analysisFile=$(readlink -f $1)
 analysisBasename=`basename $analysisFile`;
@@ -40,10 +41,20 @@ if [ ! -f $pigScriptFile ]; then
 	echo "Could not find pig script to do roundtripping with for rewritemethod $rewriteMethod. I tried $pigScriptFile";
 	exit;
 fi
-pig $pigScriptFile $hadoopAnalysisFile;
 
-selectMaxTopKForAnalysisFile.sh $analysisFile;
+if [[ "$hadoopAnalysisFile" =~ "$skipAggregateFor" ]]; then  
+	pig $pigScriptFile $hadoopAnalysisFile;
+	selectMaxTopKForAnalysisFile.sh $analysisFile skipAggregate;
+else
+	
+	for aggregateMethod in "${aggregateMethods[@]}"; do
+		pig $pigScriptFile $hadoopAnalysisFile $aggregateMethod;
+		selectMaxTopKForAnalysisFile.sh $analysisFile;
+		checkpoint.sh;
+	done
+fi
 
-checkpoint.sh;
+
+
 
 
