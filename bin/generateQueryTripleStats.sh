@@ -31,7 +31,7 @@ for dir in "$@"; do
     	inputHadoopFile+="$basenameAnalysisFile"
 		echo "running pig to get weights for query triples $inputHadoopFile"
 		for queryFile in "${hadoopLs[@]}"; do
-			if [ ${file: -3} == ".nt" ]; then
+			if [ ${queryFile: -3} == ".nt" ]; then
 				pig pigAnalysis/stats/getQueryTripleWeights.py $dataset/roundtrip/$inputHadoopFile $queryFile;
 			fi
 		done
