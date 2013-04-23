@@ -1,4 +1,4 @@
-package com.d2s.subgraph.eval.batch;
+package com.d2s.subgraph.eval;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -15,6 +15,9 @@ import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
 import org.xml.sax.SAXException;
 
+import com.d2s.subgraph.eval.experiments.DbpExperimentSetup;
+import com.d2s.subgraph.eval.experiments.ExperimentSetup;
+import com.d2s.subgraph.eval.experiments.Sp2bExperimentSetup;
 import com.d2s.subgraph.eval.results.BatchResults;
 import com.d2s.subgraph.eval.results.GraphResults;
 import com.d2s.subgraph.eval.results.GraphResultsSample;
@@ -166,6 +169,7 @@ public class EvaluateGraphs {
 			
 			EvaluateGraphs evaluate = new EvaluateGraphs(new DbpExperimentSetup());
 //			EvaluateGraphs evaluate = new EvaluateGraphs(new SwdfExperimentSetup());
+//			EvaluateGraphs evaluate = new EvaluateGraphs(new Sp2bExperimentSetup());
 			evaluate.run();
 		} catch (Exception e) {
 			e.printStackTrace();

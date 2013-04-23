@@ -1,21 +1,19 @@
 PREFIX rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX foaf:    <http://xmlns.com/foaf/0.1/>
+PREFIX bench:   <http://localhost/vocabulary/bench/>
 PREFIX dc:      <http://purl.org/dc/elements/1.1/>
 PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX foaf:    <http://xmlns.com/foaf/0.1/>
+PREFIX swrc:    <http://swrc.ontoware.org/ontology#>
 
-SELECT ?yr ?name ?document
+SELECT DISTINCT ?name1 ?name2 
 WHERE {
-  ?class rdfs:subClassOf foaf:Document .
-  ?document rdf:type ?class .
-  ?document dcterms:issued ?yr .
-  ?document dc:creator ?author .
-  ?author foaf:name ?name
-  OPTIONAL {
-    ?class2 rdfs:subClassOf foaf:Document .
-    ?document2 rdf:type ?class2 .
-    ?document2 dcterms:issued ?yr2 .
-    ?document2 dc:creator ?author2 
-    FILTER (?author=?author2 && ?yr2<?yr)
-  } FILTER (!bound(?author2))
+  ?article1 rdf:type bench:Article .
+  ?article2 rdf:type bench:Article .
+  ?article1 dc:creator ?author1 .
+  ?author1 foaf:name ?name1 .
+  ?article2 dc:creator ?author2 .
+  ?author2 foaf:name ?name2 .
+  ?article1 swrc:journal ?journal .
+  ?article2 swrc:journal ?journal
+  FILTER (?name1<?name2)
 }

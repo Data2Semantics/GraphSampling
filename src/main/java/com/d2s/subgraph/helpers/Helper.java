@@ -20,8 +20,8 @@ import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.TupleQueryResult;
 import org.openrdf.repository.RepositoryException;
 
-import com.d2s.subgraph.eval.batch.EvaluateGraphs;
-import com.d2s.subgraph.eval.batch.SwdfExperimentSetup;
+import com.d2s.subgraph.eval.EvaluateGraphs;
+import com.d2s.subgraph.eval.experiments.SwdfExperimentSetup;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;

@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -12,8 +13,9 @@ import org.apache.commons.io.FileUtils;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
-import com.d2s.subgraph.eval.batch.ExperimentSetup;
-import com.d2s.subgraph.eval.batch.SwdfExperimentSetup;
+
+import com.d2s.subgraph.eval.experiments.ExperimentSetup;
+import com.d2s.subgraph.eval.experiments.SwdfExperimentSetup;
 import com.d2s.subgraph.helpers.Helper;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
@@ -45,9 +47,11 @@ public class GetTriplesFromConstruct {
 			Query constructQuery = Helper.getAsConstructQuery(queryWithFromClause);
 			// System.out.println(constructQuery.toString());
 			Model model = Helper.executeConstruct(experimentSetup.getEndpoint(), constructQuery);
+			
 			File resultsFile = new File(RESULTS_PATH + "/" + experimentSetup.getGraphPrefix() + "q" + Integer.toString(query.getQueryId())
-					+ ".csv");
-			storeTriples(resultsFile, model);
+					+ ".nt");
+			FileOutputStream fop = new FileOutputStream(resultsFile);
+			model.write(fop, "N-TRIPLE");
 		}
 	}
 
@@ -72,16 +76,28 @@ public class GetTriplesFromConstruct {
 		// }
 		// resultsWriter.close();
 	}
-
+	
+	/**
+	 * The triples we get back from the query do not match the serialized ntriple format. check!
+	 * @param resource
+	 * @return
+	 * @throws IOException
+	 */
 	private String processResource(Node resource) throws IOException {
 		String resourceAsString = "";
 		if (resource.isURI()) {
 			resourceAsString = "<" + resource.toString() + ">";
 		} else if (resource.isLiteral()) {
-			resourceAsString = resource.toString(false);
-			resourceAsString = resourceAsString.replace("\"", "\\\"");
+			resourceAsString = resource.toString(true);
+//			resourceAsString = resourceAsString.replace("\"", "\\\"");
+			//remove linebreaks
 			resourceAsString = resourceAsString.replace("\n", "\\n");
-			resourceAsString = "\"" + resourceAsString + "\"";
+			//add brackets to literal datatype
+			if (resourceAsString.contains("\"^^http")) {
+				resourceAsString = resourceAsString.replace("\"^^http", "\"^^<http");
+				resourceAsString += ">";
+			}
+//			resourceAsString = "\"" + resourceAsString + "\"";
 		} else {
 			resourceAsString = resource.toString();
 		}
@@ -94,6 +110,8 @@ public class GetTriplesFromConstruct {
 			String strLine;
 			boolean valid = false;
 			// Read File Line By Line
+			//"2007-04-20T15:30:00+02:00"^^<http://www.w3.org/2001/XMLSchema#dateTime>
+			//"2007-04-20T15:30:00+02:00"^^http://www.w3.org/2001/XMLSchema#dateTime
 			while ((strLine = br.readLine()) != null) {
 				if (strLine.contains(resourceAsString)) {
 					valid = true;

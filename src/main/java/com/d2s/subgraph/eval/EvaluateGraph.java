@@ -1,4 +1,4 @@
-package com.d2s.subgraph.eval.batch;
+package com.d2s.subgraph.eval;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,6 +11,7 @@ import com.d2s.subgraph.eval.results.QueryResultsRegular;
 import com.d2s.subgraph.helpers.Helper;
 import com.d2s.subgraph.queries.GetQueries;
 import com.d2s.subgraph.queries.QueryWrapper;
+import com.d2s.subgraph.queries.Sp2bQueries;
 import com.d2s.subgraph.queries.SwdfQueries;
 import com.d2s.subgraph.queries.filters.DescribeFilter;
 import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
@@ -41,6 +42,12 @@ public class EvaluateGraph {
 		this.subGraph = subGraph;
 		results.setGraphName(subGraph);
 	}
+	public EvaluateGraph(String endpoint, String goldenStandardGraph, String subGraph) {
+		this.endpoint = endpoint;
+		this.goldenStandardGraph = goldenStandardGraph;
+		this.subGraph = subGraph;
+		results.setGraphName(subGraph);
+	}
 
 	public void run() throws RepositoryException, MalformedQueryException, QueryEvaluationException, IOException {
 		for (QueryWrapper evalQuery : queries) {
@@ -55,6 +62,7 @@ public class EvaluateGraph {
 		if (evalQuery.isSelect()) {
 			ResultSetRewindable goldenStandardResults;
 			ResultSetRewindable subgraphResults;
+//			System.out.println(evalQuery.getQueryString(subGraph));
 			try {
 				goldenStandardResults = executeSelect(endpoint, evalQuery.getQueryString(goldenStandardGraph));
 				subgraphResults = executeSelect(endpoint, evalQuery.getQueryString(subGraph));
@@ -63,25 +71,28 @@ public class EvaluateGraph {
 				invalidCount++;
 				return;
 			}
-
-			if (Helper.getResultSize(goldenStandardResults) == 0) {
+			int goldenSize = Helper.getResultSize(goldenStandardResults);
+			if (goldenSize == 0) {
 //				System.out.println("no results retrieved for query " + evalQuery.getQueryString(goldenStandardGraph));
 				invalidCount++;
 				return; // havent loaded complete dbpedia yet. might be missing things, so just skip this query
 			} else {
+//				System.out.println("size: " + goldenSize);
+//				System.out.println("sub size: " + Helper.getResultSize(subgraphResults));
 				validCount++;
-				double precision = getPrecision(goldenStandardResults, subgraphResults);
+				//double precision = getPrecision(goldenStandardResults, subgraphResults);
 //				double recall = getRecallOnBindings(goldenStandardResults, subgraphResults);
 				double recall = getRecallOnProjectionVars(goldenStandardResults, subgraphResults);
+//				double recall = getRecallOnBindings(goldenStandardResults, subgraphResults);
 //				if (recall <= 1.0 && recall > 0.0) {
 //					System.out.println(evalQuery.toString());
 //					System.exit(1);
 //				}
 				QueryResultsRegular result = new QueryResultsRegular();
 				result.setQuery(evalQuery);
-				result.setPrecision(precision);
+				result.setPrecision(0.0);//NOTICE: set to 0.0 for now. saves us time to calculate (we don't use precision anyway)
 				result.setRecall(recall);
-				result.setGoldenStandardSize(Helper.getResultSize(goldenStandardResults));
+				result.setGoldenStandardSize(goldenSize);
 				results.add(result);
 				// System.out.println(result.toString());
 				System.out.print(recall + ":");
@@ -92,6 +103,7 @@ public class EvaluateGraph {
 	}
 
 	// Precision is the number of relevant documents a search retrieves divided by the total number of documents retrieved
+	@SuppressWarnings("unused")
 	private double getPrecision(ResultSetRewindable goldenStandard, ResultSetRewindable subgraph) throws QueryEvaluationException {
 		goldenStandard.reset();
 		subgraph.reset();
@@ -204,25 +216,33 @@ public class EvaluateGraph {
 
 	public static void main(String[] args) {
 
-		String goldenStandardGraph = "http://swdf";
-		String subgraph = "http://df_s-o-litAsNode_unweighted_directed_betweenness-4_0.2.nt";
+		String goldenStandardGraph = "http://sp2b";
+		String subgraph = "http://sp2b_s-o-litAsLit_unweighted_directed_betweenness-5_max-50-43.nt";
 		try {
 //			 EvaluateGraph evaluate = new EvaluateGraph(new QaldDbpQueries(QaldDbpQueries.QALD_2_QUERIES, new OnlyDboQueries()), EvaluateGraph.OPS_VIRTUOSO, goldenStandardGraph, subgraph);
-			 EvaluateGraph evaluate = new EvaluateGraph(new SwdfQueries(new DescribeFilter(), new SimpleBgpFilter()), EvaluateGraph.OPS_VIRTUOSO, goldenStandardGraph, subgraph);
-			 QueryWrapper query = new QueryWrapper("SELECT DISTINCT  ?b ?attrType\n" + 
-			 		"WHERE\n" + 
-			 		"  { ?a <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://swrc.ontoware.org/ontology#ConferenceEvent> .\n" + 
-			 		"    ?a ?b ?c\n" + 
-			 		"    OPTIONAL\n" + 
-			 		"      { ?b <http://www.w3.org/2000/01/rdf-schema#range> ?attrType }\n" + 
-			 		"    OPTIONAL\n" + 
-			 		"      { ?c <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?d }\n" + 
-			 		"    FILTER ( ! bound(?d) )\n" + 
-			 		"  }\n" + 
+//			 EvaluateGraph evaluate = new EvaluateGraph(new SwdfQueries(new DescribeFilter(), new SimpleBgpFilter()), EvaluateGraph.OPS_VIRTUOSO, goldenStandardGraph, subgraph);
+			EvaluateGraph evaluate = new EvaluateGraph( EvaluateGraph.OPS_VIRTUOSO, goldenStandardGraph, subgraph);
+			 QueryWrapper query = new QueryWrapper("PREFIX  dc:   <http://purl.org/dc/elements/1.1/>\n" + 
+			 		"PREFIX  bench: <http://localhost/vocabulary/bench/>\n" + 
+			 		"PREFIX  foaf: <http://xmlns.com/foaf/0.1/>\n" + 
+			 		"PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" + 
+			 		"PREFIX  swrc: <http://swrc.ontoware.org/ontology#>\n" + 
+			 		"PREFIX  dcterms: <http://purl.org/dc/terms/>\n" + 
 			 		"\n" + 
-			 		"");
-			 System.out.println(query);
+			 		"SELECT DISTINCT  ?name1 ?name2\n" + 
+			 		"WHERE\n" + 
+			 		"  { ?article1 rdf:type bench:Article .\n" + 
+			 		"    ?article2 rdf:type bench:Article .\n" + 
+			 		"    ?article1 dc:creator ?author1 .\n" + 
+			 		"    ?author1 foaf:name ?name1 .\n" + 
+			 		"    ?article2 dc:creator ?author2 .\n" + 
+			 		"    ?author2 foaf:name ?name2 .\n" + 
+			 		"    ?article1 swrc:journal ?journal .\n" + 
+			 		"    ?article2 swrc:journal ?journal\n" + 
+			 		"    FILTER ( ?name1 < ?name2 )\n" + 
+			 		"  }");
 			 evaluate.runForQuery(query);
+			 System.out.println(evaluate.toString());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

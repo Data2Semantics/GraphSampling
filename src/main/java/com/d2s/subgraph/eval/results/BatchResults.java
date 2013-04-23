@@ -10,8 +10,9 @@ import java.util.HashMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import au.com.bytecode.opencsv.CSVWriter;
-import com.d2s.subgraph.eval.batch.EvaluateGraph;
-import com.d2s.subgraph.eval.batch.ExperimentSetup;
+
+import com.d2s.subgraph.eval.EvaluateGraph;
+import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 import com.d2s.subgraph.eval.results.GraphResults;
 import com.d2s.subgraph.helpers.Helper;
 import com.d2s.subgraph.helpers.RHelper;

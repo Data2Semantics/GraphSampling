@@ -13,8 +13,9 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-import com.d2s.subgraph.eval.batch.DbpExperimentSetup;
-import com.d2s.subgraph.eval.batch.EvaluateGraph;
+
+import com.d2s.subgraph.eval.EvaluateGraph;
+import com.d2s.subgraph.eval.experiments.DbpExperimentSetup;
 import com.d2s.subgraph.helpers.Helper;
 import com.d2s.subgraph.queries.filters.QueryFilter;
 import com.hp.hpl.jena.query.Query;

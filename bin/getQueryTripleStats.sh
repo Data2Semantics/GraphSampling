@@ -15,18 +15,25 @@ if [ -z "$1" ];then
         exit;
 fi
 
-
+hadoopLs $dataset/queryStatsInput/
+if [ ${#hadoopLs[@]} == "0" ]; then
+	echo "Did not find query files to get stats for. ($dataset/queryStatsInput/)"
+	exit;
+fi
 for dir in "$@"; do
 	dirBasename=`basename $dir`
 	IFS=_ read -a delimited <<< "$dirBasename"
 	dataset=${delimited[0]}
-	hadoopLs $dataset/queryStatsInput/
-	if [ ${#hadoopLs[@]} == "0" ]; then
-		echo "Did not find query files to get stats for. ($dataset/queryStatsInput/)"
-		exit;
-	fi
-	echo "running pig to get weights for query triples $dirBasename"
-	for queryFile in "${hadoopLs[@]}"; do
-		pig pigAnalysis/stats/getQueryTripleWeights.py $dataset/roundtrip/$dirBasename $queryFile;
-	done
+
+	analysisFiles=`find $dir/output/*`
+    while read -r analysisFile; do
+    	basenameAnalysisFile=`basename $analysisFile`;
+    	inputHadoopFile="$dirBasename"
+    	inputHadoopFile+="_"
+    	inputHadoopFile+="$basenameAnalysisFile"
+		echo "running pig to get weights for query triples $inputHadoopFile"
+		for queryFile in "${hadoopLs[@]}"; do
+			pig pigAnalysis/rewrite/getQueryTripleWeights.py $dataset/roundtrip/$inputHadoopFile $queryFile;
+		done
+    done <<< "$analysisFiles"
 done

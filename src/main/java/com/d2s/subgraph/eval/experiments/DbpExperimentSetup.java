@@ -1,8 +1,10 @@
-package com.d2s.subgraph.eval.batch;
+package com.d2s.subgraph.eval.experiments;
 
 import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
+
+import com.d2s.subgraph.eval.EvaluateGraph;
 import com.d2s.subgraph.queries.GetQueries;
 import com.d2s.subgraph.queries.QaldDbpQueries;
 import com.d2s.subgraph.queries.filters.OnlyDboQueries;

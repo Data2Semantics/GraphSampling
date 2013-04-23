@@ -1,4 +1,4 @@
-package com.d2s.subgraph.eval.batch;
+package com.d2s.subgraph.eval.experiments;
 
 import com.d2s.subgraph.queries.GetQueries;
 
