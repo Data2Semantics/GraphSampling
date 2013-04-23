@@ -1,7 +1,6 @@
 #!/bin/bash
 function hadoopLs {
 	hadoopLs=()
-	echo "hadoop fs -ls $1";
 	dirListing=`hadoop fs -ls $1`;
 	for word in ${dirListing} ; do
  		if [[ $word =~ ^/ ]];then 
