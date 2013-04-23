@@ -64,7 +64,7 @@ public class SwdfQueries implements GetQueries {
 				queries = new ArrayList<QueryWrapper>(queriesHm.values());
 				queriesHm.clear();
 			}
-			saveCopyAsCsv();
+			saveCsvCopy(new File(CSV_COPY));
 			saveQueriesToCacheFile();
 		}
 	}
@@ -178,8 +178,7 @@ public class SwdfQueries implements GetQueries {
 				+ duplicateQueries + " no results queries: " + noResultsQueries;
 	}
 
-	public void saveCopyAsCsv() throws IOException {
-		File csvFile = new File(CSV_COPY);
+	public void saveCsvCopy(File csvFile) throws IOException {
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
 		writer.writeNext(new String[] { "queryId", "query" });
 		for (QueryWrapper query : queries) {

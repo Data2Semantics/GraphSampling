@@ -14,7 +14,7 @@ if [ -z "$1" ];then
         echo "at least 1 argument required (rewrite methods as directories to get query triples stats for)"
         exit;
 fi
-
+dataset=""
 for dir in "$@"; do
 	dirBasename=`basename $dir`
 	IFS=_ read -a delimited <<< "$dirBasename"
@@ -38,3 +38,5 @@ for dir in "$@"; do
 		done
     done <<< "$analysisFiles"
 done
+
+catQueryTripleStatsLocally.sh $dataset

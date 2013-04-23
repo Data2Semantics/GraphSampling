@@ -1,15 +1,8 @@
 package com.d2s.subgraph.queries;
 
-import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import org.apache.commons.io.FileUtils;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
@@ -17,30 +10,24 @@ import org.openrdf.repository.RepositoryException;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 import com.d2s.subgraph.eval.experiments.SwdfExperimentSetup;
 import com.d2s.subgraph.helpers.Helper;
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.rdf.model.StmtIterator;
 
 public class GetTriplesFromConstruct {
 	private ExperimentSetup experimentSetup;
 	private static String RESULTS_PATH = "constructResources";
-	boolean validateMode = true;
-
+	
 	public GetTriplesFromConstruct(ExperimentSetup experimentSetup) {
 		this.experimentSetup = experimentSetup;
 		File resultsPath = new File(RESULTS_PATH);
 		if (!resultsPath.exists()) {
 			resultsPath.mkdir();
 		}
-
 	}
 
-	public ArrayList<ArrayList<String>> resourcesPerQuery = new ArrayList<ArrayList<String>>();
 
 	public void run() throws RepositoryException, MalformedQueryException, QueryEvaluationException, IOException {
+		experimentSetup.getQueries().saveCsvCopy(new File(RESULTS_PATH + "/queries.csv"));
 		for (QueryWrapper query : experimentSetup.getQueries().getQueries()) {
 
 			Query queryWithFromClause = Helper.addFromClause(query.getQuery(), experimentSetup.getGoldenStandardGraph());
@@ -55,78 +42,8 @@ public class GetTriplesFromConstruct {
 		}
 	}
 
-	private void storeTriples(File file, Model model) throws IOException {
-		// resultsWriter = new CSVWriter(new FileWriter(file), '\t');
-		// store as hashmap, so we don't have double triples in our list
-		HashMap<String, String> resources = new HashMap<String, String>();
-		StmtIterator statements = model.listStatements();
-		while (statements.hasNext()) {
-			Statement statement = statements.next();
-			Triple triple = statement.asTriple();
-			String subject = processResource(triple.getSubject());
-			String predicate = processResource(triple.getPredicate());
-			String object = processResource(triple.getObject());
-
-			resources.put(subject + predicate + object, subject + '\t' + predicate + '\t' + object);
-		}
-		FileUtils.writeLines(file, resources.values());
-		// for (ArrayList<String> triple: resources.values()) {
-		//
-		// resultsWriter.writeNext(triple.toArray(new String[triple.size()]));
-		// }
-		// resultsWriter.close();
-	}
 	
-	/**
-	 * The triples we get back from the query do not match the serialized ntriple format. check!
-	 * @param resource
-	 * @return
-	 * @throws IOException
-	 */
-	private String processResource(Node resource) throws IOException {
-		String resourceAsString = "";
-		if (resource.isURI()) {
-			resourceAsString = "<" + resource.toString() + ">";
-		} else if (resource.isLiteral()) {
-			resourceAsString = resource.toString(true);
-//			resourceAsString = resourceAsString.replace("\"", "\\\"");
-			//remove linebreaks
-			resourceAsString = resourceAsString.replace("\n", "\\n");
-			//add brackets to literal datatype
-			if (resourceAsString.contains("\"^^http")) {
-				resourceAsString = resourceAsString.replace("\"^^http", "\"^^<http");
-				resourceAsString += ">";
-			}
-//			resourceAsString = "\"" + resourceAsString + "\"";
-		} else {
-			resourceAsString = resource.toString();
-		}
-
-		if (validateMode) {
-			FileInputStream fstream = new FileInputStream(new File("df.nt"));
-			// Get the object of DataInputStream
-			DataInputStream in = new DataInputStream(fstream);
-			BufferedReader br = new BufferedReader(new InputStreamReader(in));
-			String strLine;
-			boolean valid = false;
-			// Read File Line By Line
-			//"2007-04-20T15:30:00+02:00"^^<http://www.w3.org/2001/XMLSchema#dateTime>
-			//"2007-04-20T15:30:00+02:00"^^http://www.w3.org/2001/XMLSchema#dateTime
-			while ((strLine = br.readLine()) != null) {
-				if (strLine.contains(resourceAsString)) {
-					valid = true;
-					break;
-				}
-			}
-			br.close();
-			if (!valid) {
-				System.out.println("kut. did not find extracted resource in original file: " + resourceAsString);
-			}
-		}
-
-		return resourceAsString;
-	}
-
+	
 	public static void main(String[] args) throws IOException, RepositoryException, MalformedQueryException, QueryEvaluationException {
 		// GetTriplesFromConstruct getTriples = new GetTriplesFromConstruct(new DbpExperimentSetup());
 		GetTriplesFromConstruct getTriples = new GetTriplesFromConstruct(new SwdfExperimentSetup());

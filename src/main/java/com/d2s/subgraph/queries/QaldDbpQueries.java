@@ -1,6 +1,7 @@
 package com.d2s.subgraph.queries;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,6 +14,8 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+import au.com.bytecode.opencsv.CSVWriter;
 
 import com.d2s.subgraph.eval.EvaluateGraph;
 import com.d2s.subgraph.eval.experiments.DbpExperimentSetup;
@@ -214,6 +217,15 @@ public class QaldDbpQueries implements GetQueries {
 	
 	public String toString() {
 		return "valids: " + validQueries + " invalids: " + invalidQueries + " filtered: " + filteredQueries ;
+	}
+	
+	public void saveCsvCopy(File csvFile) throws IOException {
+		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
+		writer.writeNext(new String[] { "queryId", "query" });
+		for (QueryWrapper query : queries) {
+			writer.writeNext(new String[] { Integer.toString(query.getQueryId()), query.toString() });
+		}
+		writer.close();
 	}
 	
 	
