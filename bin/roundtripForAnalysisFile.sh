@@ -6,6 +6,7 @@ if [ -z "$1" ];then
 fi
 #last one is strange: it's actually: half the graph, and only retrieve weights...
 aggregateMethods=(min max avg)
+#aggregateMethods=(avg)
 skipAggregateFor="so-so"
 pigRoundtripDir="$HOME/pigAnalysis/roundtrip"
 analysisFile=$(readlink -f $1)
@@ -49,9 +50,9 @@ else
 	
 	for aggregateMethod in "${aggregateMethods[@]}"; do
 		pig $pigScriptFile $hadoopAnalysisFile $aggregateMethod;
-		selectMaxTopKForAnalysisFile.sh $analysisFile;
-		checkpoint.sh;
 	done
+	selectMaxTopKForAnalysisFile.sh $analysisFile;
+        checkpoint.sh;
 fi
 
 
