@@ -1,12 +1,13 @@
 #!/bin/bash
 
 if [ -z "$1" ];then
-	echo "at least 1 argument required (the analysis file). "
+	echo "at least 1 argument required (the analysis file). Optional arg: skip pig script invocation"
 	exit;
 fi
 #last one is strange: it's actually: half the graph, and only retrieve weights...
 
 #topKVariants=(0.2 0.5 1000n "1w")
+skipPig=$2
 topKVariants=(0.5 "1w")
 #topKVariants=("1w")
 aggregateMethods=(min max avg)
@@ -44,7 +45,9 @@ for aggregateMethod in "${aggregateMethods[@]}"; do
 	for topK in "${topKVariants[@]}"; do
 		echo "selecting top-k $topK"
 		echo "pig $pigRoundtripDir/selectMaxTopK.py $hadoopRoundtripFile $topK;"
-		pig $pigRoundtripDir/selectMaxTopK.py $hadoopRoundtripFile $topK;
+		if [ -z $skipPig ]; then 
+			pig $pigRoundtripDir/selectMaxTopK.py $hadoopRoundtripFile $topK;
+		fi
 		
 	
 		echo "catting results locally"
