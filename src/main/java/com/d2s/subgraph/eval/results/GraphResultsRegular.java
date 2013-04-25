@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 
@@ -105,5 +106,22 @@ public class GraphResultsRegular implements GraphResults {
 	public ArrayList<Integer> getQueryIds() {
 		return new ArrayList<Integer>(results.keySet());
 	}
+	public String toString() {
+		return getGraphName();
+	}
 	
+	public String getShortGraphName() {
+		String graphName = getGraphName();
+		graphName = graphName.replace("unweighted_", "");
+		graphName = graphName.replace(".nt", "");
+		ArrayList<String> parts = new ArrayList<String>(Arrays.asList( graphName.split("_")));
+		parts.remove(0); //http://dbp
+		String shortGraphname = "";
+		for (String part: parts) {
+			shortGraphname += part + "_";
+		}
+		shortGraphname = shortGraphname.substring(0, shortGraphname.length()-1);//remove trailing _
+		return shortGraphname;
+		
+	}
 }

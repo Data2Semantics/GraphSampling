@@ -14,6 +14,7 @@ public class DbpExperimentSetup implements ExperimentSetup {
 	public static String GOLDEN_STANDARD_GRAPH = "http://dbpo";
 	private static String GRAPH_PREFIX = "dbp_";
 	private static String RESULTS_DIR = "dbpResults";
+	private static String QUERY_RESULTS_DIR = "dbpQueryTriples";
 	private static int MAX_NUM_QUERIES = 0;//i.e. all
 	private GetQueries queries;
 	public DbpExperimentSetup() throws SAXException, IOException, ParserConfigurationException {
@@ -39,5 +40,8 @@ public class DbpExperimentSetup implements ExperimentSetup {
 	}
 	public String getEndpoint() {
 		return EvaluateGraph.OPS_VIRTUOSO;
+	}
+	public String getQueryResultsDir() {
+		return QUERY_RESULTS_DIR;
 	}
 }

@@ -23,6 +23,8 @@ public interface GraphResults {
 	public double getStdRecall();
 
 	public String getGraphName();
+	
+	public String getShortGraphName();
 
 	public void setGraphName(String name);
 	
@@ -32,5 +34,5 @@ public interface GraphResults {
 	
 	public ArrayList<Integer> getQueryIds();
 	
-	
+	public String toString();
 }

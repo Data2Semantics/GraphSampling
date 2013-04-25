@@ -14,9 +14,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
 import au.com.bytecode.opencsv.CSVWriter;
-
 import com.d2s.subgraph.eval.EvaluateGraph;
 import com.d2s.subgraph.eval.experiments.DbpExperimentSetup;
 import com.d2s.subgraph.helpers.Helper;

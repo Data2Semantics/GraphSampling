@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 
@@ -148,6 +149,17 @@ public class GraphResultsSample implements GraphResults{
 			e.printStackTrace();
 		}
 	}
-
-	
+	public String toString() {
+		return getGraphName();
+	}
+	public String getShortGraphName() {
+		ArrayList<String> parts = new ArrayList<String>(Arrays.asList( graphName.split("_")));
+		parts.remove(0); //http://dbp
+		String shortGraphname = "";
+		for (String part: parts) {
+			shortGraphname += part;
+		}
+		shortGraphname = shortGraphname.replace(".nt", "");
+		return shortGraphname;
+	}
 }

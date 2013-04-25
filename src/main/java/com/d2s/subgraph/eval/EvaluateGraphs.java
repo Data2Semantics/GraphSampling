@@ -18,6 +18,7 @@ import org.xml.sax.SAXException;
 import com.d2s.subgraph.eval.experiments.DbpExperimentSetup;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 import com.d2s.subgraph.eval.experiments.Sp2bExperimentSetup;
+import com.d2s.subgraph.eval.experiments.SwdfExperimentSetup;
 import com.d2s.subgraph.eval.results.BatchResults;
 import com.d2s.subgraph.eval.results.GraphResults;
 import com.d2s.subgraph.eval.results.GraphResultsSample;
@@ -39,7 +40,7 @@ public class EvaluateGraphs {
 	private GetQueries queries;
 	private ArrayList<String> graphs = new ArrayList<String>();;
 	private HashMap<String,ArrayList<String>> sampleGraphs = new HashMap<String,ArrayList<String>>();
-	public EvaluateGraphs(ExperimentSetup experimentSetup) {
+	public EvaluateGraphs(ExperimentSetup experimentSetup) throws IOException {
 		queries = experimentSetup.getQueries();
 		batchResults = new BatchResults(experimentSetup, queries);
 		this.experimentSetup = experimentSetup;
@@ -167,8 +168,8 @@ public class EvaluateGraphs {
 ////			String queryString = "SELECT DISTINCT * FROM <http://df_s-o-litAsNode_unweighted_directed_betweenness-4_max-0.5-0.49.nt> WHERE {?x ?y ?z}";
 //			QueryWrapper query = new QueryWrapper(queryString);
 			
-			EvaluateGraphs evaluate = new EvaluateGraphs(new DbpExperimentSetup());
-//			EvaluateGraphs evaluate = new EvaluateGraphs(new SwdfExperimentSetup());
+//			EvaluateGraphs evaluate = new EvaluateGraphs(new DbpExperimentSetup());
+			EvaluateGraphs evaluate = new EvaluateGraphs(new SwdfExperimentSetup());
 //			EvaluateGraphs evaluate = new EvaluateGraphs(new Sp2bExperimentSetup());
 			evaluate.run();
 		} catch (Exception e) {
