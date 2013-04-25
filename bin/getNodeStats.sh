@@ -11,7 +11,6 @@ plotsDir="$HOME/stats/plots/nodeWeightDist"
 outputRunScript="$HOME/tmp/rRunScript.R"
 logFile="$HOME/logs/getNodeStats_"
 logFile+=`date +"%Y%m%d"`
-logFile+=".log"
 for rewriteDir in "$@"; do
 	rewriteMethod=`basename $rewriteDir`
     echo "getting stats for rewrite method $rewriteDir";
@@ -27,6 +26,6 @@ for rewriteDir in "$@"; do
         echo "outputTop1000 <- \"$top1000Dir/$targetFile\"" >> $runScript;
         echo "outputPdf <- \"$plotsDir/$targetFile.pdf\"" >> $runScript;
         cat $scriptsFile >> $runScript;
-        R -f $runScript >> $logFile &
+        R -f $runScript >> $logFile.log 2>> $logsFile.err &
     done <<< "$analysisFiles"
 done

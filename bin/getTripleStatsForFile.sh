@@ -10,7 +10,6 @@ scriptsFile="$HOME/rProject/scripts/getTripleStats.R"
 outputRunScript="$HOME/tmp/rRunScript_$RANDOM.R"
 logFile="$HOME/logs/getTripleStats_"
 logFile+=`date +"%Y%m%d"`
-logFile+=".log"
 
 for tripleWeightsFile in "$@"; do
 	if [ ! -f $tripleWeightsFile ]; then
@@ -24,7 +23,7 @@ for tripleWeightsFile in "$@"; do
 	echo "filename <- \"$absFile\"" > $outputRunScript;
 	echo "outputPdf <- \"$targetFile\"" >> $outputRunScript;
 	cat $scriptsFile >> $outputRunScript;
-	R -f $outputRunScript >> $logFile &
+	R -f $outputRunScript >> $logFile.log 2>> $logFile.err &
 done
 
 

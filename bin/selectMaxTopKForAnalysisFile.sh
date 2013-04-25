@@ -100,6 +100,10 @@ for aggregateMethod in "${aggregateMethods[@]}"; do
                     echo "Relative size is 0?? $topKFile"
                     continue
             fi
+            if [ ${#relSize} == 1 ]; then
+                relSize="0$relSize"
+            fi
+
             topKPercentage=$(echo "$topK * 100" | bc -l)
             topKPercentage=`printf %.0f $topKPercentage`
 			if [ "$topKPercentage" -gt "100" ]; then
@@ -133,7 +137,7 @@ for aggregateMethod in "${aggregateMethods[@]}"; do
 	if [ -n "$aggregateMethod" ]; then
 		exit;
 		#we need just 1 loop (no other aggregate methods)
-	done
+	fi
 done;
 
 
