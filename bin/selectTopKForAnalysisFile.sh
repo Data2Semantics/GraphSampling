@@ -5,7 +5,8 @@ if [ -z "$1" ];then
 	exit;
 fi
 #last one is strange: it's actually: half the graph, and only retrieve weights...
-topKVariants=(0.2 0.5 1000n "1w")
+#topKVariants=(0.2 0.5 1000n "1w")
+topKVariants=("1w")
 analysisFile=$(readlink -f $1)
 pigRoundtripDir="$HOME/pigAnalysis/roundtrip"
 analysisBasename=`basename $analysisFile`;
@@ -38,8 +39,20 @@ for topK in "${topKVariants[@]}"; do
 	
 	if [[ $topK =~ n$ ]];then
 		hadoop fs -cat $hadoopRoundtripDir/$topKFile/part* > $statsDir/$topKFile;
+		numLines=`head $statsDir/$topKFile | wc -l`
+		if [ $numLines == 2 ]; then
+			echo "Unable to cat results! File contents:";
+			cat $statsDir/$topKFile;
+			exit 1;
+		fi
 	elif [[ $topK =~ w$ ]];then
 		hadoop fs -cat $hadoopRoundtripDir/$topKFile/part* > $tripleWeightsDir/$topKFile;
+                numLines=`head $tripleWeightsDir/$topKFile | wc -l`
+                if [ $numLines == 2 ]; then
+                        echo "Unable to cat results! File contents:";
+                        cat $tripleWeightsDir/$topKFile;
+                        exit 1;
+                fi
 		echo "just catted a file with just the triple weights. Now plot them"
 		getTripleStatsForFile.sh $tripleWeightsDir/$topKFile;
 	else
@@ -50,6 +63,13 @@ for topK in "${topKVariants[@]}"; do
 		fi
 
 		hadoop fs -cat $hadoopRoundtripDir/$topKFile/part* > $localTargetFile;
+                numLines=`head $localTargetFile | wc -l`
+                if [ $numLines == 2 ]; then
+                        echo "Unable to cat results! File contents:";
+                        cat $localTargetFile;
+                        exit 1;
+                fi
+
 		putDirInVirtuoso.sh $localTargetDir;
 	fi
 done

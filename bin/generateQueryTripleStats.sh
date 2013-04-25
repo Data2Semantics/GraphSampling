@@ -14,6 +14,7 @@ if [ -z "$1" ];then
         exit;
 fi
 dataset=""
+aggregateMethods=(min max avg)
 for dir in "$@"; do
 	dirBasename=`basename $dir`
 	IFS=_ read -a delimited <<< "$dirBasename"
@@ -25,17 +26,29 @@ for dir in "$@"; do
 	fi
 	analysisFiles=`find $dir/output/*`
     while read -r analysisFile; do
-    	basenameAnalysisFile=`basename $analysisFile`;
-    	inputHadoopFile="$dirBasename"
-    	inputHadoopFile+="_"
-    	inputHadoopFile+="$basenameAnalysisFile"
+	for aggregateMethod in "${aggregateMethods[@]}"; do
+	    	basenameAnalysisFile=`basename $analysisFile`;
+    		inputHadoopFile="$dirBasename"
+    		inputHadoopFile+="_"
+    		inputHadoopFile+="$basenameAnalysisFile"
+		inputHadoopFile+="_"
+		inputHadoopFile+="$aggregateMethod"
 		echo "running pig to get weights for query triples $inputHadoopFile"
 		for queryFile in "${hadoopLs[@]}"; do
 			if [ ${queryFile: -3} == ".nt" ]; then
 				pig pigAnalysis/stats/getQueryTripleWeights.py $dataset/roundtrip/$inputHadoopFile $queryFile;
+				queryFileBasename=`basename $queryFile`
+				IFS=_ read -a delimited <<< "$queryFileBasename"
+        			queryId=${delimited[1]}
+				resultFilename="$inputHadoopFile"
+				resultFilename+="_"
+				resultFilename+="$queryId"
+				resultFilename=${resultFilename%.*} #remove .nt extension
+				resultsPath="$dataset/queryStats/$resultFilename"
+				processQueryTripleStats.sh $resultsPath;
 			fi
 		done
-    done <<< "$analysisFiles"
+	done
+   done <<< "$analysisFiles"
 done
 
-catQueryTripleStatsLocally.sh $dataset

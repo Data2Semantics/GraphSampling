@@ -6,7 +6,9 @@ if [ -z "$1" ];then
 fi
 #last one is strange: it's actually: half the graph, and only retrieve weights...
 
-topKVariants=(0.2 0.5 1000n "1w")
+#topKVariants=(0.2 0.5 1000n "1w")
+topKVariants=(0.5 "1w")
+#topKVariants=("1w")
 aggregateMethods=(min max avg)
 skipAggregateFor="so-so"
 #topKVariants=(0.5)
@@ -29,13 +31,8 @@ statsDir="$HOME/stats/top1000/triples/"
 tripleWeightsDir="$HOME/stats/tripleWeights"
 
 tmpDir="$HOME/tmp"
-if [[ "$hadoopAnalysisFile" =~ "$skipAggregateFor" ]]; then  
-
-else
-
-fi
 for aggregateMethod in "${aggregateMethods[@]}"; do
-	if [[ "$hadoopAnalysisFile" =~ "$skipAggregateFor" ]]; then  
+	if [[ "$targetFilename+=" =~ "$skipAggregateFor" ]]; then  
 		hadoopRoundtripFile="$hadoopRoundtripDir/$targetFilename"
 		aggregateMethod=""
 	else 
@@ -46,7 +43,7 @@ for aggregateMethod in "${aggregateMethods[@]}"; do
 	
 	for topK in "${topKVariants[@]}"; do
 		echo "selecting top-k $topK"
-		#echo "pig $pigRoundtripDir/selectMaxTopK.py $hadoopRoundtripFile $topK;"
+		echo "pig $pigRoundtripDir/selectMaxTopK.py $hadoopRoundtripFile $topK;"
 		pig $pigRoundtripDir/selectMaxTopK.py $hadoopRoundtripFile $topK;
 		
 	
@@ -55,16 +52,16 @@ for aggregateMethod in "${aggregateMethods[@]}"; do
 		topKFile="$targetFilename"
 
 		if [ -n "$aggregateMethod" ]; then
-			$topKFile+="_"
-			$topKFile+="$aggregateMethod";
+			topKFile+="_"
+			topKFile+="$aggregateMethod";
 		fi
 		topKFile+="_"
 		topKFile+="max$topK.nt"
 		
 		tmpFile="$tmpDir/$targetFilename"
 		if [ -n "$aggregateMethod" ]; then
-			$tmpFile+="_"
-			$tmpFile+="$aggregateMethod";
+			tmpFile+="_"
+			tmpFile+="$aggregateMethod";
 		fi
 		tmpFile+="_"
 		tmpFile+="$topK.tmp"
@@ -74,8 +71,8 @@ for aggregateMethod in "${aggregateMethods[@]}"; do
 		if [[ $topK =~ n$ ]];then
 			targetTopKFilename="$targetFilename"
 			if [ -n "$aggregateMethod" ]; then
-				$targetTopKFilename+="_"
-				$targetTopKFilename+="$aggregateMethod";
+				targetTopKFilename+="_"
+				targetTopKFilename+="$aggregateMethod";
 			fi
 			targetTopKFilename+="_"
 			targetTopKFilename+="$topK.nt"
@@ -83,8 +80,8 @@ for aggregateMethod in "${aggregateMethods[@]}"; do
 		elif [[ $topK =~ w$ ]];then
 			targetTopKFilename="$targetFilename"
 			if [ -n "$aggregateMethod" ]; then
-				$targetTopKFilename+="_"
-				$targetTopKFilename+="$aggregateMethod";
+				targetTopKFilename+="_"
+				targetTopKFilename+="$aggregateMethod";
 			fi
 			targetTopKFilename+="_"
 			targetTopKFilename+="$topK.nt"
@@ -109,10 +106,13 @@ for aggregateMethod in "${aggregateMethods[@]}"; do
 				echo "orig file size: $origFileSize"
 				exit;
 			fi
+		if [ ${#topKPercentage} == 1 ]; then
+        		topKPercentage="0$topKPercentage"
+		fi
 			targetTopKFilename="$targetFilename"
 			if [ -n "$aggregateMethod" ]; then
-				$targetTopKFilename+="_"
-				$targetTopKFilename+="$aggregateMethod";
+				targetTopKFilename+="_"
+				targetTopKFilename+="$aggregateMethod";
 			fi
 			targetTopKFilename+="_"
 			targetTopKFilename+="max-$topKPercentage-$relSize.nt"
