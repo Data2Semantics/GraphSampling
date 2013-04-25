@@ -44,8 +44,8 @@ for aggregateMethod in "${aggregateMethods[@]}"; do
 	
 	for topK in "${topKVariants[@]}"; do
 		echo "selecting top-k $topK"
-		echo "pig $pigRoundtripDir/selectMaxTopK.py $hadoopRoundtripFile $topK;"
 		if [ -z $skipPig ]; then 
+			echo "pig $pigRoundtripDir/selectMaxTopK.py $hadoopRoundtripFile $topK;"
 			pig $pigRoundtripDir/selectMaxTopK.py $hadoopRoundtripFile $topK;
 		fi
 		
@@ -130,6 +130,10 @@ for aggregateMethod in "${aggregateMethods[@]}"; do
 		fi
 	done
 	checkpoint.sh;
+	if [ -n "$aggregateMethod" ]; then
+		exit;
+		#we need just 1 loop (no other aggregate methods)
+	done
 done;
 
 

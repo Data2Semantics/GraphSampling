@@ -45,7 +45,7 @@ fi
 
 if [[ "$hadoopAnalysisFile" =~ "$skipAggregateFor" ]]; then  
 	pig $pigScriptFile $hadoopAnalysisFile;
-	selectMaxTopKForAnalysisFile.sh $analysisFile skipAggregate;
+	selectMaxTopKForAnalysisFile.sh $analysisFile;
 else
 	
 	for aggregateMethod in "${aggregateMethods[@]}"; do
