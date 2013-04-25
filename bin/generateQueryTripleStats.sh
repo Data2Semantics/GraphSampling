@@ -10,8 +10,31 @@ function hadoopLs {
 }  
 
 if [ -z "$1" ];then
-        echo "at least 1 argument required (rewrite methods as directories to get query triples stats for)"
+        echo "at least 1 argument required (rewrite methods as directories to get query triples stats for). as optional first argument -skipPig. as optional second argument: -queryPattern <pattern>"
         exit;
+fi
+skipPig=0;
+queryPattern=0;
+for arg in "$@"; do
+        if [ "$arg" == "-skipPig" ]; then
+		skipPig=1;
+                shift;
+                continue;
+        fi
+        if [ "$arg" == "-queryPattern" ]; then
+                echo "query pattern detected!"
+                queryPattern=1;
+                shift;
+                continue;
+        fi
+        if [ $queryPattern == 1 ]; then
+                queryPattern="$arg";
+                echo "query pattern is: $queryPattern"
+                shift;
+        fi
+done
+if [ ${#queryPattern} == 1 ]; then
+	queryPattern=""
 fi
 dataset=""
 aggregateMethods=(min max avg)
@@ -19,7 +42,7 @@ for dir in "$@"; do
 	dirBasename=`basename $dir`
 	IFS=_ read -a delimited <<< "$dirBasename"
 	dataset=${delimited[0]}
-	hadoopLs $dataset/queryStatsInput/
+	hadoopLs $dataset/queryStatsInput/$queryPattern
 	if [ ${#hadoopLs[@]} == "0" ]; then
         	echo "Did not find query files to get stats for. ($dataset/queryStatsInput/)"
         	exit;
@@ -36,7 +59,9 @@ for dir in "$@"; do
 		echo "running pig to get weights for query triples $inputHadoopFile"
 		for queryFile in "${hadoopLs[@]}"; do
 			if [ ${queryFile: -3} == ".nt" ]; then
-				pig pigAnalysis/stats/getQueryTripleWeights.py $dataset/roundtrip/$inputHadoopFile $queryFile;
+				if [ $skipPig == 0 ]; then
+					pig pigAnalysis/stats/getQueryTripleWeights.py $dataset/roundtrip/$inputHadoopFile $queryFile;
+				fi
 				queryFileBasename=`basename $queryFile`
 				IFS=_ read -a delimited <<< "$queryFileBasename"
         			queryId=${delimited[1]}

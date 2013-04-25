@@ -4,7 +4,7 @@ if [ -z "$1" ];then
         echo "at least 1 argument required (directory path to check)"
         exit;
 fi
-instances=`listInstances.sh`
+instances=`listValidInstances.sh`
 for dir in "$@"; do 
 	if [ -d $dir ]; then
 		absDir=$(readlink -f $dir)
@@ -16,3 +16,6 @@ for dir in "$@"; do
 		fi
 	fi
 done
+
+echo "list of instances which are in load list, but not imported"
+listInvalidInstances.sh

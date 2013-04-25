@@ -52,7 +52,10 @@ tripleWeightsFile+="_"
 tripleWeightsFile+="1w.nt"
 queryTriplesFile="$resultsDir/$queryFileBasename"
 plotsDir="$HOME/stats/plots/queryScores/$dataset"
-
+if [ ! -d $plotsDir ]; then
+	echo "$plotsDir does not exist. creating it"
+	mkdir $plotsDir;
+fi
 pdffile="$plotsDir/$queryFileBasename.pdf"
 outputRunScript="$HOME/tmp/rRunScript.R$RANDOM"
 logFile="$HOME/logs/getQueryTripleStats_"
