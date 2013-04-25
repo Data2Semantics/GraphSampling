@@ -10,3 +10,12 @@ filename.txt
 .project
 
 /target
+.tmp
+*Results
+src/main/resources/swdf*
+src/main/resources/biomed*
+tools/sp2b/*.nt
+tools/sp2b/*.n3
+*QueryTriples
+
+

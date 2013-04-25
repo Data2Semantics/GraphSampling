@@ -3,6 +3,7 @@ package com.d2s.subgraph.eval.experiments;
 import java.io.IOException;
 
 import com.d2s.subgraph.eval.EvaluateGraph;
+import com.d2s.subgraph.queries.BiomedQueries;
 import com.d2s.subgraph.queries.GetQueries;
 import com.d2s.subgraph.queries.SwdfQueries;
 import com.d2s.subgraph.queries.filters.DescribeFilter;
@@ -11,16 +12,16 @@ import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
 
 
 
-public class SwdfExperimentSetup implements ExperimentSetup {
-	public static String GOLDEN_STANDARD_GRAPH = "http://swdf";
-	private static String GRAPH_PREFIX = "df_";
-	private static String QUERY_RESULTS_DIR = "swdfQueryTriples";
-	private static String RESULTS_DIR = "swdfResults";
+public class BiomedExperimentSetup implements ExperimentSetup {
+	public static String GOLDEN_STANDARD_GRAPH = "http://biomed";
+	private static String GRAPH_PREFIX = "bio_";
+	private static String RESULTS_DIR = "biomedResults";
+	private static String QUERY_RESULTS_DIR = "biomedQueryTriples";
 	private static int MAX_NUM_QUERIES = 100;
 	private GetQueries queries;
 	
-	public SwdfExperimentSetup() throws IOException {
-		queries = new SwdfQueries(true, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter());
+	public BiomedExperimentSetup() throws IOException {
+		queries = new BiomedQueries(true, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter());
 		queries.setMaxNQueries(MAX_NUM_QUERIES);
 	}
 	

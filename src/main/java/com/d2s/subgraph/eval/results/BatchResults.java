@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -30,16 +31,17 @@ public class BatchResults {
 	private static String FILE_CSV_FLAT_FULL_LIST = "flatlist.csv";
 	private HashMap<String, Boolean> modesImported = new HashMap<String, Boolean>();
 	
-	public BatchResults(ExperimentSetup experimentSetup, GetQueries queries) {
+	public BatchResults(ExperimentSetup experimentSetup, GetQueries queries) throws IOException {
 		this.experimentSetup = experimentSetup;
 		this.queries = queries;
 		this.resultsDir = new File(experimentSetup.getResultsDir());
-		if (!(resultsDir.exists() && resultsDir.isDirectory())) {
-			resultsDir.mkdir();
-		}
+		FileUtils.deleteDirectory(resultsDir);
+		resultsDir.mkdir();
 	}
+	
 	public void writeOutput() throws IOException, InterruptedException {
 		if (batchResults.size() > 0) {
+			Collections.sort(batchResults, new GraphResultsComparator());
 			writeSummaryCsv();
 			ArrayList<ArrayList<String>> modesToOutput = new ArrayList<ArrayList<String>>();
 			modesToOutput.add(new ArrayList<String>(Arrays.asList(new String[]{"max-20", "0.2"})));
@@ -65,6 +67,7 @@ public class BatchResults {
 		}
 	}
 	
+	
 	public void add(GraphResults graphResults) {
 		if (graphResults.getGraphName().contains("max-20")) modesImported.put("max-20", true);
 		if (graphResults.getGraphName().contains("0.2")) modesImported.put("0.2", true);
@@ -84,7 +87,7 @@ public class BatchResults {
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
 		writer.writeNext(new String[]{"graph", "avg recall", "median recall", "std recall"});
 		for (GraphResults graphResults: batchResults) {
-			writer.writeNext(new String[]{graphResults.getGraphName(), Double.toString(graphResults.getAverageRecall()), Double.toString(graphResults.getMedianRecall()), Double.toString(graphResults.getStdRecall())});
+			writer.writeNext(new String[]{graphResults.getShortGraphName(), Double.toString(graphResults.getAverageRecall()), Double.toString(graphResults.getMedianRecall()), Double.toString(graphResults.getStdRecall())});
 		}
 		writer.close();
 	}
@@ -124,7 +127,7 @@ public class BatchResults {
 		header.add("queryId");
 		for (GraphResults graphResults: batchResults) {
 			if (Helper.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
-				header.add(graphResults.getGraphName());
+				header.add(graphResults.getShortGraphName());
 			}
 			
 		}
@@ -149,7 +152,7 @@ public class BatchResults {
 			if (Helper.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
 				for (QueryWrapper query: queries.getQueries()) {
 					if (graphResults.contains(query.getQueryId())) {
-						writer.writeNext(new String[]{Integer.toString(query.getQueryId()), graphResults.getGraphName(), Double.toString(graphResults.get(query.getQueryId()).getRecall())});
+						writer.writeNext(new String[]{Integer.toString(query.getQueryId()), graphResults.getShortGraphName(), Double.toString(graphResults.get(query.getQueryId()).getRecall())});
 					}
 				}
 			}

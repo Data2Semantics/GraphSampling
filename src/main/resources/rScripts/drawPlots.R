@@ -26,8 +26,12 @@ dev.off()
 
 
 # Boxplot
-pdf("boxplot_plus_average_recall.pdf")
-ggplot(data=flatlist_all, aes(x=graph, y=recall)) + geom_boxplot() + theme(axis.text.x=element_text(angle=-90))  + geom_point(data=summary, aes(x=graph,y=avg.recall, size=avg.recall, colour=graph)) + theme(legend.position="none")
+pdf("boxplot_plus_average_recall_0.2.pdf")
+ggplot(data=flatlist_2, aes(x=graph, y=recall)) + geom_boxplot() + theme(axis.text.x=element_text(angle=-90))  + geom_point(data=summary, aes(x=graph,y=avg.recall, size=avg.recall, colour=graph)) + theme(legend.position="none")
+dev.off()
+
+pdf("boxplot_plus_average_recall_0.5.pdf")
+ggplot(data=flatlist_5, aes(x=graph, y=recall)) + geom_boxplot() + theme(axis.text.x=element_text(angle=-90))  + geom_point(data=summary, aes(x=graph,y=avg.recall, size=avg.recall, colour=graph)) + theme(legend.position="none")
 dev.off()
 
 # Normal scatterplot queryId by recall, colored by graph

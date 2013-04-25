@@ -84,8 +84,8 @@ public class EvaluateGraph {
 //				double recall = getRecallOnBindings(goldenStandardResults, subgraphResults);
 				double recall = getRecallOnProjectionVars(goldenStandardResults, subgraphResults);
 //				double recall = getRecallOnBindings(goldenStandardResults, subgraphResults);
-//				if (recall <= 1.0 && recall > 0.0) {
-//					System.out.println(evalQuery.toString());
+//				if (recall > 1.0) {
+//					System.out.println(evalQuery.getQueryString(subGraph));
 //					System.exit(1);
 //				}
 				QueryResultsRegular result = new QueryResultsRegular();
@@ -222,27 +222,12 @@ public class EvaluateGraph {
 //			 EvaluateGraph evaluate = new EvaluateGraph(new QaldDbpQueries(QaldDbpQueries.QALD_2_QUERIES, new OnlyDboQueries()), EvaluateGraph.OPS_VIRTUOSO, goldenStandardGraph, subgraph);
 //			 EvaluateGraph evaluate = new EvaluateGraph(new SwdfQueries(new DescribeFilter(), new SimpleBgpFilter()), EvaluateGraph.OPS_VIRTUOSO, goldenStandardGraph, subgraph);
 			EvaluateGraph evaluate = new EvaluateGraph( EvaluateGraph.OPS_VIRTUOSO, goldenStandardGraph, subgraph);
-			 QueryWrapper query = new QueryWrapper("PREFIX  dc:   <http://purl.org/dc/elements/1.1/>\n" + 
-			 		"PREFIX  bench: <http://localhost/vocabulary/bench/>\n" + 
-			 		"PREFIX  foaf: <http://xmlns.com/foaf/0.1/>\n" + 
-			 		"PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" + 
-			 		"PREFIX  swrc: <http://swrc.ontoware.org/ontology#>\n" + 
-			 		"PREFIX  dcterms: <http://purl.org/dc/terms/>\n" + 
+			 QueryWrapper query = new QueryWrapper("PREFIX  person: <http://localhost/persons/>\n" + 
 			 		"\n" + 
-			 		"SELECT DISTINCT  ?name1 ?name2\n" + 
+			 		"SELECT  ?subject ?predicate\n" + 
 			 		"WHERE\n" + 
-			 		"  { ?article1 rdf:type bench:Article .\n" + 
-			 		"    ?article2 rdf:type bench:Article .\n" + 
-			 		"    ?article1 dc:creator ?author1 .\n" + 
-			 		"    ?author1 foaf:name ?name1 .\n" + 
-			 		"    ?article2 dc:creator ?author2 .\n" + 
-			 		"    ?author2 foaf:name ?name2 .\n" + 
-			 		"    ?article1 swrc:journal ?journal .\n" + 
-			 		"    ?article2 swrc:journal ?journal\n" + 
-			 		"    FILTER ( ?name1 < ?name2 )\n" + 
-			 		"  }");
+			 		"  { ?subject ?predicate person:Paul_Erdoes }");
 			 evaluate.runForQuery(query);
-			 System.out.println(evaluate.toString());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
