@@ -20,6 +20,8 @@ public class GraphResultsSample implements GraphResults{
 	private HashMap<Integer, QueryResultsSample> results = new HashMap<Integer, QueryResultsSample>();
 	private String graphName;
 	private ArrayList<GraphResults> allGraphResults = new ArrayList<GraphResults>();
+	private int totalGoldenStandardSize = 0;
+	private int totalTruePositives = 0;
 	
 	public void add(QueryResults result) {
 		//do nothing. (this object is more of a wrapper for other graph results objects)
@@ -161,5 +163,22 @@ public class GraphResultsSample implements GraphResults{
 		}
 		shortGraphname = shortGraphname.replace(".nt", "");
 		return shortGraphname;
+	}
+
+	public void addRecallTruePositives(int truePositives) {
+		this.totalTruePositives += truePositives;
+	}
+
+	public void addRecallGoldenStandardSize(int size) {
+		this.totalGoldenStandardSize += size;
+	}
+	public int getRecallTruePositives() {
+		return totalTruePositives;
+	}
+	public int getRecallGoldenStandardSize() {
+		return totalGoldenStandardSize;
+	}
+	public double getGraphRecall() { 
+		return (double)totalTruePositives / (double)totalGoldenStandardSize;
 	}
 }

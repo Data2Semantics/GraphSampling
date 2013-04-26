@@ -34,7 +34,7 @@ public class BatchResults {
 	public BatchResults(ExperimentSetup experimentSetup, GetQueries queries) throws IOException {
 		this.experimentSetup = experimentSetup;
 		this.queries = queries;
-		this.resultsDir = new File(experimentSetup.getResultsDir());
+		this.resultsDir = new File(experimentSetup.getEvalResultsDir());
 		FileUtils.deleteDirectory(resultsDir);
 		resultsDir.mkdir();
 	}
@@ -85,9 +85,17 @@ public class BatchResults {
 		System.out.println("writing summary CSV");
 		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + FILE_CSV_SUMMARY);
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
-		writer.writeNext(new String[]{"graph", "avg recall", "median recall", "std recall"});
+		writer.writeNext(new String[]{"graph", "avg recall", "median recall", "std recall", "recallOnAllQueries", "goldenSize", "truePositives"});
 		for (GraphResults graphResults: batchResults) {
-			writer.writeNext(new String[]{graphResults.getShortGraphName(), Double.toString(graphResults.getAverageRecall()), Double.toString(graphResults.getMedianRecall()), Double.toString(graphResults.getStdRecall())});
+			writer.writeNext(new String[]{
+					graphResults.getShortGraphName(), 
+					Double.toString(graphResults.getAverageRecall()), 
+					Double.toString(graphResults.getMedianRecall()), 
+					Double.toString(graphResults.getStdRecall()), 
+					Double.toString(graphResults.getGraphRecall()),
+					Double.toString(graphResults.getRecallGoldenStandardSize()),
+					Double.toString(graphResults.getRecallTruePositives()),
+			});
 		}
 		writer.close();
 	}
@@ -243,7 +251,7 @@ public class BatchResults {
 			html += "</tr>";
 		}
 		html += "\n</tbody> </table></body></html>";
-		FileUtils.writeStringToFile(new File(experimentSetup.getResultsDir() + "/" + onlyGraphsContaining.get(0) + "_" + FILE_HTML_SUMMARY), html);
+		FileUtils.writeStringToFile(new File(experimentSetup.getEvalResultsDir() + "/" + onlyGraphsContaining.get(0) + "_" + FILE_HTML_SUMMARY), html);
 	}
 	
 

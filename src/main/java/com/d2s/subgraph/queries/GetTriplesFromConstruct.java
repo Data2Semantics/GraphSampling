@@ -19,7 +19,7 @@ public class GetTriplesFromConstruct {
 	private File resultsPath;
 	public GetTriplesFromConstruct(ExperimentSetup experimentSetup) {
 		this.experimentSetup = experimentSetup;
-		resultsPath = new File(experimentSetup.getQueryResultsDir());
+		resultsPath = new File(experimentSetup.getQueryTriplesDir());
 		if (!resultsPath.exists()) {
 			resultsPath.mkdir();
 		}
@@ -27,7 +27,7 @@ public class GetTriplesFromConstruct {
 
 
 	public void run() throws RepositoryException, MalformedQueryException, QueryEvaluationException, IOException {
-		experimentSetup.getQueries().saveCsvCopy(new File(experimentSetup.getQueryResultsDir() + "/queries.csv"));
+		experimentSetup.getQueries().saveCsvCopy(new File(experimentSetup.getQueryTriplesDir() + "/queries.csv"));
 		for (QueryWrapper query : experimentSetup.getQueries().getQueries()) {
 
 			Query queryWithFromClause = Helper.addFromClause(query.getQuery(), experimentSetup.getGoldenStandardGraph());
@@ -35,7 +35,7 @@ public class GetTriplesFromConstruct {
 			// System.out.println(constructQuery.toString());
 			Model model = Helper.executeConstruct(experimentSetup.getEndpoint(), constructQuery);
 			
-			File resultsFile = new File(experimentSetup.getQueryResultsDir() + "/" + experimentSetup.getGraphPrefix() + "q" + Integer.toString(query.getQueryId())
+			File resultsFile = new File(experimentSetup.getQueryTriplesDir() + "/" + experimentSetup.getGraphPrefix() + "q" + Integer.toString(query.getQueryId())
 					+ ".nt");
 			FileOutputStream fop = new FileOutputStream(resultsFile);
 			model.write(fop, "N-TRIPLE");

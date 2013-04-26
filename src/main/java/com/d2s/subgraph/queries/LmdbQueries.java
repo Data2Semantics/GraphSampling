@@ -16,9 +16,8 @@ import java.util.Scanner;
 import au.com.bytecode.opencsv.CSVWriter;
 
 import com.d2s.subgraph.eval.EvaluateGraph;
-import com.d2s.subgraph.eval.experiments.SwdfExperimentSetup;
+import com.d2s.subgraph.eval.experiments.LmdbExperimentSetup;
 import com.d2s.subgraph.helpers.Helper;
-import com.d2s.subgraph.queries.filters.BiomedFilter;
 import com.d2s.subgraph.queries.filters.DescribeFilter;
 import com.d2s.subgraph.queries.filters.GraphClauseFilter;
 import com.d2s.subgraph.queries.filters.QueryFilter;
@@ -32,10 +31,10 @@ import com.hp.hpl.jena.query.QueryParseException;
 import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 
-public class BiomedQueries implements GetQueries {
-	public static String QUERY_FILE = "src/main/resources/biomed_queries.log";
-	public static String CSV_COPY = "src/main/resources/biomed_queries.csv";
-	public static String PARSE_QUERIES_FILE = "src/main/resources/biomed_queries.arraylist";
+public class LmdbQueries implements GetQueries {
+	public static String QUERY_FILE = "src/main/resources/lmdbQueries.txt";
+	public static String CSV_COPY = "src/main/resources/lmdb_queries.csv";
+	public static String PARSE_QUERIES_FILE = "src/main/resources/lmdb_queries.arraylist";
 	private static boolean ONLY_UNIQUE = true;
 	private int invalidQueries = 0;
 	private int validQueries = 0;
@@ -47,18 +46,18 @@ public class BiomedQueries implements GetQueries {
 	ArrayList<QueryWrapper> queries = new ArrayList<QueryWrapper>();
 	private int maxNumQueries = 100;
 
-	public BiomedQueries(QueryFilter... filters) throws IOException {
+	public LmdbQueries(QueryFilter... filters) throws IOException {
 		this(true, filters);
 	}
 
-	public BiomedQueries(boolean useCacheFile, QueryFilter... filters) throws IOException {
+	public LmdbQueries(boolean useCacheFile, QueryFilter... filters) throws IOException {
 		File cacheFile = new File(PARSE_QUERIES_FILE);
 		if (useCacheFile && cacheFile.exists()) {
 			System.out.println("WATCH OUT! getting queries from cache file. might be outdated!");
 			readQueriesFromCacheFile(cacheFile);
 		}
 		if (queries == null || queries.size() == 0 || (maxNumQueries > 0 && maxNumQueries != queries.size())) {
-			System.out.println("parsing biomed query logs");
+			System.out.println("parsing lmdb query logs");
 			this.filters = new ArrayList<QueryFilter>(Arrays.asList(filters));
 			parseLogFile(new File(QUERY_FILE));
 			if (ONLY_UNIQUE) {
@@ -97,16 +96,10 @@ public class BiomedQueries implements GetQueries {
 
 	private void parseLogFile(File textFile) throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader(textFile));
-		String line;
-		String query = "";
-		while ((line = br.readLine()) != null) {
-			if (line.startsWith("#")) {
-				if (query.length() > 0) {
-					addQueryToList(query);
-					query = "";
-				}
-			} else {
-				query += "\n" + line;
+		String query;
+		while ((query = br.readLine()) != null) {
+			if (query.length() > 0) {
+				addQueryToList(query);
 			}
 			if (queries.size() > maxNumQueries) {
 				break;
@@ -119,7 +112,7 @@ public class BiomedQueries implements GetQueries {
 		try {
 			QueryWrapper query = new QueryWrapper(QueryFactory.create(queryString));
 			if (checkFilters(query)) {
-				System.out.println(query.getQueryString("http://bioportal"));
+//				System.out.println(query.getQueryString("http://lmdb"));
 				if (ONLY_UNIQUE) {
 					if (queriesHm.containsKey(query)) {
 						duplicateQueries++;
@@ -150,17 +143,17 @@ public class BiomedQueries implements GetQueries {
 	}
 
 	private boolean hasResults(QueryWrapper queryWrapper) {
-//		try {
-//			Query query = QueryFactory.create(queryWrapper.getQueryString(SwdfExperimentSetup.GOLDEN_STANDARD_GRAPH));
-//			QueryExecution queryExecution = QueryExecutionFactory.sparqlService(EvaluateGraph.OPS_VIRTUOSO, query);
-//			ResultSetRewindable result = ResultSetFactory.copyResults(queryExecution.execSelect());
-//			if (Helper.getResultSize(result) > 0) {
-//				return true;
-//			}
-//		} catch (Exception e) {
-//			// failed to execute. endpoint down, or incorrect query
-//		}
-		return true;
+		try {
+			Query query = QueryFactory.create(queryWrapper.getQueryString(LmdbExperimentSetup.GOLDEN_STANDARD_GRAPH));
+			QueryExecution queryExecution = QueryExecutionFactory.sparqlService(EvaluateGraph.OPS_VIRTUOSO, query);
+			ResultSetRewindable result = ResultSetFactory.copyResults(queryExecution.execSelect());
+			if (Helper.getResultSize(result) > 0) {
+				return true;
+			}
+		} catch (Exception e) {
+			// failed to execute. endpoint down, or incorrect query
+		}
+		return false;
 	}
 
 	public void setMaxNQueries(int maxNum) {
@@ -225,14 +218,8 @@ public class BiomedQueries implements GetQueries {
 
 		try {
 
-			BiomedQueries bioQueries = new BiomedQueries(false, new BiomedFilter());
-			System.out.println(bioQueries.toString());
-			// ArrayList<QueryWrapper> queries = qaldQueries.getQueries();
-
-			// for (QueryWrapper query: queries) {
-			// System.out.println(Integer.toString(query.getQueryId()));
-			// }
-
+			LmdbQueries lmdbQueries = new LmdbQueries(false, new GraphClauseFilter(), new SimpleBgpFilter(), new DescribeFilter());
+			System.out.println(lmdbQueries.toString());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

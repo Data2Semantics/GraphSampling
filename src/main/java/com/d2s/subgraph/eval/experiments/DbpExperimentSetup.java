@@ -13,8 +13,9 @@ import com.d2s.subgraph.queries.filters.OnlyDboQueries;
 public class DbpExperimentSetup implements ExperimentSetup {
 	public static String GOLDEN_STANDARD_GRAPH = "http://dbpo";
 	private static String GRAPH_PREFIX = "dbp_";
-	private static String RESULTS_DIR = "dbpResults";
-	private static String QUERY_RESULTS_DIR = "dbpQueryTriples";
+	private static String EVAL_RESULTS_DIR = "dbpResults";
+	private static String QUERY_TRIPLES_DIR = "dbpQueryTriples";
+	private static String QUERY_RESULTS_DIR = "dbpQueryResults";
 	private static int MAX_NUM_QUERIES = 0;//i.e. all
 	private GetQueries queries;
 	public DbpExperimentSetup() throws SAXException, IOException, ParserConfigurationException {
@@ -32,14 +33,17 @@ public class DbpExperimentSetup implements ExperimentSetup {
 		return queries;
 	}
 
-	public String getResultsDir() {
-		return RESULTS_DIR;
+	public String getEvalResultsDir() {
+		return EVAL_RESULTS_DIR;
 	}
 	public int getMaxNumQueries() {
 		return MAX_NUM_QUERIES;
 	}
 	public String getEndpoint() {
 		return EvaluateGraph.OPS_VIRTUOSO;
+	}
+	public String getQueryTriplesDir() {
+		return QUERY_TRIPLES_DIR;
 	}
 	public String getQueryResultsDir() {
 		return QUERY_RESULTS_DIR;

@@ -10,8 +10,9 @@ public interface ExperimentSetup {
 	public String getGoldenStandardGraph();
 	public String getGraphPrefix();
 	public GetQueries getQueries();
-	public String getResultsDir();
+	public String getEvalResultsDir();
 	public int getMaxNumQueries();
 	public String getEndpoint();
+	public String getQueryTriplesDir();
 	public String getQueryResultsDir();
 }

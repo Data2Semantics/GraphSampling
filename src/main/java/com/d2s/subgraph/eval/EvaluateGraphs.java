@@ -44,7 +44,7 @@ public class EvaluateGraphs {
 		queries = experimentSetup.getQueries();
 		batchResults = new BatchResults(experimentSetup, queries);
 		this.experimentSetup = experimentSetup;
-		this.resultsDir = new File(experimentSetup.getResultsDir());
+		this.resultsDir = new File(experimentSetup.getEvalResultsDir());
 		if (!(resultsDir.exists() && resultsDir.isDirectory())) {
 			resultsDir.mkdir();
 		}
@@ -59,7 +59,7 @@ public class EvaluateGraphs {
 		System.out.println("Running evaluation for graphs " + graphs.toString());
 		for (String graph: graphs) {
 			System.out.println("evaluating for graph " + graph);
-			EvaluateGraph eval = new EvaluateGraph(queries, EvaluateGraph.OPS_VIRTUOSO, experimentSetup.getGoldenStandardGraph(), graph);
+			EvaluateGraph eval = new EvaluateGraph(queries, EvaluateGraph.OPS_VIRTUOSO, experimentSetup, graph);
 			eval.run();
 			GraphResults results = eval.getResults();
 			batchResults.add(results);
@@ -71,7 +71,7 @@ public class EvaluateGraphs {
 				GraphResultsSample sampleGraphResultsCombined = new GraphResultsSample();
 				ArrayList<GraphResults> sampleGraphResults = new ArrayList<GraphResults>();
 				for (String sampleGraph: entry.getValue()) {
-					EvaluateGraph eval = new EvaluateGraph(queries, EvaluateGraph.OPS_VIRTUOSO, experimentSetup.getGoldenStandardGraph(), sampleGraph);
+					EvaluateGraph eval = new EvaluateGraph(queries, EvaluateGraph.OPS_VIRTUOSO, experimentSetup, sampleGraph);
 					eval.run();
 					sampleGraphResults.add(eval.getResults());
 				}

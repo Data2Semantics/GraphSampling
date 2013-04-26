@@ -18,6 +18,8 @@ import au.com.bytecode.opencsv.CSVWriter;
 public class GraphResultsRegular implements GraphResults {
 	private HashMap<Integer, QueryResults> results = new HashMap<Integer, QueryResults>();
 	private String graphName;
+	private int totalTruePositives = 0;
+	private int totalGoldenStandardSize = 0;
 	public void add(QueryResults result) {
 		results.put(result.getQuery().getQueryId(), result);
 	}
@@ -123,5 +125,23 @@ public class GraphResultsRegular implements GraphResults {
 		shortGraphname = shortGraphname.substring(0, shortGraphname.length()-1);//remove trailing _
 		return shortGraphname;
 		
+	}
+
+	public void addRecallTruePositives(int truePositives) {
+		this.totalTruePositives += truePositives;
+	}
+
+
+	public void addRecallGoldenStandardSize(int size) {
+		this.totalGoldenStandardSize += size;
+	}
+	public int getRecallTruePositives() {
+		return totalTruePositives;
+	}
+	public int getRecallGoldenStandardSize() {
+		return totalGoldenStandardSize;
+	}
+	public double getGraphRecall() { 
+		return (double)totalTruePositives / (double)totalGoldenStandardSize;
 	}
 }

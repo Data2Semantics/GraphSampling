@@ -14,8 +14,9 @@ import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
 public class Sp2bExperimentSetup implements ExperimentSetup {
 	public static String GOLDEN_STANDARD_GRAPH = "http://sp2b";
 	private static String GRAPH_PREFIX = "sp2b_";
-	private static String RESULTS_DIR = "sp2bResults";
-	private static String QUERY_RESULTS_DIR = "sp2bQueryTriples";
+	private static String EVAL_RESULTS_DIR = "sp2bResults";
+	private static String QUERY_TRIPLES_DIR = "sp2bQueryTriples";
+	private static String QUERY_RESULTS_DIR = "sp2bQueryResults";
 	private static int MAX_NUM_QUERIES = 0;
 	private GetQueries queries;
 	
@@ -35,12 +36,12 @@ public class Sp2bExperimentSetup implements ExperimentSetup {
 	}
 	
 
-	public String getResultsDir() {
-		return RESULTS_DIR;
+	public String getEvalResultsDir() {
+		return EVAL_RESULTS_DIR;
 	}
 	
-	public String getQueryResultsDir() {
-		return QUERY_RESULTS_DIR;
+	public String getQueryTriplesDir() {
+		return QUERY_TRIPLES_DIR;
 	}
 	
 	public int getMaxNumQueries() {
@@ -48,5 +49,8 @@ public class Sp2bExperimentSetup implements ExperimentSetup {
 	}
 	public String getEndpoint() {
 		return EvaluateGraph.OPS_VIRTUOSO;
+	}
+	public String getQueryResultsDir() {
+		return QUERY_RESULTS_DIR;
 	}
 }

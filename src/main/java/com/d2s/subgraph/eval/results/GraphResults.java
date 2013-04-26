@@ -35,4 +35,12 @@ public interface GraphResults {
 	public ArrayList<Integer> getQueryIds();
 	
 	public String toString();
+	
+	public void addRecallTruePositives(int truePositives);
+	public void addRecallGoldenStandardSize(int size);
+	
+	public int getRecallTruePositives();
+	public int getRecallGoldenStandardSize();
+	public double getGraphRecall();
+	
 }
