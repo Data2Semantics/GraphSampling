@@ -24,26 +24,29 @@ if [ -z "$1" ];then
         exit;
 fi
 dataset=$1
-pattern=""
+pattern="*"
 if [ -n "$2" ]; then
 	pattern="$2"
 fi
 pigAnalysisDir="$HOME/pigAnalysis/analysis"
-analysisMethods=(pageRank.py indegree.py outdegree.py)
+#analysisMethods=(pageRank.py indegree.py outdegree.py)
+analysisMethods=(pageRank.py)
 
-
-hadoopLs "$dataset/rewrite/$pattern";
+hadoopLs "$dataset/rewrite";
 for dir in "${hadoopLs[@]}"; do
+	if [[ ! "$dir" == $pattern ]]; then
+		continue
+	fi
 	echo "running analysis for $dir"
 	for analysisMethod in "${analysisMethods[@]}"; do
 		echo "running $analysisMethod"
 		if [ $analysisMethod == "pageRank.py" ]; then
 			echo "cleaning all previously ran pagerank files in tmp dir"
-			hadoop fs -rmr $dataset/tmp*
+			#hadoop fs -rmr $dataset/tmp/*
 			
 			echo "preprocessing pagerank"
 			pig $pigAnalysisDir/pageRankPreProcess.py $dir
-			preProcessedPagerankFile=$dir
+			preProcessedPagerankFile=`basename $dir`
 			preProcessedPagerankFile+="_"
 			preProcessedPagerankFile+="directed"
 			preProcessedPagerankFile+="_"

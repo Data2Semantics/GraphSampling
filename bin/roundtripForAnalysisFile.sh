@@ -5,8 +5,8 @@ if [ -z "$1" ];then
 	exit;
 fi
 #last one is strange: it's actually: half the graph, and only retrieve weights...
-aggregateMethods=(min max avg)
-#aggregateMethods=(avg)
+#aggregateMethods=(min max avg)
+aggregateMethods=(avg max)
 skipAggregateFor="so-so"
 pigRoundtripDir="$HOME/pigAnalysis/roundtrip"
 analysisFile=$(readlink -f $1)

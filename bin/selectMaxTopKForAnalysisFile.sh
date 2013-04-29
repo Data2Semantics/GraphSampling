@@ -8,9 +8,11 @@ fi
 
 #topKVariants=(0.2 0.5 1000n "1w")
 skipPig=$2
-topKVariants=(0.5 "1w")
+#topKVariants=(0.5 "1w")
+topKVariants=(0.5)
 #topKVariants=("1w")
-aggregateMethods=(min max avg)
+#aggregateMethods=(min max avg)
+aggregateMethods=(max avg)
 skipAggregateFor="so-so"
 #topKVariants=(0.5)
 analysisFile=$(readlink -f $1)
@@ -134,7 +136,7 @@ for aggregateMethod in "${aggregateMethods[@]}"; do
 		fi
 	done
 	checkpoint.sh;
-	if [ -n "$aggregateMethod" ]; then
+	if [ -z "$aggregateMethod" ]; then
 		exit;
 		#we need just 1 loop (no other aggregate methods)
 	fi
