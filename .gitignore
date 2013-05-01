@@ -1,0 +1,9 @@
+target
+*Results
+src
+bin
+.tmp
+.settings
+.pydevproject
+.project
+.classpath
