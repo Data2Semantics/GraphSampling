@@ -37,7 +37,8 @@ if [ ${#queryPattern} == 1 ]; then
 	queryPattern=""
 fi
 dataset=""
-aggregateMethods=(min max avg)
+#aggregateMethods=(min max avg)
+aggregateMethods=(max avg)
 for dir in "$@"; do
 	dirBasename=`basename $dir`
 	IFS=_ read -a delimited <<< "$dirBasename"

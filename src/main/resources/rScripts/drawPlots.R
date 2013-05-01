@@ -31,7 +31,12 @@ ggplot(data=flatlist_2, aes(x=graph, y=recall)) + geom_boxplot() + theme(axis.te
 dev.off()
 
 pdf("boxplot_plus_average_recall_0.5.pdf")
-ggplot(data=flatlist_5, aes(x=graph, y=recall)) + geom_boxplot() + theme(axis.text.x=element_text(angle=-90, hjust=0, vjust=0.5))  + geom_point(data=summary, aes(x=graph,y=avg.recall, size=avg.recall, colour=graph)) + theme(legend.position="none")
+ggplot(data=flatlist_5, aes(x=graph, y=recall)) + 
+  ggtitle("red: avg recall of all queries, blue: recall on all query results") + 
+  geom_boxplot() + theme(axis.text.x=element_text(angle=-90, hjust=0, vjust=0.5))  + 
+  geom_point(data=summary, aes(x=graph,y=avg.recall, size=avg.recall),  colour="red") + 
+  geom_point(data=summary, aes(x=graph,y=recallOnAllQueries, size=recallOnAllQueries), colour="blue") + 
+  theme(legend.position="none", plot.title = element_text(lineheight=.8))
 dev.off()
 
 # Normal scatterplot queryId by recall, colored by graph

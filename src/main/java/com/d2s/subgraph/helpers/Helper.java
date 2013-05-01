@@ -20,14 +20,10 @@ import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.TupleQueryResult;
 import org.openrdf.repository.RepositoryException;
 
-import com.d2s.subgraph.eval.EvaluateGraphs;
-import com.d2s.subgraph.eval.experiments.SwdfExperimentSetup;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
 import com.hp.hpl.jena.sparql.core.TriplePath;
@@ -267,5 +263,11 @@ public class Helper {
 		Query queryWithFromClause = query.cloneQuery();
 		queryWithFromClause.addGraphURI(fromGraph);
 		return queryWithFromClause;
+	}
+	
+	public static void executeCommand(String[] args) throws IOException, InterruptedException {
+		ProcessBuilder ps = new ProcessBuilder(args);
+		Process pr = ps.start();
+		pr.waitFor();
 	}
 }

@@ -4,17 +4,27 @@ package com.d2s.subgraph.queries;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.lang.builder.HashCodeBuilder;
-
 import com.d2s.subgraph.helpers.Helper;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QueryParseException;
+import com.hp.hpl.jena.query.ResultSetRewindable;
+import com.hp.hpl.jena.sparql.algebra.Algebra;
+import com.hp.hpl.jena.sparql.algebra.OpVisitorBase;
+import com.hp.hpl.jena.sparql.algebra.OpWalker;
+import com.hp.hpl.jena.sparql.algebra.op.OpJoin;
+import com.hp.hpl.jena.sparql.algebra.op.OpLeftJoin;
+import com.hp.hpl.jena.sparql.core.TriplePath;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.expr.Expr;
+import com.hp.hpl.jena.sparql.syntax.Element;
+import com.hp.hpl.jena.sparql.syntax.ElementPathBlock;
+import com.hp.hpl.jena.sparql.syntax.ElementVisitorBase;
+import com.hp.hpl.jena.sparql.syntax.ElementWalker;
 
 public class QueryWrapper {
 	private boolean onlyDbo;
@@ -22,11 +32,20 @@ public class QueryWrapper {
 	private String answerType; 
 	private int queryId;
 	private ArrayList<HashMap<String, String>> answers = new ArrayList<HashMap<String, String>>();
+	private ResultSetRewindable goldenStandardResults = null;
+	private int triplePatternCountCcv = 0;
+	private int triplePatternCountCvv = 0;
+	private int triplePatternCountVcc = 0;
+	private int numberOfJoins = 0;
+	private int numberOfLeftJoins = 0;
+	private int numberOfNonOptionalTriplePatterns = 0;
 	public QueryWrapper() {
 	}
 	
 	public QueryWrapper(String query) throws QueryParseException {
 		setQuery(query);
+		getTriplePatternsInfo();
+		getJoinsStats();
 	}
 	public QueryWrapper(Query query) {
 		this.query = query;
@@ -148,25 +167,107 @@ public class QueryWrapper {
             toHashCode();
     }
 	
-	public static void main(String[] args)  {
-		String query = "PREFIX res: <http://dbpedia.org/resource/>\n" + 
-				"PREFIX dbo: <http://dbpedia.org/ontology/>\n" + 
-				"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" + 
-				"SELECT DISTINCT ?uri ?string \n" + 
-				"WHERE {\n" + 
-				"        res:Bruce_Carver dbo:deathCause ?uri .     \n" + 
-				"        OPTIONAL {?uri rdfs:label ?string. FILTER (lang(?string) = 'en') }\n" + 
-				"}";
-		QueryWrapper evalQuery = new QueryWrapper(query);
-		System.out.println(evalQuery.getQuery().toString());
-		try {
-			evalQuery.removeProjectVar("string");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		System.out.println(evalQuery.getQuery().toString());
-		
+
+	
+	public void setGoldenStandardResults(ResultSetRewindable resultSet) {
+		this.goldenStandardResults  = resultSet;
 	}
 	
+	public ResultSetRewindable getGoldenStandardResults() {
+		return goldenStandardResults;
+	}
+	
+	public void getJoinsStats() {
+		OpWalker.walk(Algebra.compile(query), 
+			new OpVisitorBase() {
+				public void visit(OpJoin opJoin) {
+					numberOfJoins++;
+				}
+				public void visit(OpLeftJoin opLeftJoin) {
+					numberOfLeftJoins++;
+				}
+		});
+	}
+	
+	private void getTriplePatternsInfo() {
+		Element qPattern = query.getQueryPattern();
+
+		// This will walk through all parts of the query
+		ElementWalker.walk(qPattern,
+		    // For each element...
+		    new ElementVisitorBase() {
+		        // ...when it's a block of triples...
+		        public void visit(ElementPathBlock el) {
+		        	
+		            // ...go through all the triples...
+		            Iterator<TriplePath> triples = el.patternElts();
+		            while (triples.hasNext()) {
+		            	numberOfNonOptionalTriplePatterns++;
+		            	TriplePath triplePath = triples.next();
+		            	if (	!triplePath.getSubject().isVariable() && 
+		            			!triplePath.getPredicate().isVariable() &&
+		            			triplePath.getObject().isVariable()) {
+		            		triplePatternCountCcv++;
+		            	} else if (	!triplePath.getSubject().isVariable() && 
+			            			triplePath.getPredicate().isVariable() &&
+			            			triplePath.getObject().isVariable()) {
+		            		triplePatternCountCvv++;
+		            	} else if (	triplePath.getSubject().isVariable() && 
+			            			!triplePath.getPredicate().isVariable() &&
+			            			!triplePath.getObject().isVariable()) {
+		            		triplePatternCountVcc++;
+		            	}
+		            }
+		        }
+		    }
+		);
+	}
+	
+	/**
+	 * given a sub/pred, obtain object value
+	 * @return
+	 */
+	public int getTriplePatternCountCcv() {
+		return triplePatternCountCcv;
+	}
+	/**
+	 * given a subject, obtain pred/obj values
+	 * @return
+	 */
+	public int getTriplePatternCountCvv() {
+		return triplePatternCountCvv;
+	}
+	/**
+	 * Given a predicate and object, obtain subject value
+	 * @return
+	 */
+	public int getTriplePatternCountVcc() {
+		return triplePatternCountVcc;
+	}
+	
+	public int getNumberOfJoins() {
+		return numberOfJoins;
+	}
+	public int getNumberOfLeftJoins() {
+		return numberOfLeftJoins;
+	}
+	public int getNumberOfNonOptionalTriplePatterns() {
+		return numberOfNonOptionalTriplePatterns ;
+	}
+	
+	
+	public static void main(String[] args)  {
+		String query = "SELECT ?name ?city\n" + 
+				"WHERE {\n" + 
+				"    ?who <http://Person#fname> ?name .\n" + 
+				"  ?b <http://blaat> ?bla. \n }";
+		QueryWrapper evalQuery = new QueryWrapper(query);
+		System.out.println(Algebra.compile(evalQuery.getQuery()).toString());
+		System.out.println("ccv count: " + evalQuery.getTriplePatternCountCcv());
+		System.out.println("cvv count: " + evalQuery.getTriplePatternCountCvv());
+		System.out.println("vcc count: " + evalQuery.getTriplePatternCountVcc());
+		System.out.println("number of joins: " + evalQuery.getNumberOfJoins());
+		System.out.println("number of left joins: " + evalQuery.getNumberOfLeftJoins());
+		System.out.println("number of non-optional triple patterns: " + evalQuery.getNumberOfNonOptionalTriplePatterns());
+	}
 }

@@ -176,7 +176,7 @@ public class BatchResults {
 		System.out.println("writing html files for "  + onlyGraphsContaining);
 		String encodedEndpoint = URLEncoder.encode(EvaluateGraph.OPS_VIRTUOSO, "UTF-8"); 
 		String html = "<html><head>\n" +
-				"<link rel='stylesheet' href='../static/style.css' type='text/css' />\n" +
+				"<link rel='stylesheet' href='http://www.few.vu.nl/~lrietveld/static/style.css' type='text/css' />\n" +
 				"<script src='http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js'></script>\n" +
 				"<script src='http://www.few.vu.nl/~lrietveld/static/tablesorter/jquery.tablesorter.min.js'></script>\n" +
 				"<script src='http://www.few.vu.nl/~lrietveld/static/script.js'></script>\n" +
@@ -216,12 +216,16 @@ public class BatchResults {
 			}
 			row.add("<td>" + queryId + "</td>");
 			row.add("<td><a href='" + url + "' target='_blank'>" + Helper.getDoubleAsFormattedString(avgRecall) + " (n:" + goldenStandardSize + ")</a></td>");
+			row.add("<td>" + query.getNumberOfJoins() + "</td>");
+			row.add("<td>" + query.getTriplePatternCountCcv() + "</td>");
+			row.add("<td>" + query.getTriplePatternCountCvv() + "</td>");
+			row.add("<td>" + query.getTriplePatternCountVcc() + "</td>");
 			table.put(queryId, row);
 		}
 		
 		
 		html += "<thead>\n<tr>";
-		html += "<th>queryId</th><th>avg</th>";
+		html += "<th>queryId</th><th>avg</th><th>#joins<br></th><th>#bgs<br>(non opt)<br><th>#ccv<br></th><th>#cvv<br></th><th>#vcc<br></th>";
 		
 		for (GraphResults graphResults: batchResults) {
 			if (Helper.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {

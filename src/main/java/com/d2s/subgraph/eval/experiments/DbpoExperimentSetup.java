@@ -10,16 +10,30 @@ import com.d2s.subgraph.queries.QaldDbpQueries;
 import com.d2s.subgraph.queries.filters.OnlyDboQueries;
 
 
-public class DbpExperimentSetup implements ExperimentSetup {
+public class DbpoExperimentSetup implements ExperimentSetup {
+	public static int QALD_REMOVE_OPTIONALS = 1;
+	public static int QALD_KEEP_OPTIONALS = 2;
+	public static int QUERY_LOGS = 3;
+	
 	public static String GOLDEN_STANDARD_GRAPH = "http://dbpo";
 	private static String GRAPH_PREFIX = "dbp_";
 	private static String EVAL_RESULTS_DIR = "dbpResults";
 	private static String QUERY_TRIPLES_DIR = "dbpQueryTriples";
 	private static String QUERY_RESULTS_DIR = "dbpQueryResults";
+	
 	private static int MAX_NUM_QUERIES = 0;//i.e. all
 	private GetQueries queries;
-	public DbpExperimentSetup() throws SAXException, IOException, ParserConfigurationException {
-		queries = new QaldDbpQueries(QaldDbpQueries.QALD_2_QUERIES, new OnlyDboQueries());
+	private int querySelection;
+	
+	public DbpoExperimentSetup(int querySelection) throws SAXException, IOException, ParserConfigurationException, IllegalStateException {
+		this.querySelection = querySelection;
+		if (querySelection == QALD_KEEP_OPTIONALS || querySelection == QALD_REMOVE_OPTIONALS) {
+			queries = new QaldDbpQueries(QaldDbpQueries.QALD_2_QUERIES, (querySelection == QALD_REMOVE_OPTIONALS? true: false), new OnlyDboQueries());
+		} else if (querySelection == QUERY_LOGS) {
+			throw new IllegalStateException("No implemented yet");
+		} else {
+			throw new IllegalStateException("Illegal query selection mode passed to dbpo experiment setup");
+		}
 		queries.setMaxNQueries(MAX_NUM_QUERIES);
 	}
 	
@@ -34,7 +48,15 @@ public class DbpExperimentSetup implements ExperimentSetup {
 	}
 
 	public String getEvalResultsDir() {
-		return EVAL_RESULTS_DIR;
+		String evalResultsDir = EVAL_RESULTS_DIR + "_";
+		if (querySelection == QALD_KEEP_OPTIONALS) {
+			evalResultsDir += "qaldWithOptionals";
+		} else if (querySelection == QALD_REMOVE_OPTIONALS) {
+			evalResultsDir += "qaldNoOptionals";
+		} else if (querySelection == QUERY_LOGS) {
+			evalResultsDir += "queryLogs";
+		}
+		return evalResultsDir;
 	}
 	public int getMaxNumQueries() {
 		return MAX_NUM_QUERIES;
