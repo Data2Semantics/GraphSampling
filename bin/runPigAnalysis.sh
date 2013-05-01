@@ -42,7 +42,7 @@ for dir in "${hadoopLs[@]}"; do
 		echo "running $analysisMethod"
 		if [ $analysisMethod == "pageRank.py" ]; then
 			echo "cleaning all previously ran pagerank files in tmp dir"
-			#hadoop fs -rmr $dataset/tmp/*
+			hadoop fs -rmr $dataset/tmp/*
 			
 			echo "preprocessing pagerank"
 			pig $pigAnalysisDir/pageRankPreProcess.py $dir
