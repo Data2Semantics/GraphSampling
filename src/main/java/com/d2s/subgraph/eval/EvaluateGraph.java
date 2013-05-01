@@ -53,13 +53,16 @@ public class EvaluateGraph {
 		graphResults.setGraphName(subGraph);
 	}
 
-	public void run() throws RepositoryException, MalformedQueryException, QueryEvaluationException, IOException {
+	public void run() throws RepositoryException, MalformedQueryException, QueryEvaluationException, IOException, IllegalStateException {
 		for (QueryWrapper evalQuery : queries) {
 			runForQuery(evalQuery);
 		}
 		System.out.println();
 		System.out.println("Invalids (i.e. no results on golden standard, or sparql error on execution): " + Integer.toString(invalidCount)
 				+ ", valids: " + Integer.toString(validCount));
+		if (validCount == 0 && invalidCount > 0) {
+			throw new IllegalStateException("Something wrong. only invalids. OPS down? No internet connection?");
+		}
 	}
 
 	public void runForQuery(QueryWrapper evalQuery) throws QueryEvaluationException {
@@ -68,7 +71,13 @@ public class EvaluateGraph {
 			ResultSetRewindable subgraphResults;
 			// System.out.println(evalQuery.getQueryString(subGraph));
 			try {
-				goldenStandardResults = executeSelect(endpoint, evalQuery.getQueryString(goldenStandardGraph));
+				if (evalQuery.getGoldenStandardResults() == null) {
+					//store golden standard results, so we don't have to execute this query for every subgraph
+					goldenStandardResults = executeSelect(endpoint, evalQuery.getQueryString(goldenStandardGraph));
+					evalQuery.setGoldenStandardResults(goldenStandardResults);
+				} else {
+					goldenStandardResults = evalQuery.getGoldenStandardResults();
+				}
 				subgraphResults = executeSelect(endpoint, evalQuery.getQueryString(subGraph));
 			} catch (Exception e) {
 				// e.printStackTrace();
@@ -197,6 +206,7 @@ public class EvaluateGraph {
 		double totalSize = (double)(Helper.getResultSize(goldenStandard) * projectionVars.size());
 		graphResults.addRecallGoldenStandardSize((int)totalSize);
 		graphResults.addRecallTruePositives((int)truePositives);
+		//divide by projection vars size, so we don't give too strong of an influence to queries with lots of projection vars
 		if (totalSize > 0)
 			recall = truePositives / totalSize;
 		return recall;

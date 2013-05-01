@@ -8,22 +8,21 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.xml.parsers.ParserConfigurationException;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
 import org.xml.sax.SAXException;
-
-import com.d2s.subgraph.eval.experiments.DbpExperimentSetup;
+import com.d2s.subgraph.eval.experiments.DbpoExperimentSetup;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
+import com.d2s.subgraph.eval.experiments.LmdbExperimentSetup;
 import com.d2s.subgraph.eval.experiments.Sp2bExperimentSetup;
 import com.d2s.subgraph.eval.experiments.SwdfExperimentSetup;
 import com.d2s.subgraph.eval.results.BatchResults;
 import com.d2s.subgraph.eval.results.GraphResults;
 import com.d2s.subgraph.eval.results.GraphResultsSample;
+import com.d2s.subgraph.helpers.Helper;
 import com.d2s.subgraph.queries.GetQueries;
-import com.d2s.subgraph.queries.QueryWrapper;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -152,8 +151,7 @@ public class EvaluateGraphs {
 		in.close();
 		
 		if (graphs.size() == 0 && sampleGraphs.size() == 0) {
-			System.out.println("No graphs retrieved from OPS via SSH. Maybe virtuoso down?");
-			System.exit(1);
+			throw new IllegalStateException("No graphs retrieved from ops via ssh. OPS down? no internet connection?");
 		}
 		for (ArrayList<String> sampleGraphsArray: sampleGraphs.values()) {
 			Collections.sort(sampleGraphsArray);
@@ -162,18 +160,41 @@ public class EvaluateGraphs {
 		return graphs;
 	}
 
-	public static void main(String[] args)  {
+	public static void main(String[] args) throws IOException, InterruptedException  {
+		EvaluateGraphs[] evalGraphs = null;
 		try {
-//			String queryString = "SELECT DISTINCT * FROM <http://df_s-o-litAsLit_unweighted_directed_betweenness-5_max-20-exact-10.nt> WHERE {?x ?y ?z}";
-////			String queryString = "SELECT DISTINCT * FROM <http://df_s-o-litAsNode_unweighted_directed_betweenness-4_max-0.5-0.49.nt> WHERE {?x ?y ?z}";
-//			QueryWrapper query = new QueryWrapper(queryString);
-			
-//			EvaluateGraphs evaluate = new EvaluateGraphs(new DbpExperimentSetup());
-			EvaluateGraphs evaluate = new EvaluateGraphs(new SwdfExperimentSetup());
-//			EvaluateGraphs evaluate = new EvaluateGraphs(new Sp2bExperimentSetup());
-			evaluate.run();
+			evalGraphs = new EvaluateGraphs[]{
+//					new EvaluateGraphs(new DbpoExperimentSetup(DbpoExperimentSetup.QALD_REMOVE_OPTIONALS)), 
+//					new EvaluateGraphs(new DbpoExperimentSetup(DbpoExperimentSetup.QALD_KEEP_OPTIONALS)),
+//					new EvaluateGraphs(new DbpoExperimentSetup(DbpoExperimentSetup.QUERY_LOGS)),
+//					new EvaluateGraphs(new SwdfExperimentSetup()),
+					new EvaluateGraphs(new Sp2bExperimentSetup()),
+					new EvaluateGraphs(new LmdbExperimentSetup()),
+			};
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+		
+		if (evalGraphs != null) {
+			int processIndex = 0;
+			int retryAttempts = 0;
+			while (processIndex <  evalGraphs.length && retryAttempts < 3) {
+				try {
+					evalGraphs[processIndex].run();
+					processIndex++;
+				} catch (IllegalStateException e) {
+					System.out.println(e.getMessage());
+					System.out.println("restarting virtuoso, and retrying analysis of graph");
+					retryAttempts++;
+					Helper.executeCommand(new String[]{ "ssh", "ops.few.vu.nl", "subgraphSelection/bin/virtuoso/restartVirtuosoIfNeeded.sh" });
+				} catch (Exception e) {
+					e.printStackTrace();
+					System.exit(1);
+				}
+			}
+			if (retryAttempts == 3) {
+				System.out.println("Too many retries");
+			}
 		}
 	}
 
