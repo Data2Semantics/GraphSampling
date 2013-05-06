@@ -46,10 +46,11 @@ public class SwdfQueries implements GetQueries {
 	private int maxNumQueries = 0;
 
 	public SwdfQueries(QueryFilter... filters) throws IOException {
-		this(true, filters);
+		this(true, 0, filters);
 	}
 
-	public SwdfQueries(boolean useCacheFile, QueryFilter... filters) throws IOException {
+	public SwdfQueries(boolean useCacheFile, int maxNumQueries, QueryFilter... filters) throws IOException {
+		this.maxNumQueries = maxNumQueries;
 		File cacheFile = new File(PARSE_QUERIES_FILE);
 		if (useCacheFile && cacheFile.exists()) {
 			System.out.println("WATCH OUT! getting queries from cache file. might be outdated!");
@@ -108,7 +109,7 @@ public class SwdfQueries implements GetQueries {
 				String encodedSparqlQuery = encodedUrlQuery.split("&")[0];
 
 				addQueryToList(URLDecoder.decode(encodedSparqlQuery, "UTF-8"));
-				if (queries.size() > maxNumQueries) {
+				if (queries.size() > maxNumQueries || queriesHm.size() > maxNumQueries) {
 					break;
 				}
 			}
@@ -213,7 +214,7 @@ public class SwdfQueries implements GetQueries {
 
 		try {
 
-			SwdfQueries swdfQueries = new SwdfQueries(false, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter());
+			SwdfQueries swdfQueries = new SwdfQueries(false, 100, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter());
 			System.out.println(swdfQueries.toString());
 			// ArrayList<QueryWrapper> queries = qaldQueries.getQueries();
 

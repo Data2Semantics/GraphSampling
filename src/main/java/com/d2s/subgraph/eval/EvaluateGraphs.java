@@ -167,9 +167,9 @@ public class EvaluateGraphs {
 //					new EvaluateGraphs(new DbpoExperimentSetup(DbpoExperimentSetup.QALD_REMOVE_OPTIONALS)), 
 //					new EvaluateGraphs(new DbpoExperimentSetup(DbpoExperimentSetup.QALD_KEEP_OPTIONALS)),
 //					new EvaluateGraphs(new DbpoExperimentSetup(DbpoExperimentSetup.QUERY_LOGS)),
-//					new EvaluateGraphs(new SwdfExperimentSetup()),
-					new EvaluateGraphs(new Sp2bExperimentSetup()),
-					new EvaluateGraphs(new LmdbExperimentSetup()),
+					new EvaluateGraphs(new SwdfExperimentSetup()),
+//					new EvaluateGraphs(new Sp2bExperimentSetup()),
+//					new EvaluateGraphs(new LmdbExperimentSetup()),
 			};
 		} catch (Exception e) {
 			e.printStackTrace();
