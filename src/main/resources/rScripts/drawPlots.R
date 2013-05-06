@@ -2,12 +2,13 @@ library(ggplot2)
 
 # Dogfood
 flatlist_5 = read.csv("max-50_flatlist.csv",header=TRUE, sep=";")
-flatlist_2 = read.csv("max-20_flatlist.csv",header=TRUE, sep=";")
+#flatlist_2 = read.csv("max-20_flatlist.csv",header=TRUE, sep=";")
 summary = read.csv("summary.csv",header=TRUE, sep=";")
 
 
 
-flatlist_all <- merge(flatlist_5,flatlist_2, all=TRUE)
+#flatlist_all <- merge(flatlist_5,flatlist_2, all=TRUE)
+flatlist_all <- flatlist_5
 flatlist <- flatlist_5
 
 list <- read.csv("max-50_list.csv", header=TRUE, sep=";")
@@ -26,18 +27,20 @@ dev.off()
 
 
 # Boxplot
-pdf("boxplot_plus_average_recall_0.2.pdf")
-ggplot(data=flatlist_2, aes(x=graph, y=recall)) + geom_boxplot() + theme(axis.text.x=element_text(angle=-90, hjust=0, vjust=0.5))  + geom_point(data=summary, aes(x=graph,y=avg.recall, size=avg.recall, colour=graph)) + theme(legend.position="none")
-dev.off()
+#pdf("boxplot_plus_average_recall_0.2.pdf")
+#ggplot(data=flatlist_2, aes(x=graph, y=recall)) + geom_boxplot() + theme(axis.text.x=element_text(angle=-90, hjust=0, vjust=0.5))  + geom_point(data=summary, aes(x=graph,y=avg.recall, size=avg.recall, colour=graph)) + theme(legend.position="none")
+#dev.off()
 
-pdf("boxplot_plus_average_recall_0.5.pdf")
-ggplot(data=flatlist_5, aes(x=graph, y=recall)) + 
-  ggtitle("red: avg recall of all queries, blue: recall on all query results") + 
-  geom_boxplot() + theme(axis.text.x=element_text(angle=-90, hjust=0, vjust=0.5))  + 
-  geom_point(data=summary, aes(x=graph,y=avg.recall, size=avg.recall),  colour="red") + 
-  geom_point(data=summary, aes(x=graph,y=recallOnAllQueries, size=recallOnAllQueries), colour="blue") + 
+#pdf("boxplot_plus_average_recall_0.5.pdf")
+plot <- ggplot(data=flatlist_5, aes(x=algorithm, y=recall)) + 
+  #ggtitle("red: avg recall of all queries, blue: recall on all query results") + 
+  facet_grid(.~rewrMethod, scale="free_x", space = "free_x") +
+  geom_boxplot() + theme(axis.text.x=element_text(angle=45, hjust=1, vjust=1))  + 
+  geom_point(data=summary, aes(x=algorithm,y=avg.recall, size=avg.recall),  colour="red") + 
+  #geom_point(data=summary, aes(x=graph,y=recallOnAllQueries, size=recallOnAllQueries), colour="blue") + 
   theme(legend.position="none", plot.title = element_text(lineheight=.8))
-dev.off()
+ggsave("boxplot_plus_average_recall_0.5.pdf", plot = plot)
+#dev.off()
 
 # Normal scatterplot queryId by recall, colored by graph
 pdf("scatterplot_byQuery_colorByGraph.pdf")

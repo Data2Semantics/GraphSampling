@@ -21,7 +21,7 @@ public class SwdfExperimentSetup implements ExperimentSetup {
 	private GetQueries queries;
 	
 	public SwdfExperimentSetup() throws IOException {
-		queries = new SwdfQueries(false, MAX_NUM_QUERIES, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter());
+		queries = new SwdfQueries(true, MAX_NUM_QUERIES, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter());
 		queries.setMaxNQueries(MAX_NUM_QUERIES);
 	}
 	

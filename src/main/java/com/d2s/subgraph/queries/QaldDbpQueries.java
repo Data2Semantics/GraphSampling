@@ -65,7 +65,7 @@ public class QaldDbpQueries implements GetQueries {
 				if (Helper.getResultSize(result) > 0) {
 					validQueriesList.add(queryWrapper);
 				} else {
-					System.out.println(queryWrapper.getQueryString(DbpoExperimentSetup.GOLDEN_STANDARD_GRAPH));
+					//System.out.println(queryWrapper.getQueryString(DbpoExperimentSetup.GOLDEN_STANDARD_GRAPH));
 					emptyQueries++;
 				}
 			} catch (Exception e) {

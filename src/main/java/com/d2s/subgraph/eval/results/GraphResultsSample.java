@@ -164,6 +164,15 @@ public class GraphResultsSample implements GraphResults{
 		shortGraphname = shortGraphname.replace(".nt", "");
 		return shortGraphname;
 	}
+	
+	public String getProperName() {
+		if (graphName.contains("0.5")) {
+			return "sample 50%";
+		} else {
+			return "sample 20%";
+		}
+		
+	}
 
 	public void addRecallTruePositives(int truePositives) {
 		this.totalTruePositives += truePositives;
@@ -180,5 +189,11 @@ public class GraphResultsSample implements GraphResults{
 	}
 	public double getGraphRecall() { 
 		return (double)totalTruePositives / (double)totalGoldenStandardSize;
+	}
+	public String getRewriteMethod() {
+		return "baseline";
+	}
+	public String getAlgorithm() {
+		return "sample";
 	}
 }

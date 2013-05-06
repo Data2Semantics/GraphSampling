@@ -2,6 +2,7 @@ package com.d2s.subgraph.helpers;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,7 +41,19 @@ public class Helper {
 	private static String HEADER_ACCEPT_QUERY = "application/sparql-results+json";
 	private static String HEADER_ACCEPT_CONSTRUCT = "text/turtle";
 	private static String ADDITIONAL_ARGS = "&soft-limit=-1";
+	
+	public static int REWRITE_NODE1 = 0;
+	public static int REWRITE_NODE2 = 1;
+	public static int REWRITE_NODE3 = 2;
+	public static int REWRITE_NODE4 = 3;
+	public static int REWRITE_PATH = 4;
 
+	public static int ALG_EIGENVECTOR = 0;
+	public static int ALG_PAGERANK = 1;
+	public static int ALG_BETWEENNESS = 2;
+	public static int ALG_INDEGREE = 3;
+	public static int ALG_OUTDEGREE = 4;
+	
 	public static InputStream executeQuery(String endpoint, String queryString) {
 		InputStream result = execHttpPost(endpoint, "query=" + queryString + ADDITIONAL_ARGS, HEADER_ACCEPT_QUERY);
 		return result;
@@ -269,5 +282,71 @@ public class Helper {
 		ProcessBuilder ps = new ProcessBuilder(args);
 		Process pr = ps.start();
 		pr.waitFor();
+	}
+
+	public static int getRewriteMethod(String graphName) {
+		int rewriteMethod = -1;
+		if (graphName.contains("litAsLit")) {
+			rewriteMethod = REWRITE_NODE3;
+		} else if (graphName.contains("noLit")) {
+			rewriteMethod = REWRITE_NODE2;
+		} else if (graphName.contains("litAsNode")) {
+			rewriteMethod = REWRITE_NODE1;
+		} else if (graphName.contains("litWithPred")) {
+			rewriteMethod = REWRITE_NODE4;
+		} else if (graphName.contains("so-so")) {
+			rewriteMethod = REWRITE_PATH;
+		}
+		return rewriteMethod;
+	}
+	
+	public static int getAnalysisAlgorithm(String graphName) {
+		int algorithm = -1;
+		if (graphName.contains("eigenvector")) {
+			algorithm = ALG_EIGENVECTOR;
+		} else if (graphName.contains("pagerank")) {
+			algorithm = ALG_PAGERANK;
+		} else if (graphName.contains("betweenness")) {
+			algorithm = ALG_BETWEENNESS;
+		} else if (graphName.contains("indegree")) {
+			algorithm = ALG_INDEGREE;
+		} else if (graphName.contains("outdegree")) {
+			algorithm = ALG_OUTDEGREE;
+		}
+		return algorithm;
+	}
+
+	public static String getRewriteMethodAsString(String graphName) {
+		int rewriteMethod = Helper.getRewriteMethod(graphName);
+		String rewriteMethodString = "";
+		if (rewriteMethod == REWRITE_NODE1) {
+			rewriteMethodString = "node1";
+		} else if (rewriteMethod == REWRITE_NODE2) {
+			rewriteMethodString = "node2";
+		} else if (rewriteMethod == REWRITE_NODE3) {
+			rewriteMethodString = "node3";
+		} else if (rewriteMethod == REWRITE_NODE4) {
+			rewriteMethodString = "node4";
+		} else if (rewriteMethod == REWRITE_PATH) {
+			rewriteMethodString = "path";
+		}
+		return rewriteMethodString;
+	}
+	
+	public static String getAlgorithmAsString(String graphName) {
+		int algorithm = Helper.getAnalysisAlgorithm(graphName);
+		String algorithmString = "";
+		if (algorithm == ALG_BETWEENNESS) {
+			algorithmString = "betweenness";
+		} else if (algorithm == ALG_EIGENVECTOR) {
+			algorithmString = "eigenvector";
+		} else if (algorithm == ALG_INDEGREE) {
+			algorithmString = "indegree";
+		} else if (algorithm == ALG_OUTDEGREE) {
+			algorithmString = "outdegree";
+		} else if (algorithm == ALG_PAGERANK) {
+			algorithmString = "pagerank";
+		}
+		return algorithmString;
 	}
 }

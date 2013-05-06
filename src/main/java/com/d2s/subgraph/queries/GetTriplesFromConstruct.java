@@ -63,11 +63,11 @@ public class GetTriplesFromConstruct {
 		try {
 			getTripleCollection = new GetTriplesFromConstruct[]{
 //					new EvaluateGraphs(new DbpoExperimentSetup(DbpoExperimentSetup.QALD_REMOVE_OPTIONALS)), 
-					new GetTriplesFromConstruct(new DbpoExperimentSetup(DbpoExperimentSetup.QALD_KEEP_OPTIONALS)),
+//					new GetTriplesFromConstruct(new DbpoExperimentSetup(DbpoExperimentSetup.QALD_KEEP_OPTIONALS)),
 //					new EvaluateGraphs(new DbpoExperimentSetup(DbpoExperimentSetup.QUERY_LOGS)),
-					new GetTriplesFromConstruct(new SwdfExperimentSetup()),
+//					new GetTriplesFromConstruct(new SwdfExperimentSetup()),
 					new GetTriplesFromConstruct(new Sp2bExperimentSetup()),
-					new GetTriplesFromConstruct(new LmdbExperimentSetup()),
+//					new GetTriplesFromConstruct(new LmdbExperimentSetup()),
 			};
 		} catch (Exception e) {
 			e.printStackTrace();

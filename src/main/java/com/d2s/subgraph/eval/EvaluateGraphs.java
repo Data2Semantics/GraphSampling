@@ -128,10 +128,10 @@ public class EvaluateGraphs {
 			if (line.startsWith("http://" + experimentSetup.getGraphPrefix())) {
 				if (line.toLowerCase().contains("sample")) {
 					if (line.contains("0.2")) {
-						if (!sampleGraphs.containsKey("0.2")) {
-							sampleGraphs.put("0.2", new ArrayList<String>());
-						}
-						sampleGraphs.get("0.2").add(line);
+//						if (!sampleGraphs.containsKey("0.2")) {
+//							sampleGraphs.put("0.2", new ArrayList<String>());
+//						}
+//						sampleGraphs.get("0.2").add(line);
 					} else if (line.contains("0.5")) {
 						if (!sampleGraphs.containsKey("0.5")) {
 							sampleGraphs.put("0.5", new ArrayList<String>());

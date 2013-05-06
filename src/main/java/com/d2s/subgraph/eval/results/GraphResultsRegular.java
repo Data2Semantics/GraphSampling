@@ -126,6 +126,39 @@ public class GraphResultsRegular implements GraphResults {
 		return shortGraphname;
 		
 	}
+	
+	public String getProperName() {
+		int rewriteMethod = Helper.getRewriteMethod(getGraphName());
+		int analysisAlg = Helper.getAnalysisAlgorithm(getGraphName());
+		String properName = "";
+		if (rewriteMethod == Helper.REWRITE_NODE1) {
+			properName += "Node1";
+		} else if (rewriteMethod == Helper.REWRITE_NODE2) {
+			properName += "Node2";
+		} else if (rewriteMethod == Helper.REWRITE_NODE3) {
+			properName += "Node3";
+		} else if (rewriteMethod == Helper.REWRITE_NODE4) {
+			properName += "Node4";
+		} else if (rewriteMethod == Helper.REWRITE_PATH) {
+			properName += "Path";
+		}
+		if (analysisAlg == Helper.ALG_BETWEENNESS) {
+			properName += " betweenness";
+		} else if (analysisAlg == Helper.ALG_EIGENVECTOR) {
+			properName += " eigenvector";
+		} else if (analysisAlg == Helper.ALG_INDEGREE) {
+			properName += " indegree";
+		} else if (analysisAlg == Helper.ALG_OUTDEGREE) {
+			properName += " outdegree";
+		} else if (analysisAlg == Helper.ALG_PAGERANK) {
+			properName += " pagerank";
+		}
+		ArrayList<String> parts = new ArrayList<String>(Arrays.asList( graphName.split("-")));
+		String trailingBit = parts.get(parts.size()-1);
+		trailingBit = trailingBit.replace(".nt", "");
+		properName += " " + trailingBit + "%";
+		return properName;
+	}
 
 	public void addRecallTruePositives(int truePositives) {
 		this.totalTruePositives += truePositives;
@@ -143,5 +176,28 @@ public class GraphResultsRegular implements GraphResults {
 	}
 	public double getGraphRecall() { 
 		return (double)totalTruePositives / (double)totalGoldenStandardSize;
+	}
+	public String getRewriteMethod() {
+		String rewriteMethod = Helper.getRewriteMethodAsString(graphName);
+		if (rewriteMethod.length() == 0) {
+			if (graphName.contains("Baseline")) {
+				rewriteMethod = "baseline";
+			} else {
+				rewriteMethod = graphName;
+			}
+		}
+		return rewriteMethod;
+	}
+	public String getAlgorithm() {
+		String algorithm = Helper.getAlgorithmAsString(graphName);
+		if (algorithm.length() == 0) {
+			algorithm = graphName;
+			if (graphName.contains("Baseline")) {
+				algorithm = "resource frequency";
+			} else {
+				algorithm = graphName;
+			}
+		}
+		return algorithm;
 	}
 }

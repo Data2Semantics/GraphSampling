@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import au.com.bytecode.opencsv.CSVWriter;
@@ -29,6 +31,8 @@ public class BatchResults {
 	private static String FILE_HTML_SUMMARY = "results.html";
 	private static String FILE_CSV_FULL_LIST = "list.csv";
 	private static String FILE_CSV_FLAT_FULL_LIST = "flatlist.csv";
+	private static String FILE_CSV_REWR_VS_ALGS = "rewrVsAlgs.csv";
+	private static String FILE_CSV_AVG_RECALL_PER_QUERY = "avgRecallPerQuery.csv";
 	private HashMap<String, Boolean> modesImported = new HashMap<String, Boolean>();
 	
 	public BatchResults(ExperimentSetup experimentSetup, GetQueries queries) throws IOException {
@@ -58,6 +62,8 @@ public class BatchResults {
 					outputAsHtmlTable(modes);
 					outputAsCsvTable(modes);
 					outputAsCsvFlatList(modes);
+					outputRewriteVsAlgs(modes);
+					outputAverageRecallPerQuery(modes);
 //					plotBoxPlots(mode);
 				}
 			}
@@ -68,6 +74,34 @@ public class BatchResults {
 	}
 	
 	
+	private void outputAverageRecallPerQuery(ArrayList<String> onlyGraphsContaining) throws IOException {
+		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + FILE_CSV_AVG_RECALL_PER_QUERY);
+		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
+		writer.writeNext(new String[]{"queryId", "avgRecall"});
+		for (QueryWrapper query: queries.getQueries()) {
+			int queryId = query.getQueryId();
+			
+			ArrayList<String> row = new ArrayList<String>();
+			double totalRecall = 0.0;// totalrecall!
+			int numGraphs = 0;
+			for (GraphResults results: batchResults) {
+				if (results.contains(queryId)) {
+//					if (onlyGraphsContaining.length() == 0 || results.getGraphName().contains(onlyGraphsContaining)) {
+					if (Helper.partialStringMatch(results.getGraphName(), onlyGraphsContaining)) {
+						QueryResults queryResults = results.get(queryId);
+						totalRecall += queryResults.getRecall();
+						numGraphs++;
+					}
+				}
+			}
+			
+			double avgRecall = totalRecall / (double)numGraphs;
+			writer.writeNext(new String[]{Integer.toString(queryId), Double.toString(avgRecall)});
+		}
+		writer.close();
+		
+	}
+
 	public void add(GraphResults graphResults) {
 		if (graphResults.getGraphName().contains("max-20")) modesImported.put("max-20", true);
 		if (graphResults.getGraphName().contains("0.2")) modesImported.put("0.2", true);
@@ -85,16 +119,18 @@ public class BatchResults {
 		System.out.println("writing summary CSV");
 		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + FILE_CSV_SUMMARY);
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
-		writer.writeNext(new String[]{"graph", "avg recall", "median recall", "std recall", "recallOnAllQueries", "goldenSize", "truePositives"});
+		writer.writeNext(new String[]{"graph", "avg recall", "median recall", "std recall", "recallOnAllQueries", "goldenSize", "truePositives", "rewrMethod", "algorithm"});
 		for (GraphResults graphResults: batchResults) {
 			writer.writeNext(new String[]{
-					graphResults.getShortGraphName(), 
+					graphResults.getProperName(), 
 					Double.toString(graphResults.getAverageRecall()), 
 					Double.toString(graphResults.getMedianRecall()), 
 					Double.toString(graphResults.getStdRecall()), 
 					Double.toString(graphResults.getGraphRecall()),
 					Double.toString(graphResults.getRecallGoldenStandardSize()),
 					Double.toString(graphResults.getRecallTruePositives()),
+					graphResults.getRewriteMethod(),
+					graphResults.getAlgorithm()
 			});
 		}
 		writer.close();
@@ -154,13 +190,13 @@ public class BatchResults {
 		System.out.println("writing csv flatlist for "  + onlyGraphsContaining);
 		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + onlyGraphsContaining.get(0) + "_"+ FILE_CSV_FLAT_FULL_LIST);
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
-		writer.writeNext(new String[]{"queryId", "graph", "recall"});
+		writer.writeNext(new String[]{"queryId", "graph", "recall", "rewrMethod", "algorithm"});
 		
 		for (GraphResults graphResults: batchResults) {
 			if (Helper.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
 				for (QueryWrapper query: queries.getQueries()) {
 					if (graphResults.contains(query.getQueryId())) {
-						writer.writeNext(new String[]{Integer.toString(query.getQueryId()), graphResults.getShortGraphName(), Double.toString(graphResults.get(query.getQueryId()).getRecall())});
+						writer.writeNext(new String[]{Integer.toString(query.getQueryId()), graphResults.getProperName(), Double.toString(graphResults.get(query.getQueryId()).getRecall()), graphResults.getRewriteMethod(), graphResults.getAlgorithm()});
 					}
 				}
 			}
@@ -168,6 +204,110 @@ public class BatchResults {
 		writer.close();
 	}
 	
+	private void outputRewriteVsAlgs(ArrayList<String> onlyGraphsContaining) throws IOException {
+		System.out.println("writing csv rewrite vs. algs "  + onlyGraphsContaining);
+		HashMap<Integer, Double> node1 = new HashMap<Integer, Double>();
+		HashMap<Integer, Double> node2 = new HashMap<Integer, Double>();
+		HashMap<Integer, Double> node3 = new HashMap<Integer, Double>();
+		HashMap<Integer, Double> node4 = new HashMap<Integer, Double>();
+		HashMap<Integer, Double> path = new HashMap<Integer, Double>();
+		
+		for (GraphResults graphResults: batchResults) {
+			String graphName = graphResults.getGraphName();
+			if (Helper.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining) && !graphName.contains("sample") && !graphName.contains("Baseline")) {
+				HashMap<Integer, Double> hashmapPick = null;
+				int rewriteMethod = Helper.getRewriteMethod(graphName);
+				int analysisAlgorithm = Helper.getAnalysisAlgorithm(graphName);
+				
+				
+				
+				if (rewriteMethod == Helper.REWRITE_NODE1) hashmapPick = node1;
+				if (rewriteMethod == Helper.REWRITE_NODE2) hashmapPick = node2;
+				if (rewriteMethod == Helper.REWRITE_NODE3) hashmapPick = node3;
+				if (rewriteMethod == Helper.REWRITE_NODE4) hashmapPick = node4;
+				if (rewriteMethod == Helper.REWRITE_PATH) hashmapPick = path;
+				if (hashmapPick == null || analysisAlgorithm == -1) {
+					System.out.println("Not able to detect rewrite method or analysis of graph " + graphName);
+					System.exit(1);
+				}
+				hashmapPick.put(analysisAlgorithm, graphResults.getAverageRecall());
+			}
+		}
+		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + onlyGraphsContaining.get(0) + "_"+ FILE_CSV_REWR_VS_ALGS);
+		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
+		double sampleAverage = getSampleAverage("0.5");
+		writer.writeNext(new String[]{Double.toString(sampleAverage), "eigenvector", "pagerank", "betweenness", "indegree", "outdegree"});
+		
+		ArrayList<String> row = getHashMapAsArrayRow(node1);
+		row.add(0, "node1");
+		writer.writeNext(row.toArray(new String[row.size()]));
+		
+		row = getHashMapAsArrayRow(node2);
+		row.add(0, "node2");
+		writer.writeNext(row.toArray(new String[row.size()]));
+		
+		row = getHashMapAsArrayRow(node3);
+		row.add(0, "node3");
+		writer.writeNext(row.toArray(new String[row.size()]));
+		
+		row = getHashMapAsArrayRow(node4);
+		row.add(0, "node4");
+		writer.writeNext(row.toArray(new String[row.size()]));
+		
+		row = getHashMapAsArrayRow(path);
+		row.add(0, "path");
+		writer.writeNext(row.toArray(new String[row.size()]));
+		
+		writer.close();
+	}
+	
+	
+	private double getSampleAverage(String mode) {
+		boolean found = false;
+		double sampleAverage = 0.0;
+		for (GraphResults results: this.batchResults) {
+			if (results.getGraphName().equals("http://" + experimentSetup.getGraphPrefix() + "sample_" + mode + ".nt")) {
+				found = true;
+				sampleAverage = results.getAverageRecall();
+			}
+		}
+		if (!found) {
+			System.out.println("could not find average recall for sample graphs... Tried looking for " + experimentSetup.getGraphPrefix() + "sample_" + mode + ".nt");
+			System.exit(1);
+		}
+		return sampleAverage;
+		
+	}
+	
+	private ArrayList<String> getHashMapAsArrayRow(HashMap<Integer, Double> hm) {
+		ArrayList<String> row = new ArrayList<String>();
+		if (hm.containsKey(Helper.ALG_EIGENVECTOR)) {
+			row.add(Double.toString(hm.get(Helper.ALG_EIGENVECTOR)));
+		} else {
+			row.add("");
+		}
+		if (hm.containsKey(Helper.ALG_PAGERANK)) {
+			row.add(Double.toString(hm.get(Helper.ALG_PAGERANK)));
+		} else {
+			row.add("");
+		}
+		if (hm.containsKey(Helper.ALG_BETWEENNESS)) {
+			row.add(Double.toString(hm.get(Helper.ALG_BETWEENNESS)));
+		} else {
+			row.add("");
+		}
+		if (hm.containsKey(Helper.ALG_INDEGREE)) {
+			row.add(Double.toString(hm.get(Helper.ALG_INDEGREE)));
+		} else {
+			row.add("");
+		}
+		if (hm.containsKey(Helper.ALG_OUTDEGREE)) {
+			row.add(Double.toString(hm.get(Helper.ALG_OUTDEGREE)));
+		} else {
+			row.add("");
+		}
+		return row;
+	}
 	/**
 	 * html table with graph evalutations as columns, and queries per row
 	 * @throws IOException

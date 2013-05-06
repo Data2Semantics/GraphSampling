@@ -68,8 +68,12 @@ public class RHelper {
 	
 	public void drawPlots(File directory) throws IOException, InterruptedException {
 		String rScript = "setwd(\"" + directory.getAbsolutePath() + "\")\n";
-		execute(rScript, new File(SCRIPT_DRAW_PLOTS));
+		File drawPlotsFile =  new File(SCRIPT_DRAW_PLOTS);
+		execute(rScript, drawPlotsFile);
+		FileUtils.copyFile(drawPlotsFile, new File(directory.getAbsolutePath() +  "/" + drawPlotsFile.getName()));
 	}
+	
+	
 
 	public static Rengine getEngine() throws InstantiationException {
 		Rengine re = new Rengine(new String[] { "--vanilla" }, false, null);

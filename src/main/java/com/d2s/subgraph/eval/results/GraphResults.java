@@ -25,6 +25,8 @@ public interface GraphResults {
 	public String getGraphName();
 	
 	public String getShortGraphName();
+	
+	public String getProperName();
 
 	public void setGraphName(String name);
 	
@@ -42,5 +44,8 @@ public interface GraphResults {
 	public int getRecallTruePositives();
 	public int getRecallGoldenStandardSize();
 	public double getGraphRecall();
+	
+	public String getRewriteMethod();
+	public String getAlgorithm();
 	
 }
