@@ -15,6 +15,7 @@ if [ -z "$1" ];then
 fi
 skipPig=0;
 queryPattern=0;
+skipAggregateFor="so-so"
 for arg in "$@"; do
         if [ "$arg" == "-skipPig" ]; then
 		skipPig=1;
@@ -55,8 +56,12 @@ for dir in "$@"; do
     		inputHadoopFile="$dirBasename"
     		inputHadoopFile+="_"
     		inputHadoopFile+="$basenameAnalysisFile"
-		inputHadoopFile+="_"
-		inputHadoopFile+="$aggregateMethod"
+		if [[ "$inputHadoopFile" =~ "$skipAggregateFor" ]]; then  
+			echo "dont append aggregator thing to input hadoop string"
+		else
+			inputHadoopFile+="_"
+	                inputHadoopFile+="$aggregateMethod"
+		fi
 		echo "running pig to get weights for query triples $inputHadoopFile"
 		for queryFile in "${hadoopLs[@]}"; do
 			if [ ${queryFile: -3} == ".nt" ]; then
@@ -64,11 +69,11 @@ for dir in "$@"; do
 					pig pigAnalysis/stats/getQueryTripleWeights.py $dataset/roundtrip/$inputHadoopFile $queryFile;
 				fi
 				queryFileBasename=`basename $queryFile`
-				IFS=_ read -a delimited <<< "$queryFileBasename"
-        			queryId=${delimited[1]}
+				#IFS=_ read -a delimited <<< "$queryFileBasename"
+        			#queryId=${delimited[1]}
 				resultFilename="$inputHadoopFile"
 				resultFilename+="_"
-				resultFilename+="$queryId"
+				resultFilename+="$queryFileBasename"
 				resultFilename=${resultFilename%.*} #remove .nt extension
 				resultsPath="$dataset/queryStats/$resultFilename"
 				processQueryTripleStats.sh $resultsPath;
