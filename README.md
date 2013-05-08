@@ -1,2 +1,2 @@
-PartialReplication
+Graph Sampling
 ==================
