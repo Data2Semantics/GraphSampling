@@ -196,4 +196,8 @@ public class GraphResultsSample implements GraphResults{
 	public String getAlgorithm() {
 		return "sample";
 	}
+	
+	public int getPercentage() {
+		return 50;
+	}
 }

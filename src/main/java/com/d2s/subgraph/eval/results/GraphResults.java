@@ -47,5 +47,7 @@ public interface GraphResults {
 	
 	public String getRewriteMethod();
 	public String getAlgorithm();
+
+	public int getPercentage();
 	
 }

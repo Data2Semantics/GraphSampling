@@ -23,6 +23,7 @@ import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QueryParseException;
 import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.query.ResultSetRewindable;
+import com.hp.hpl.jena.sparql.engine.http.QueryExceptionHTTP;
 
 public class Sp2bQueries implements GetQueries {
 	private static String QUERY_DIR = "src/main/resources/sp2bQueries";
@@ -97,10 +98,10 @@ public class Sp2bQueries implements GetQueries {
 					queries.add(query);
 					validQueries++;
 				}
+				query.generateStats();
 			} else {
 				filteredQueries++;
 			}
-
 		} catch (QueryParseException e) {
 			// could not parse query, probably a faulty one. ignore!
 			invalidQueries++;
@@ -115,8 +116,12 @@ public class Sp2bQueries implements GetQueries {
 			if (Helper.getResultSize(result) > 0) {
 				return true;
 			}
+		} catch (QueryExceptionHTTP e) {
+			e.printStackTrace();
+			System.exit(1);
 		} catch (Exception e) {
-			// failed to execute. endpoint down, or incorrect query
+			//query wrong or something. ignore
+
 		}
 		return false;
 	}

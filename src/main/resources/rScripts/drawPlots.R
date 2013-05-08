@@ -36,10 +36,12 @@ plot <- ggplot(data=flatlist_5, aes(x=algorithm, y=recall)) +
   #ggtitle("red: avg recall of all queries, blue: recall on all query results") + 
   facet_grid(.~rewrMethod, scale="free_x", space = "free_x") +
   geom_boxplot() + theme(axis.text.x=element_text(angle=45, hjust=1, vjust=1))  + 
-  geom_point(data=summary, aes(x=algorithm,y=avg.recall, size=avg.recall),  colour="red") + 
+  geom_point(data=summary, aes(x=algorithm,y=avg.recall, size=3), colour="black", shape=2, fill="black") + 
   #geom_point(data=summary, aes(x=graph,y=recallOnAllQueries, size=recallOnAllQueries), colour="blue") + 
-  theme(legend.position="none", plot.title = element_text(lineheight=.8))
-ggsave("boxplot_plus_average_recall_0.5.pdf", plot = plot)
+  theme(legend.position="none", plot.title = element_text(lineheight=.8)) +
+  theme(axis.title.x=element_blank())
+  
+ggsave("boxplot_plus_average_recall_0.5.png", plot = plot, height=4)
 #dev.off()
 
 # Normal scatterplot queryId by recall, colored by graph
@@ -79,5 +81,30 @@ dev.off()
 
 # Normal scatterplot for low recall, recall by queryId, colored and sized by recall 
 # ggplot(data=low_recall_list, aes(x=queryId, y=recall)) + geom_point(aes(size=recall, colour=recall)) + theme(axis.text.x=element_text(angle=-90, hjust=0, vjust=0.5))
+
+
+
+require(plotrix)
+
+bestRecallPerAlg <- read.csv("bestRecallPerAlgorithm.csv", header=TRUE, sep=";")
+
+bestRecallPerAlg <- bestRecallPerAlg[with(bestRecallPerAlg, order(avgQueryRecall, queryId, algorithm)), ]
+
+betweenness = bestRecallPerAlg[bestRecallPerAlg$algorithm == 'betweenness',]$bestRecall
+pagerank = bestRecallPerAlg[bestRecallPerAlg$algorithm == 'pagerank',]$bestRecall
+indegree = bestRecallPerAlg[bestRecallPerAlg$algorithm == 'indegree',]$bestRecall
+outdegree = bestRecallPerAlg[bestRecallPerAlg$algorithm == 'outdegree',]$bestRecall
+eigenvector = bestRecallPerAlg[bestRecallPerAlg$algorithm == 'eigenvector',]$bestRecall
+
+dataframe = data.frame(cbind(pagerank, eigenvector, betweenness, indegree, outdegree))
+#matrix = data.matrix(dataframe, rownames.force = NA)
+#transpose
+matrix <- as.data.frame(t(dataframe))
+label <- bestRecallPerAlg[bestRecallPerAlg$algorithm == 'betweenness',]$queryId
+pdf("queryRadarPlot.pdf")
+radial.plot(matrix,labels=label,rp.type="p",
+            main="Spiderweb plot",show.grid=TRUE,
+            lwd=3,radial.lim=c(0,1))
+dev.off()
 
 

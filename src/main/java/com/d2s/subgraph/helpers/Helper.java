@@ -318,6 +318,10 @@ public class Helper {
 
 	public static String getRewriteMethodAsString(String graphName) {
 		int rewriteMethod = Helper.getRewriteMethod(graphName);
+		return getRewriteMethodAsString(rewriteMethod);
+	}
+	
+	public static String getRewriteMethodAsString(int rewriteMethod) {
 		String rewriteMethodString = "";
 		if (rewriteMethod == REWRITE_NODE1) {
 			rewriteMethodString = "node1";
@@ -335,16 +339,20 @@ public class Helper {
 	
 	public static String getAlgorithmAsString(String graphName) {
 		int algorithm = Helper.getAnalysisAlgorithm(graphName);
+		return getAlgorithmAsString(algorithm);
+	}
+	
+	public static String getAlgorithmAsString(int algorithmInt) {
 		String algorithmString = "";
-		if (algorithm == ALG_BETWEENNESS) {
+		if (algorithmInt == ALG_BETWEENNESS) {
 			algorithmString = "betweenness";
-		} else if (algorithm == ALG_EIGENVECTOR) {
+		} else if (algorithmInt == ALG_EIGENVECTOR) {
 			algorithmString = "eigenvector";
-		} else if (algorithm == ALG_INDEGREE) {
+		} else if (algorithmInt == ALG_INDEGREE) {
 			algorithmString = "indegree";
-		} else if (algorithm == ALG_OUTDEGREE) {
+		} else if (algorithmInt == ALG_OUTDEGREE) {
 			algorithmString = "outdegree";
-		} else if (algorithm == ALG_PAGERANK) {
+		} else if (algorithmInt == ALG_PAGERANK) {
 			algorithmString = "pagerank";
 		}
 		return algorithmString;

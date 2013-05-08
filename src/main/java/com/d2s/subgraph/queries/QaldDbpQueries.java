@@ -141,6 +141,7 @@ public class QaldDbpQueries implements GetQueries {
 		if (checkFilters(query)) {
 			validQueries++;
 			queries.add(query);
+			query.generateStats();
 		} else {
 			filteredQueries++;
 		}

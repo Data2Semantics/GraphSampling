@@ -44,12 +44,17 @@ public class QueryWrapper {
 	
 	public QueryWrapper(String query) throws QueryParseException {
 		setQuery(query);
-		getTriplePatternsInfo();
-		getJoinsStats();
+
 	}
 	public QueryWrapper(Query query) {
 		this.query = query;
 	}
+	
+	public void generateStats() {
+		getTriplePatternsInfo();
+		getJoinsStats();
+	}
+	
 	
 	public boolean isSelect() {
 		return query.isSelectType();

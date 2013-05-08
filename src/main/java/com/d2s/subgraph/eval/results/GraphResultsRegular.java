@@ -153,10 +153,7 @@ public class GraphResultsRegular implements GraphResults {
 		} else if (analysisAlg == Helper.ALG_PAGERANK) {
 			properName += " pagerank";
 		}
-		ArrayList<String> parts = new ArrayList<String>(Arrays.asList( graphName.split("-")));
-		String trailingBit = parts.get(parts.size()-1);
-		trailingBit = trailingBit.replace(".nt", "");
-		properName += " " + trailingBit + "%";
+		properName += " " + getPercentage() + "%";
 		return properName;
 	}
 
@@ -199,5 +196,13 @@ public class GraphResultsRegular implements GraphResults {
 			}
 		}
 		return algorithm;
+	}
+	
+	public int getPercentage() {
+		String graphName = getGraphName();
+		ArrayList<String> parts = new ArrayList<String>(Arrays.asList( graphName.split("-")));
+		String trailingBit = parts.get(parts.size()-1);
+		trailingBit = trailingBit.replace(".nt", "");
+		return Integer.parseInt(trailingBit);
 	}
 }

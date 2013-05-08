@@ -11,8 +11,12 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Scanner;
+
+import org.apache.commons.httpclient.HttpException;
+
 import au.com.bytecode.opencsv.CSVWriter;
 
 import com.d2s.subgraph.eval.EvaluateGraph;
@@ -29,9 +33,10 @@ import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QueryParseException;
 import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.query.ResultSetRewindable;
+import com.hp.hpl.jena.sparql.engine.http.QueryExceptionHTTP;
 
 public class SwdfQueries implements GetQueries {
-	public static String QUERY_FILE = "src/main/resources/swdf_queries.log";
+	public static String QUERY_FILE = "src/main/resources/swdf_queries_reversed.log";
 	public static String CSV_COPY = "src/main/resources/swdf_queries.csv";
 	public static String PARSE_QUERIES_FILE = "src/main/resources/swdf_queries.arraylist";
 	private static boolean ONLY_UNIQUE = true;
@@ -68,6 +73,7 @@ public class SwdfQueries implements GetQueries {
 			saveCsvCopy(new File(CSV_COPY));
 			saveQueriesToCacheFile();
 		}
+		
 	}
 
 	private void saveQueriesToCacheFile() throws IOException {
@@ -125,22 +131,37 @@ public class SwdfQueries implements GetQueries {
 					if (queriesHm.containsKey(query)) {
 						duplicateQueries++;
 					} else {
+						Date timeStart = new Date();
 						if (hasResults(query)) {
 							query.setQueryId(validQueries);
 							queriesHm.put(query, query);
 							validQueries++;
+							System.out.println(validQueries);
 						} else {
 							noResultsQueries++;
+						}
+						Date timeEnd = new Date();
+						if ((timeEnd.getTime() - timeStart.getTime()) > 5000) {
+							//longer than 5 seconds
+							System.out.println("taking longer than 5 seconds:");
+							System.out.println(query.toString());
 						}
 					}
 				} else {
 					queries.add(query);
 					validQueries++;
 				}
+				try {
+					query.generateStats();
+				} catch (Exception e) {
+					System.out.println(query.toString());
+					e.printStackTrace();
+					System.exit(1);
+				}
 			} else {
 				filteredQueries++;
 			}
-
+			
 		} catch (QueryParseException e) {
 			// could not parse query, probably a faulty one. ignore!
 			invalidQueries++;
@@ -148,6 +169,10 @@ public class SwdfQueries implements GetQueries {
 	}
 
 	private boolean hasResults(QueryWrapper queryWrapper) {
+		if (queryWrapper.toString().contains("contains(lcase(?title), \"algorithm\") || contains(lcase(?abstract), \"algorithm\")")) {
+			return false;
+			//this query keeps crashing virtuoso! just skip it
+		}
 		try {
 			Query query = QueryFactory.create(queryWrapper.getQueryString(SwdfExperimentSetup.GOLDEN_STANDARD_GRAPH));
 			QueryExecution queryExecution = QueryExecutionFactory.sparqlService(EvaluateGraph.OPS_VIRTUOSO, query);
@@ -155,8 +180,13 @@ public class SwdfQueries implements GetQueries {
 			if (Helper.getResultSize(result) > 0) {
 				return true;
 			}
+		} catch (QueryExceptionHTTP e) {
+			System.out.println(queryWrapper.toString());
+			e.printStackTrace();
+			System.exit(1);
 		} catch (Exception e) {
-			// failed to execute. endpoint down, or incorrect query
+			//query wrong or something. ignore
+
 		}
 		return false;
 	}

@@ -33,6 +33,7 @@ public class BatchResults {
 	private static String FILE_CSV_FLAT_FULL_LIST = "flatlist.csv";
 	private static String FILE_CSV_REWR_VS_ALGS = "rewrVsAlgs.csv";
 	private static String FILE_CSV_AVG_RECALL_PER_QUERY = "avgRecallPerQuery.csv";
+	private static String FILE_CSV_BEST_RECALL_PER_ALG = "bestRecallPerAlgorithm.csv";
 	private HashMap<String, Boolean> modesImported = new HashMap<String, Boolean>();
 	
 	public BatchResults(ExperimentSetup experimentSetup, GetQueries queries) throws IOException {
@@ -64,6 +65,7 @@ public class BatchResults {
 					outputAsCsvFlatList(modes);
 					outputRewriteVsAlgs(modes);
 					outputAverageRecallPerQuery(modes);
+					outputBestRecallPerAlgorithm(modes);
 //					plotBoxPlots(mode);
 				}
 			}
@@ -74,6 +76,54 @@ public class BatchResults {
 	}
 	
 	
+	private void outputBestRecallPerAlgorithm(ArrayList<String> onlyGraphsContaining) throws IOException {
+		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + FILE_CSV_BEST_RECALL_PER_ALG);
+		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
+		writer.writeNext(new String[]{"queryId", "algorithm", "bestRecall", "avgQueryRecall"});
+		int[] algorithms = new int[]{Helper.ALG_BETWEENNESS, Helper.ALG_EIGENVECTOR, Helper.ALG_INDEGREE, Helper.ALG_OUTDEGREE, Helper.ALG_PAGERANK};
+		int[] rewrMethods = new int[]{Helper.REWRITE_NODE1, Helper.REWRITE_NODE2, Helper.REWRITE_NODE3, Helper.REWRITE_NODE4, Helper.REWRITE_PATH};
+		
+		for (QueryWrapper query: queries.getQueries()) {
+			ArrayList<ArrayList<String>> rows = new ArrayList<ArrayList<String>>();
+			int queryId = query.getQueryId();
+			
+			double totalRecall = 0.0;
+			int graphCount = 0;
+			for (int algorithm: algorithms) {
+				ArrayList<String> row = new ArrayList<String>();
+				double bestRecall = 0.0;
+				int numGraphResultsFound = 0;
+				for (GraphResults results: batchResults) {
+					if (Helper.getAnalysisAlgorithm(results.getGraphName()) == algorithm) {
+						numGraphResultsFound++;
+						totalRecall += results.get(queryId).getRecall();
+						graphCount++;
+//						int rewrMethod = Helper.getRewriteMethod(results.getGraphName());
+						if (results.get(queryId).getRecall() > bestRecall) {
+							bestRecall = results.get(queryId).getRecall();
+						}
+					}
+				}
+				if (numGraphResultsFound != rewrMethods.length) {
+					System.out.println("unable to find all rewrite methods when calculating best recall per algorithm");
+					System.exit(1);
+				} else {
+					row.add(Integer.toString(queryId));
+					row.add(Helper.getAlgorithmAsString(algorithm));
+					row.add(Double.toString(bestRecall));
+					rows.add(row);
+				}
+			}
+			double avgQueryRecall = totalRecall / (double)graphCount;
+			for (ArrayList<String> row: rows) {
+				writer.writeNext(new String[]{row.get(0), row.get(1), row.get(2), Double.toString(avgQueryRecall)});
+			}
+			
+			
+		}
+		writer.close();
+	}
+
 	private void outputAverageRecallPerQuery(ArrayList<String> onlyGraphsContaining) throws IOException {
 		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + FILE_CSV_AVG_RECALL_PER_QUERY);
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
@@ -81,7 +131,6 @@ public class BatchResults {
 		for (QueryWrapper query: queries.getQueries()) {
 			int queryId = query.getQueryId();
 			
-			ArrayList<String> row = new ArrayList<String>();
 			double totalRecall = 0.0;// totalrecall!
 			int numGraphs = 0;
 			for (GraphResults results: batchResults) {
@@ -130,7 +179,7 @@ public class BatchResults {
 					Double.toString(graphResults.getRecallGoldenStandardSize()),
 					Double.toString(graphResults.getRecallTruePositives()),
 					graphResults.getRewriteMethod(),
-					graphResults.getAlgorithm()
+					graphResults.getAlgorithm() + " " + Integer.toString(graphResults.getPercentage()) + "%"
 			});
 		}
 		writer.close();
@@ -196,7 +245,12 @@ public class BatchResults {
 			if (Helper.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
 				for (QueryWrapper query: queries.getQueries()) {
 					if (graphResults.contains(query.getQueryId())) {
-						writer.writeNext(new String[]{Integer.toString(query.getQueryId()), graphResults.getProperName(), Double.toString(graphResults.get(query.getQueryId()).getRecall()), graphResults.getRewriteMethod(), graphResults.getAlgorithm()});
+						writer.writeNext(new String[]{
+								Integer.toString(query.getQueryId()), 
+								graphResults.getProperName(), 
+								Double.toString(graphResults.get(query.getQueryId()).getRecall()), 
+								graphResults.getRewriteMethod(), 
+								graphResults.getAlgorithm() + " " + Integer.toString(graphResults.getPercentage()) + "%"});
 					}
 				}
 			}
@@ -357,6 +411,7 @@ public class BatchResults {
 			row.add("<td>" + queryId + "</td>");
 			row.add("<td><a href='" + url + "' target='_blank'>" + Helper.getDoubleAsFormattedString(avgRecall) + " (n:" + goldenStandardSize + ")</a></td>");
 			row.add("<td>" + query.getNumberOfJoins() + "</td>");
+			row.add("<td>" + query.getNumberOfNonOptionalTriplePatterns() + "</td>");
 			row.add("<td>" + query.getTriplePatternCountCcv() + "</td>");
 			row.add("<td>" + query.getTriplePatternCountCvv() + "</td>");
 			row.add("<td>" + query.getTriplePatternCountVcc() + "</td>");
@@ -365,7 +420,7 @@ public class BatchResults {
 		
 		
 		html += "<thead>\n<tr>";
-		html += "<th>queryId</th><th>avg</th><th>#joins<br></th><th>#bgs<br>(non opt)<br><th>#ccv<br></th><th>#cvv<br></th><th>#vcc<br></th>";
+		html += "<th>queryId</th><th>avg</th><th>#joins<br></th><th>#tp's<br>(non opt)<br><th>#ccv<br></th><th>#cvv<br></th><th>#vcc<br></th>";
 		
 		for (GraphResults graphResults: batchResults) {
 			if (Helper.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {

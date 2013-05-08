@@ -30,6 +30,7 @@ import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QueryParseException;
 import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.query.ResultSetRewindable;
+import com.hp.hpl.jena.sparql.engine.http.QueryExceptionHTTP;
 
 public class LmdbQueries implements GetQueries {
 	public static String QUERY_FILE = "src/main/resources/lmdbQueries.txt";
@@ -129,16 +130,22 @@ public class LmdbQueries implements GetQueries {
 					queries.add(query);
 					validQueries++;
 				}
+				query.generateStats();
 			} else {
 				filteredQueries++;
 			}
-
 		} catch (QueryParseException e) {
 			// could not parse query, probably a faulty one. ignore!
 			invalidQueries++;
 		} catch (QueryBuildException e) {
 			// could not parse query, probably a faulty one. ignore!
 			invalidQueries++;
+		} catch (QueryExceptionHTTP e) {
+			e.printStackTrace();
+			System.exit(1);
+		} catch (Exception e) {
+			//query wrong or something. ignore
+	
 		}
 	}
 

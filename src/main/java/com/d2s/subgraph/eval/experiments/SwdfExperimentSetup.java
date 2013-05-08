@@ -5,6 +5,7 @@ import java.io.IOException;
 import com.d2s.subgraph.eval.EvaluateGraph;
 import com.d2s.subgraph.queries.GetQueries;
 import com.d2s.subgraph.queries.SwdfQueries;
+import com.d2s.subgraph.queries.filters.ConstructFilter;
 import com.d2s.subgraph.queries.filters.DescribeFilter;
 import com.d2s.subgraph.queries.filters.GraphClauseFilter;
 import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
@@ -21,7 +22,7 @@ public class SwdfExperimentSetup implements ExperimentSetup {
 	private GetQueries queries;
 	
 	public SwdfExperimentSetup() throws IOException {
-		queries = new SwdfQueries(true, MAX_NUM_QUERIES, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter());
+		queries = new SwdfQueries(false, MAX_NUM_QUERIES, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter(), new ConstructFilter());
 		queries.setMaxNQueries(MAX_NUM_QUERIES);
 	}
 	
