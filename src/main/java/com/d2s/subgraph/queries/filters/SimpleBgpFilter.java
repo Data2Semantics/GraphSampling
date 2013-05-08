@@ -11,6 +11,7 @@ import com.hp.hpl.jena.sparql.syntax.ElementWalker;
 
 public class SimpleBgpFilter implements QueryFilter {
 	boolean isSimpleBgp = true;
+	boolean onlyVariables = true;
 	public boolean filter(final QueryWrapper query) {
 		isSimpleBgp = true;
 		Element qPattern = query.getQuery().getQueryPattern();
@@ -23,32 +24,19 @@ public class SimpleBgpFilter implements QueryFilter {
 		        public void visit(ElementPathBlock el) {
 		            // ...go through all the triples...
 		            Iterator<TriplePath> triples = el.patternElts();
-		            int index = 0;
 		            while (triples.hasNext()) {
-		            	index++;
-		            	if (index > 2) {
-//		            		System.out.println("> 2");
-		            		isSimpleBgp = false;
-		            		break;
-		            	}
 		            	TriplePath triplePath = triples.next();
 		            	if (!(triplePath.getObject().isVariable() && 
 		            			triplePath.getSubject().isVariable() &&
 		            			triplePath.getPredicate().isVariable())) {
 		            		//not everything in bgp is var
 		            		isSimpleBgp = false;
-//		            		System.out.println("not all vars");
-//		            		System.out.println(triplePath.toString());
 		            		break;
 		            	}
 		            }
 		        }
 		    }
 		);
-//		if (!isSimpleBgp && query.toString().contains("?s ?p ?o")) {
-//    		System.out.println(query.toString());
-//    		System.exit(1);
-//    	}
 		return isSimpleBgp;
 	}
 	
