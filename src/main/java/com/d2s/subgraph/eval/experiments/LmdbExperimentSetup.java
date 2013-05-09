@@ -18,6 +18,7 @@ public class LmdbExperimentSetup implements ExperimentSetup {
 	private static String EVAL_RESULTS_DIR = "lmdbResults";
 	private static String QUERY_TRIPLES_DIR = "lmdbQueryTriples";
 	private static String QUERY_RESULTS_DIR = "lmdbQueryResults";
+	private static boolean PRIVATE_QUERIES = false;
 	private static int MAX_NUM_QUERIES = 0;//i.e. all
 	private GetQueries queries;
 	public LmdbExperimentSetup() throws SAXException, IOException, ParserConfigurationException {
@@ -49,5 +50,8 @@ public class LmdbExperimentSetup implements ExperimentSetup {
 	}
 	public String getQueryResultsDir() {
 		return QUERY_RESULTS_DIR;
+	}
+	public boolean privateQueries() {
+		return PRIVATE_QUERIES;
 	}
 }

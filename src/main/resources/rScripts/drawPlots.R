@@ -30,6 +30,8 @@ dev.off()
 #pdf("boxplot_plus_average_recall_0.2.pdf")
 #ggplot(data=flatlist_2, aes(x=graph, y=recall)) + geom_boxplot() + theme(axis.text.x=element_text(angle=-90, hjust=0, vjust=0.5))  + geom_point(data=summary, aes(x=graph,y=avg.recall, size=avg.recall, colour=graph)) + theme(legend.position="none")
 #dev.off()
+flatlist_5$rewrMethod <- factor(flatlist_5$rewrMethod,
+                       levels = c("Baseline", "Simple", "WithoutLiterals", "UniqueLiterals", "ContextLiterals", "Path"))
 
 #pdf("boxplot_plus_average_recall_0.5.pdf")
 plot <- ggplot(data=flatlist_5, aes(x=algorithm, y=recall)) + 
@@ -41,7 +43,7 @@ plot <- ggplot(data=flatlist_5, aes(x=algorithm, y=recall)) +
   theme(legend.position="none", plot.title = element_text(lineheight=.8)) +
   theme(axis.title.x=element_blank())
   
-ggsave("boxplot_plus_average_recall_0.5.png", plot = plot, height=4)
+ggsave("boxplot_plus_average_recall_0.5.png", plot = plot, height=4, width=10)
 #dev.off()
 
 # Normal scatterplot queryId by recall, colored by graph

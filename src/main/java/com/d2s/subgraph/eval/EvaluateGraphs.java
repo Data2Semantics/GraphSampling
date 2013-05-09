@@ -13,8 +13,11 @@ import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
 import org.xml.sax.SAXException;
+
+import com.d2s.subgraph.eval.experiments.DbpExperimentSetup;
 import com.d2s.subgraph.eval.experiments.DbpoExperimentSetup;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
+import com.d2s.subgraph.eval.experiments.LgdExperimentSetup;
 import com.d2s.subgraph.eval.experiments.LmdbExperimentSetup;
 import com.d2s.subgraph.eval.experiments.Sp2bExperimentSetup;
 import com.d2s.subgraph.eval.experiments.SwdfExperimentSetup;
@@ -167,9 +170,11 @@ public class EvaluateGraphs {
 //					new EvaluateGraphs(new DbpoExperimentSetup(DbpoExperimentSetup.QALD_REMOVE_OPTIONALS)), 
 //					new EvaluateGraphs(new DbpoExperimentSetup(DbpoExperimentSetup.QALD_KEEP_OPTIONALS)),
 //					new EvaluateGraphs(new DbpoExperimentSetup(DbpoExperimentSetup.QUERY_LOGS)),
-					new EvaluateGraphs(new SwdfExperimentSetup()),
+//					new EvaluateGraphs(new SwdfExperimentSetup()),
 //					new EvaluateGraphs(new Sp2bExperimentSetup()),
 //					new EvaluateGraphs(new LmdbExperimentSetup()),
+//					new EvaluateGraphs(new LgdExperimentSetup()),
+					new EvaluateGraphs(new DbpExperimentSetup()),
 			};
 		} catch (Exception e) {
 			e.printStackTrace();

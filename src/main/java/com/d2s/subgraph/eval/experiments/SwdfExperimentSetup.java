@@ -18,6 +18,7 @@ public class SwdfExperimentSetup implements ExperimentSetup {
 	private static String QUERY_TRIPLES_DIR = "swdfQueryTriples";
 	private static String QUERY_RESULTS_DIR = "swdfQueryResults";
 	private static String EVAL_RESULTS_DIR = "swdfResults";
+	private static boolean PRIVATE_QUERIES = true;
 	private static int MAX_NUM_QUERIES = 100;
 	private GetQueries queries;
 	
@@ -51,5 +52,8 @@ public class SwdfExperimentSetup implements ExperimentSetup {
 	}
 	public String getQueryResultsDir() {
 		return QUERY_RESULTS_DIR;
+	}
+	public boolean privateQueries() {
+		return PRIVATE_QUERIES;
 	}
 }

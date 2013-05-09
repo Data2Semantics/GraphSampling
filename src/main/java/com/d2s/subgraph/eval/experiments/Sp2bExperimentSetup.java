@@ -17,6 +17,7 @@ public class Sp2bExperimentSetup implements ExperimentSetup {
 	private static String EVAL_RESULTS_DIR = "sp2bResults";
 	private static String QUERY_TRIPLES_DIR = "sp2bQueryTriples";
 	private static String QUERY_RESULTS_DIR = "sp2bQueryResults";
+	private static boolean PRIVATE_QUERIES = false;
 	private static int MAX_NUM_QUERIES = 0;
 	private GetQueries queries;
 	
@@ -52,5 +53,8 @@ public class Sp2bExperimentSetup implements ExperimentSetup {
 	}
 	public String getQueryResultsDir() {
 		return QUERY_RESULTS_DIR;
+	}
+	public boolean privateQueries() {
+		return PRIVATE_QUERIES;
 	}
 }

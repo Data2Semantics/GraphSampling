@@ -15,4 +15,5 @@ public interface ExperimentSetup {
 	public String getEndpoint();
 	public String getQueryTriplesDir();
 	public String getQueryResultsDir();
+	public boolean privateQueries();
 }

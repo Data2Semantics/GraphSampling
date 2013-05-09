@@ -20,6 +20,7 @@ public class DbpoExperimentSetup implements ExperimentSetup {
 	private static String EVAL_RESULTS_DIR = "dbpResults";
 	private static String QUERY_TRIPLES_DIR = "dbpQueryTriples";
 	private static String QUERY_RESULTS_DIR = "dbpQueryResults";
+	private static boolean PRIVATE_QUERIES = true;
 	
 	private static int MAX_NUM_QUERIES = 0;//i.e. all
 	private GetQueries queries;
@@ -69,5 +70,8 @@ public class DbpoExperimentSetup implements ExperimentSetup {
 	}
 	public String getQueryResultsDir() {
 		return QUERY_RESULTS_DIR;
+	}
+	public boolean privateQueries() {
+		return PRIVATE_QUERIES;
 	}
 }

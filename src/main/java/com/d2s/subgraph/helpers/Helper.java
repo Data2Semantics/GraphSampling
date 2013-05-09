@@ -324,15 +324,15 @@ public class Helper {
 	public static String getRewriteMethodAsString(int rewriteMethod) {
 		String rewriteMethodString = "";
 		if (rewriteMethod == REWRITE_NODE1) {
-			rewriteMethodString = "node1";
+			rewriteMethodString = "Simple";
 		} else if (rewriteMethod == REWRITE_NODE2) {
-			rewriteMethodString = "node2";
+			rewriteMethodString = "WithoutLiterals";
 		} else if (rewriteMethod == REWRITE_NODE3) {
-			rewriteMethodString = "node3";
+			rewriteMethodString = "UniqueLiterals";
 		} else if (rewriteMethod == REWRITE_NODE4) {
-			rewriteMethodString = "node4";
+			rewriteMethodString = "ContextLiterals";
 		} else if (rewriteMethod == REWRITE_PATH) {
-			rewriteMethodString = "path";
+			rewriteMethodString = "Path";
 		}
 		return rewriteMethodString;
 	}
