@@ -8,10 +8,11 @@ fi
 
 #topKVariants=(0.2 0.5 1000n "1w")
 skipPig=$2
-topKVariants=(0.5 "1w")
+#topKVariants=(25000n)
+#topKVariants=(0.5 "1w")
 #topKVariants=(1000n)
 #topKVariants=(0.5)
-#topKVariants=("1w")
+topKVariants=("1w")
 #aggregateMethods=(min max avg)
 #aggregateMethods=(max avg)
 aggregateMethods=(max)
