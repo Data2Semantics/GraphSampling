@@ -178,7 +178,7 @@ public class GraphResultsRegular implements GraphResults {
 		String rewriteMethod = Helper.getRewriteMethodAsString(graphName);
 		if (rewriteMethod.length() == 0) {
 			if (graphName.contains("Baseline")) {
-				rewriteMethod = "baseline";
+				rewriteMethod = "Baseline";
 			} else {
 				rewriteMethod = graphName;
 			}

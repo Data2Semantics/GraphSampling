@@ -191,7 +191,7 @@ public class GraphResultsSample implements GraphResults{
 		return (double)totalTruePositives / (double)totalGoldenStandardSize;
 	}
 	public String getRewriteMethod() {
-		return "baseline";
+		return "Baseline";
 	}
 	public String getAlgorithm() {
 		return "sample";

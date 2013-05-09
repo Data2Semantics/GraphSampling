@@ -36,7 +36,7 @@ import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.sparql.engine.http.QueryExceptionHTTP;
 
 public class SwdfQueries implements GetQueries {
-	public static String QUERY_FILE = "src/main/resources/swdf_queries_reversed.log";
+	public static String QUERY_FILE = "src/main/resources/swdf_queries.log";
 	public static String CSV_COPY = "src/main/resources/swdf_queries.csv";
 	public static String PARSE_QUERIES_FILE = "src/main/resources/swdf_queries.arraylist";
 	private static boolean ONLY_UNIQUE = true;

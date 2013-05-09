@@ -262,10 +262,17 @@ public class QueryWrapper {
 	
 	
 	public static void main(String[] args)  {
-		String query = "SELECT ?name ?city\n" + 
-				"WHERE {\n" + 
-				"    ?who <http://Person#fname> ?name .\n" + 
-				"  ?b <http://blaat> ?bla. \n }";
+		String query = "PREFIX  rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" + 
+				"PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" + 
+				"PREFIX  movie: <http://data.linkedmdb.org/resource/movie/>\n" + 
+				"\n" + 
+				"SELECT  ?a\n" + 
+				"WHERE\n" + 
+				"  { <http://data.linkedmdb.org/resource/film/2014> movie:actor ?acter .\n" + 
+				"    ?acter movie:actor_name ?a\n" + 
+				"  }\n" + 
+				"LIMIT   100\n" + 
+				"";
 		QueryWrapper evalQuery = new QueryWrapper(query);
 		System.out.println(Algebra.compile(evalQuery.getQuery()).toString());
 		System.out.println("ccv count: " + evalQuery.getTriplePatternCountCcv());

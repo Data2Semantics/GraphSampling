@@ -409,8 +409,11 @@ public class BatchResults {
 				url = "http://yasgui.laurensrietveld.nl?endpoint=" + encodedEndpoint + "&query=" + encodedQuery + "&tabTitle=" + queryWrapper.getQueryId();
 			}
 			row.add("<td>" + queryId + "</td>");
-			row.add("<td><a href='" + url + "' target='_blank'>" + Helper.getDoubleAsFormattedString(avgRecall) + " (n:" + goldenStandardSize + ")</a></td>");
-			row.add("<td>" + query.getNumberOfJoins() + "</td>");
+			if (experimentSetup.privateQueries()) {
+				row.add("<td>" + Helper.getDoubleAsFormattedString(avgRecall) + " (n:" + goldenStandardSize + ")</td>");
+			} else {
+				row.add("<td><a href='" + url + "' target='_blank'>" + Helper.getDoubleAsFormattedString(avgRecall) + " (n:" + goldenStandardSize + ")</a></td>");
+			}
 			row.add("<td>" + query.getNumberOfNonOptionalTriplePatterns() + "</td>");
 			row.add("<td>" + query.getTriplePatternCountCcv() + "</td>");
 			row.add("<td>" + query.getTriplePatternCountCvv() + "</td>");
@@ -420,7 +423,7 @@ public class BatchResults {
 		
 		
 		html += "<thead>\n<tr>";
-		html += "<th>queryId</th><th>avg</th><th>#joins<br></th><th>#tp's<br>(non opt)<br><th>#ccv<br></th><th>#cvv<br></th><th>#vcc<br></th>";
+		html += "<th>queryId</th><th>avg</th><th>#tp's<br>(non opt)<br><th>#ccv<br></th><th>#cvv<br></th><th>#vcc<br></th>";
 		
 		for (GraphResults graphResults: batchResults) {
 			if (Helper.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
@@ -433,7 +436,11 @@ public class BatchResults {
 						String url = "http://yasgui.laurensrietveld.nl?endpoint=" + encodedEndpoint + "&query=" + encodedQuery + "&tabTitle=" + queryResults.getQuery().getQueryId();
 						String title = StringEscapeUtils.escapeHtml(queryResults.getQuery().getQueryString(graphResults.getGraphName()));
 						String cell = "<td title='" + title + "'><a href='" + url + "' target='_blank'>" + Helper.getDoubleAsFormattedString(queryResults.getRecall()) + "</a></td>";
-						row.add(cell);
+						if (experimentSetup.privateQueries()) {
+							row.add("<td>" + Helper.getDoubleAsFormattedString(queryResults.getRecall()) + "</td>");
+						} else {
+							row.add(cell);
+						}
 					} else {
 						row.add("<td>N/A</td>");
 					}
