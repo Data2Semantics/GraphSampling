@@ -1,12 +1,100 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SampLD experiment results</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description"
+	content="Experiment results for 'SampLD: Sampling Linked Data using network properties'">
+<meta name="author" content="Laurens Rietveld">
 
-  <head>
-  </head>
+<!-- Le styles -->
+<link href="assets/css/bootstrap.css" rel="stylesheet">
+<style type="text/css">
+body {
+	padding-top: 60px;
+	padding-bottom: 40px;
+}
+</style>
+<script src="assets/js/analytics.js"></script>
+<link href="assets/css/bootstrap-responsive.css" rel="stylesheet">
 
-  <body>
-	todo
-    
+<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+<!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
 
-  </body>
+<!-- Le fav and touch icons 
+    <link rel="shortcut icon" href="../assets/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+<script type="text/javascript"> <!--
+    function UnCryptMailto( s )
+    {
+        var n = 0;
+        var r = "";
+        for( var i = 0; i < s.length; i++)
+        {
+            n = s.charCodeAt( i );
+            if( n >= 8364 )
+            {
+                n = 128;
+            }
+            r += String.fromCharCode( n - 1 );
+        }
+        return r;
+    }
+
+    function linkTo_UnCrypt( s )
+    {
+        location.href=UnCryptMailto( s );
+    }
+    // --> </script>
+<script type="text/javascript">
+	  var _gaq = _gaq || [];
+	  _gaq.push(['_setAccount', 'UA-27621163-1']);
+	  _gaq.push(['_trackPageview']);
+
+	  (function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	  })();
+
+	</script>
+</head>
+
+<body>
+
+	<div class="container">
+
+		<!-- Main hero unit for a primary marketing message or call to action -->
+		
+
+		<!-- Example row of columns -->
+		<div class="row">
+			<div class="span12">
+				<h2>About</h2>
+				<p>
+					The html files linked to from this page allows you to analyze our sampled subgraphs more in-depth. We serve an html page for every dataset. Each html pages shows the recall for each query, and for each of the generated subgraphs. 
+					
+					For the DBPedia results, the SP2Bench results and the Linked Movie Database results, each query is clickable and executable as well. Other datasets do not have this features, as we cannot distribute the queries for these datasets
+				</p>
+				<a href='dbp.html'>DBPedia Results</a><br>
+				<a href='swdf.html'>Semantic Web Dog Food Results</a><br>
+				<a href='lmd.html'>Linked Movie Database Results</a><br>
+				<a href='sp2b.html'>SP2Bench Results</a>
+			</div>
+		</div>
+
+		<hr>
+
+	</div>
+	<script type="text/javascript"
+		src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script src="assets/js/bootstrap.js"></script>
+</body>
 </html>
