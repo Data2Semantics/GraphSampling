@@ -2,11 +2,11 @@ package com.d2s.subgraph.eval.experiments;
 
 import java.io.IOException;
 
+import org.data2semantics.query.filters.DescribeFilter;
+import org.data2semantics.query.filters.GraphClauseFilter;
 import com.d2s.subgraph.eval.EvaluateGraph;
 import com.d2s.subgraph.queries.GetQueries;
 import com.d2s.subgraph.queries.Sp2bQueries;
-import com.d2s.subgraph.queries.filters.DescribeFilter;
-import com.d2s.subgraph.queries.filters.GraphClauseFilter;
 import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
 
 

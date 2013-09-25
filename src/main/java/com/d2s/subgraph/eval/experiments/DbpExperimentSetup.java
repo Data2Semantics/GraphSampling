@@ -2,29 +2,28 @@ package com.d2s.subgraph.eval.experiments;
 
 import java.io.IOException;
 
-import javax.xml.parsers.ParserConfigurationException;
-
+import org.data2semantics.query.filters.ConstructFilter;
 import org.data2semantics.query.filters.DescribeFilter;
 import org.data2semantics.query.filters.GraphClauseFilter;
-import org.xml.sax.SAXException;
 import com.d2s.subgraph.eval.EvaluateGraph;
+import com.d2s.subgraph.queries.DbpQueries;
 import com.d2s.subgraph.queries.GetQueries;
-import com.d2s.subgraph.queries.LmdbQueries;
 import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
 
 
-public class LmdbExperimentSetup implements ExperimentSetup {
-	public static String GOLDEN_STANDARD_GRAPH = "http://lmdb";
-	private static String GRAPH_PREFIX = "lmdb_";
-	private static String EVAL_RESULTS_DIR = "lmdbResults";
-	private static String QUERY_TRIPLES_DIR = "lmdbQueryTriples";
-	private static String QUERY_RESULTS_DIR = "lmdbQueryResults";
+
+public class DbpExperimentSetup implements ExperimentSetup {
+	public static String GOLDEN_STANDARD_GRAPH = "http://dbpl";
+	private static String GRAPH_PREFIX = "dbpl_";
+	private static String QUERY_TRIPLES_DIR = "dbplTriples";
+	private static String QUERY_RESULTS_DIR = "dbplQueryResults";
+	private static String EVAL_RESULTS_DIR = "dbplResults";
 	private static boolean PRIVATE_QUERIES = false;
-	private static int MAX_NUM_QUERIES = 0;//i.e. all
+	private static int MAX_NUM_QUERIES = 100;
 	private GetQueries queries;
-	public LmdbExperimentSetup() throws SAXException, IOException, ParserConfigurationException {
-		queries = new LmdbQueries(true, new GraphClauseFilter(), new SimpleBgpFilter(), new DescribeFilter());
-		queries.setMaxNQueries(MAX_NUM_QUERIES);
+	
+	public DbpExperimentSetup() throws IOException {
+		queries = new DbpQueries(false, MAX_NUM_QUERIES, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter(), new ConstructFilter());
 	}
 	
 	public String getGoldenStandardGraph() {
@@ -36,6 +35,7 @@ public class LmdbExperimentSetup implements ExperimentSetup {
 	public GetQueries getQueries() {
 		return queries;
 	}
+	
 
 	public String getEvalResultsDir() {
 		return EVAL_RESULTS_DIR;

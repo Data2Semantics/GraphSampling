@@ -1,30 +1,28 @@
 package com.d2s.subgraph.eval.experiments;
 
 import java.io.IOException;
-
-import javax.xml.parsers.ParserConfigurationException;
-
+import org.data2semantics.query.filters.ConstructFilter;
 import org.data2semantics.query.filters.DescribeFilter;
 import org.data2semantics.query.filters.GraphClauseFilter;
-import org.xml.sax.SAXException;
 import com.d2s.subgraph.eval.EvaluateGraph;
 import com.d2s.subgraph.queries.GetQueries;
-import com.d2s.subgraph.queries.LmdbQueries;
+import com.d2s.subgraph.queries.LgdQueries;
 import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
 
 
-public class LmdbExperimentSetup implements ExperimentSetup {
-	public static String GOLDEN_STANDARD_GRAPH = "http://lmdb";
-	private static String GRAPH_PREFIX = "lmdb_";
-	private static String EVAL_RESULTS_DIR = "lmdbResults";
-	private static String QUERY_TRIPLES_DIR = "lmdbQueryTriples";
-	private static String QUERY_RESULTS_DIR = "lmdbQueryResults";
-	private static boolean PRIVATE_QUERIES = false;
-	private static int MAX_NUM_QUERIES = 0;//i.e. all
+
+public class LgdExperimentSetup implements ExperimentSetup {
+	public static String GOLDEN_STANDARD_GRAPH = "http://lgd";
+	private static String GRAPH_PREFIX = "lgd_";
+	private static String QUERY_TRIPLES_DIR = "lgdQueryTriples";
+	private static String QUERY_RESULTS_DIR = "lgdQueryResults";
+	private static String EVAL_RESULTS_DIR = "lgdResults";
+	private static boolean PRIVATE_QUERIES = true;
+	private static int MAX_NUM_QUERIES = 100;
 	private GetQueries queries;
-	public LmdbExperimentSetup() throws SAXException, IOException, ParserConfigurationException {
-		queries = new LmdbQueries(true, new GraphClauseFilter(), new SimpleBgpFilter(), new DescribeFilter());
-		queries.setMaxNQueries(MAX_NUM_QUERIES);
+	
+	public LgdExperimentSetup() throws IOException {
+		queries = new LgdQueries(true, MAX_NUM_QUERIES, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter(), new ConstructFilter());
 	}
 	
 	public String getGoldenStandardGraph() {
@@ -36,6 +34,7 @@ public class LmdbExperimentSetup implements ExperimentSetup {
 	public GetQueries getQueries() {
 		return queries;
 	}
+	
 
 	public String getEvalResultsDir() {
 		return EVAL_RESULTS_DIR;

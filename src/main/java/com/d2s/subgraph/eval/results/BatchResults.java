@@ -8,10 +8,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringEscapeUtils;
+
 import au.com.bytecode.opencsv.CSVWriter;
 
 import com.d2s.subgraph.eval.EvaluateGraph;
@@ -20,7 +20,7 @@ import com.d2s.subgraph.eval.results.GraphResults;
 import com.d2s.subgraph.helpers.Helper;
 import com.d2s.subgraph.helpers.RHelper;
 import com.d2s.subgraph.queries.GetQueries;
-import com.d2s.subgraph.queries.QueryWrapper;
+import com.d2s.subgraph.queries.Query;
 
 public class BatchResults {
 	private File resultsDir;
@@ -28,6 +28,7 @@ public class BatchResults {
 	private GetQueries queries;
 	private ExperimentSetup experimentSetup;
 	private static String FILE_CSV_SUMMARY = "summary.csv";
+	private static String FILE_CSV_QUERY_SUMMARY = "querySummary.csv";
 	private static String FILE_HTML_SUMMARY = "results.html";
 	private static String FILE_CSV_FULL_LIST = "list.csv";
 	private static String FILE_CSV_FLAT_FULL_LIST = "flatlist.csv";
@@ -48,6 +49,7 @@ public class BatchResults {
 		if (batchResults.size() > 0) {
 			Collections.sort(batchResults, new GraphResultsComparator());
 			writeSummaryCsv();
+			writeQuerySummaryCsv();
 			ArrayList<ArrayList<String>> modesToOutput = new ArrayList<ArrayList<String>>();
 			modesToOutput.add(new ArrayList<String>(Arrays.asList(new String[]{"max-20", "0.2"})));
 			modesToOutput.add(new ArrayList<String>(Arrays.asList(new String[]{"max-50", "0.5"})));
@@ -83,7 +85,7 @@ public class BatchResults {
 		int[] algorithms = new int[]{Helper.ALG_BETWEENNESS, Helper.ALG_EIGENVECTOR, Helper.ALG_INDEGREE, Helper.ALG_OUTDEGREE, Helper.ALG_PAGERANK};
 		int[] rewrMethods = new int[]{Helper.REWRITE_NODE1, Helper.REWRITE_NODE2, Helper.REWRITE_NODE3, Helper.REWRITE_NODE4, Helper.REWRITE_PATH};
 		
-		for (QueryWrapper query: queries.getQueries()) {
+		for (Query query: queries.getQueries()) {
 			ArrayList<ArrayList<String>> rows = new ArrayList<ArrayList<String>>();
 			int queryId = query.getQueryId();
 			
@@ -128,7 +130,7 @@ public class BatchResults {
 		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + FILE_CSV_AVG_RECALL_PER_QUERY);
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
 		writer.writeNext(new String[]{"queryId", "avgRecall"});
-		for (QueryWrapper query: queries.getQueries()) {
+		for (Query query: queries.getQueries()) {
 			int queryId = query.getQueryId();
 			
 			double totalRecall = 0.0;// totalrecall!
@@ -185,6 +187,29 @@ public class BatchResults {
 		writer.close();
 	}
 	
+	private void writeQuerySummaryCsv() throws IOException {
+		System.out.println("writing query summary CSV");
+		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + FILE_CSV_QUERY_SUMMARY);
+		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
+		ArrayList<String> headers = new ArrayList<String>();
+		headers.add("queryId");
+		for (GraphResults graphResults: batchResults) {
+			headers.add(graphResults.getProperName());
+		}
+		writer.writeNext(headers.toArray(new String[headers.size()]));
+		for (Query query: queries.getQueries()) {
+			ArrayList<String> row = new ArrayList<String>();
+			int queryId = query.getQueryId();
+			row.add(Integer.toString(queryId));
+			for (GraphResults graphResults: batchResults) {
+				row.add(Double.toString(graphResults.get(queryId).getRecall()));
+			}
+			writer.writeNext(row.toArray(new String[row.size()]));
+		}
+		
+		writer.close();
+	}
+	
 	/**
 	 * table with graph evaluations as columns, and queries per row (with query id as row header)
 	 * @throws IOException 
@@ -192,7 +217,7 @@ public class BatchResults {
 	private void outputAsCsvTable(ArrayList<String> onlyGraphsContaining) throws IOException {
 		System.out.println("writing csv files for "  + onlyGraphsContaining);
 		HashMap<Integer, ArrayList<String>> table = new HashMap<Integer, ArrayList<String>>();
-		for (QueryWrapper query: queries.getQueries()) {
+		for (Query query: queries.getQueries()) {
 			int queryId = query.getQueryId();
 			
 			ArrayList<String> row = new ArrayList<String>();
@@ -202,7 +227,7 @@ public class BatchResults {
 		
 		for (GraphResults graphResults: batchResults) {
 			if (Helper.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
-				for (QueryWrapper query: queries.getQueries()) {
+				for (Query query: queries.getQueries()) {
 					ArrayList<String> row = table.get(query.getQueryId());
 					if (graphResults.contains(query.getQueryId())) {
 						QueryResults queryResults = graphResults.get(query.getQueryId());
@@ -243,7 +268,7 @@ public class BatchResults {
 		
 		for (GraphResults graphResults: batchResults) {
 			if (Helper.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
-				for (QueryWrapper query: queries.getQueries()) {
+				for (Query query: queries.getQueries()) {
 					if (graphResults.contains(query.getQueryId())) {
 						writer.writeNext(new String[]{
 								Integer.toString(query.getQueryId()), 
@@ -382,7 +407,7 @@ public class BatchResults {
 		
 		
 		//fill first two col of table (queryId and avg for this query)
-		for (QueryWrapper query: queries.getQueries()) {
+		for (Query query: queries.getQueries()) {
 			int queryId = query.getQueryId();
 			
 			ArrayList<String> row = new ArrayList<String>();
@@ -403,10 +428,10 @@ public class BatchResults {
 			int goldenStandardSize = 0;
 			String url = "#";
 			if (batchResults.get(0).contains(queryId)) {
-				QueryWrapper queryWrapper = batchResults.get(0).get(queryId).getQuery();
+				Query queryObj = batchResults.get(0).get(queryId).getQuery();
 				goldenStandardSize = batchResults.get(0).get(queryId).getGoldenStandardSize();
-				String encodedQuery = URLEncoder.encode(queryWrapper.getQueryString(experimentSetup.getGoldenStandardGraph()), "UTF-8");
-				url = "http://yasgui.laurensrietveld.nl?endpoint=" + encodedEndpoint + "&query=" + encodedQuery + "&tabTitle=" + queryWrapper.getQueryId();
+				String encodedQuery = URLEncoder.encode(Helper.addFromClauseToQuery(queryObj, experimentSetup.getGoldenStandardGraph()).toString(), "UTF-8");
+				url = "http://yasgui.laurensrietveld.nl?endpoint=" + encodedEndpoint + "&query=" + encodedQuery + "&tabTitle=" + queryObj.getQueryId();
 			}
 			row.add("<td>" + queryId + "</td>");
 			if (experimentSetup.privateQueries()) {
@@ -414,10 +439,11 @@ public class BatchResults {
 			} else {
 				row.add("<td><a href='" + url + "' target='_blank'>" + Helper.getDoubleAsFormattedString(avgRecall) + " (n:" + goldenStandardSize + ")</a></td>");
 			}
-			row.add("<td>" + query.getNumberOfNonOptionalTriplePatterns() + "</td>");
-			row.add("<td>" + query.getTriplePatternCountCcv() + "</td>");
-			row.add("<td>" + query.getTriplePatternCountCvv() + "</td>");
-			row.add("<td>" + query.getTriplePatternCountVcc() + "</td>");
+			
+			row.add("<td>" + query.getNumberOfNonOptionalTriplePatterns() + "</td>");//non optional triple patterns
+			row.add("<td>" + query.triplePatternCountCcv + "</td>");
+			row.add("<td>" + query.triplePatternCountCvv + "</td>");
+			row.add("<td>" + query.triplePatternCountVcc + "</td>");
 			table.put(queryId, row);
 		}
 		
@@ -428,13 +454,14 @@ public class BatchResults {
 		for (GraphResults graphResults: batchResults) {
 			if (Helper.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
 				html += "\n<th>" + graphResults.getGraphName().substring("http://".length()).replace('_', '-') + "<br>(avg: " + Helper.getDoubleAsFormattedString(graphResults.getAverageRecall()) + ")</th>";
-				for (QueryWrapper query: queries.getQueries()) {
+				for (Query query: queries.getQueries()) {
 					ArrayList<String> row = table.get(query.getQueryId());
 					if (graphResults.contains(query.getQueryId())) {
 						QueryResults queryResults = graphResults.get(query.getQueryId());
-						String encodedQuery = URLEncoder.encode(queryResults.getQuery().getQueryString(graphResults.getGraphName()), "UTF-8");
+						String queryString = Helper.addFromClauseToQuery(queryResults.getQuery(), graphResults.getGraphName()).toString();
+						String encodedQuery = URLEncoder.encode(queryString, "UTF-8");
 						String url = "http://yasgui.laurensrietveld.nl?endpoint=" + encodedEndpoint + "&query=" + encodedQuery + "&tabTitle=" + queryResults.getQuery().getQueryId();
-						String title = StringEscapeUtils.escapeHtml(queryResults.getQuery().getQueryString(graphResults.getGraphName()));
+						String title = StringEscapeUtils.escapeHtml(queryString);
 						String cell = "<td title='" + title + "'><a href='" + url + "' target='_blank'>" + Helper.getDoubleAsFormattedString(queryResults.getRecall()) + "</a></td>";
 						if (experimentSetup.privateQueries()) {
 							row.add("<td>" + Helper.getDoubleAsFormattedString(queryResults.getRecall()) + "</td>");

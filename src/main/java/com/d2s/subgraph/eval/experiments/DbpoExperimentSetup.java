@@ -1,13 +1,14 @@
 package com.d2s.subgraph.eval.experiments;
 
 import java.io.IOException;
+
 import javax.xml.parsers.ParserConfigurationException;
+
 import org.xml.sax.SAXException;
 
 import com.d2s.subgraph.eval.EvaluateGraph;
 import com.d2s.subgraph.queries.GetQueries;
 import com.d2s.subgraph.queries.QaldDbpQueries;
-import com.d2s.subgraph.queries.filters.OnlyDboQueries;
 
 
 public class DbpoExperimentSetup implements ExperimentSetup {
@@ -29,7 +30,7 @@ public class DbpoExperimentSetup implements ExperimentSetup {
 	public DbpoExperimentSetup(int querySelection) throws SAXException, IOException, ParserConfigurationException, IllegalStateException {
 		this.querySelection = querySelection;
 		if (querySelection == QALD_KEEP_OPTIONALS || querySelection == QALD_REMOVE_OPTIONALS) {
-			queries = new QaldDbpQueries(QaldDbpQueries.QALD_2_QUERIES, (querySelection == QALD_REMOVE_OPTIONALS? true: false), new OnlyDboQueries());
+			queries = new QaldDbpQueries(QaldDbpQueries.QALD_2_QUERIES, (querySelection == QALD_REMOVE_OPTIONALS? true: false), true);
 		} else if (querySelection == QUERY_LOGS) {
 			throw new IllegalStateException("No implemented yet");
 		} else {

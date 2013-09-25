@@ -1,21 +1,13 @@
 package com.d2s.subgraph.eval.results;
 
 import java.util.ArrayList;
-
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
-import com.d2s.subgraph.queries.QueryWrapper;
-
-
-
-public class QueryResultsSample implements QueryResults {
-	private QueryWrapper query;
+public class QueryResultsSample extends QueryResults {
 	private ArrayList<QueryResults> allQueryResults = new ArrayList<QueryResults>();
-	private double precision;
-	private double recall;
 	private DescriptiveStatistics recallStats;
 	private DescriptiveStatistics precisionStats;
-	private int goldenStandardSize;
+	
 	public void add(ArrayList<QueryResults> allQueryResults) {
 		this.allQueryResults = allQueryResults;
 		aggregateToSingleObject();
@@ -75,35 +67,4 @@ public class QueryResultsSample implements QueryResults {
 	private double getMedianRecall() {
 		return recallStats.getPercentile(50);
 	}
-	
-	public QueryWrapper getQuery() {
-		return query;
-	}
-	public void setQuery(QueryWrapper evalQuery) {
-		this.query = evalQuery;
-	}
-	public double getPrecision() {
-		return precision;
-	}
-	public void setPrecision(double precision) {
-		this.precision = precision;
-	}
-	public double getRecall() {
-		return recall;
-	}
-	public void setRecall(double recall) {
-		this.recall = recall;
-	}
-	
-	public String toString() {
-		return "recall: " + Double.toString(recall) + " precision: " + Double.toString(precision);
-	}
-	public void setGoldenStandardSize(int resultSize) {
-		this.goldenStandardSize = resultSize;
-		
-	}
-	public int getGoldenStandardSize() {
-		return goldenStandardSize;
-	}
-	
 }

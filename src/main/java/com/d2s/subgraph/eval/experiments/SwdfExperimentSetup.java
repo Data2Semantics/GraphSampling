@@ -2,12 +2,12 @@ package com.d2s.subgraph.eval.experiments;
 
 import java.io.IOException;
 
+import org.data2semantics.query.filters.ConstructFilter;
+import org.data2semantics.query.filters.DescribeFilter;
+import org.data2semantics.query.filters.GraphClauseFilter;
 import com.d2s.subgraph.eval.EvaluateGraph;
 import com.d2s.subgraph.queries.GetQueries;
 import com.d2s.subgraph.queries.SwdfQueries;
-import com.d2s.subgraph.queries.filters.ConstructFilter;
-import com.d2s.subgraph.queries.filters.DescribeFilter;
-import com.d2s.subgraph.queries.filters.GraphClauseFilter;
 import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
 
 
@@ -19,11 +19,11 @@ public class SwdfExperimentSetup implements ExperimentSetup {
 	private static String QUERY_RESULTS_DIR = "swdfQueryResults";
 	private static String EVAL_RESULTS_DIR = "swdfResults";
 	private static boolean PRIVATE_QUERIES = true;
-	private static int MAX_NUM_QUERIES = 100;
+	private static int MAX_NUM_QUERIES = 500;
 	private GetQueries queries;
 	
 	public SwdfExperimentSetup() throws IOException {
-		queries = new SwdfQueries(false, MAX_NUM_QUERIES, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter(), new ConstructFilter());
+		queries = new SwdfQueries(true, MAX_NUM_QUERIES, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter(), new ConstructFilter());
 		queries.setMaxNQueries(MAX_NUM_QUERIES);
 	}
 	

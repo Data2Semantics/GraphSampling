@@ -3,18 +3,14 @@ package com.d2s.subgraph.queries;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
 
-import com.d2s.subgraph.eval.EvaluateGraphs;
-import com.d2s.subgraph.eval.experiments.DbpoExperimentSetup;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
-import com.d2s.subgraph.eval.experiments.LmdbExperimentSetup;
 import com.d2s.subgraph.eval.experiments.Sp2bExperimentSetup;
-import com.d2s.subgraph.eval.experiments.SwdfExperimentSetup;
 import com.d2s.subgraph.helpers.Helper;
-import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.rdf.model.Model;
 
 public class GetTriplesFromConstruct {
@@ -33,9 +29,9 @@ public class GetTriplesFromConstruct {
 		experimentSetup.getQueries().saveCsvCopy(new File(experimentSetup.getQueryTriplesDir() + "/queries.csv"));
 		File allTriples = new File(experimentSetup.getQueryTriplesDir() + "/allQueries.nt");
 		FileOutputStream allTripleOutputStream = new FileOutputStream(allTriples);
-		for (QueryWrapper query : experimentSetup.getQueries().getQueries()) {
+		for (Query query : experimentSetup.getQueries().getQueries()) {
 
-			Query queryWithFromClause = Helper.addFromClause(query.getQuery(), experimentSetup.getGoldenStandardGraph());
+			Query queryWithFromClause = Helper.addFromClauseToQuery(query, experimentSetup.getGoldenStandardGraph());
 			Query constructQuery = Helper.getAsConstructQuery(queryWithFromClause);
 			// System.out.println(constructQuery.toString());
 			Model model = Helper.executeConstruct(experimentSetup.getEndpoint(), constructQuery);

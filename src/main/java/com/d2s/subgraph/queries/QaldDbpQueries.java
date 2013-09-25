@@ -1,71 +1,68 @@
 package com.d2s.subgraph.queries;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
+import org.data2semantics.query.QueryCollection;
+import org.data2semantics.query.filters.QueryFilter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-import au.com.bytecode.opencsv.CSVWriter;
 import com.d2s.subgraph.eval.EvaluateGraph;
 import com.d2s.subgraph.eval.experiments.DbpoExperimentSetup;
 import com.d2s.subgraph.helpers.Helper;
-import com.d2s.subgraph.queries.filters.QueryFilter;
-import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QueryParseException;
 import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 
 
-public class QaldDbpQueries implements GetQueries {
+public class QaldDbpQueries extends GetQueries {
 	public static String QALD_1_QUERIES = "src/main/resources/qald1-dbpedia-train.xml";
 	public static String QALD_2_QUERIES = "src/main/resources/qald2-dbpedia-train.xml";
 	public static String QALD_3_QUERIES = "src/main/resources/qald3-dbpedia-train.xml";
 	private static String IGNORE_QUERY_STRING = "OUT OF SCOPE";
-	ArrayList<QueryWrapper> queries = new ArrayList<QueryWrapper>();
-	private int maxNumQueries = 0;
-	private QueryFilter[] filters;
-	private int filteredQueries = 0;
-	private int validQueries = 0;
-	private int invalidQueries = 0;
 	private boolean removeStringProjVar;
+	private boolean onlyDbo;
 	
-	
-	public QaldDbpQueries(String xmlFile, boolean removeStringProjVar, QueryFilter... filters) throws SAXException, IOException, ParserConfigurationException {
-		this.filters = filters;
+	public QaldDbpQueries(String xmlFile, boolean removeStringProjVar, boolean onlyDbo, QueryFilter... filters) throws SAXException, IOException, ParserConfigurationException {
+		this.filters = new ArrayList<QueryFilter>(Arrays.asList(filters));
 		this.removeStringProjVar = removeStringProjVar;
+		this.onlyDbo = onlyDbo;
 		parseXml(new File(xmlFile));
 		eraseEmptyresultQueries();
 	}
 
 	public QaldDbpQueries(String xmlFile, boolean removeStringProjVar) throws SAXException, IOException, ParserConfigurationException {
-		this(xmlFile, removeStringProjVar, new QueryFilter[]{});
+		this(xmlFile, removeStringProjVar, false);
+	}
+	public QaldDbpQueries(String xmlFile, boolean removeStringProjVar, boolean onlyDbo) throws SAXException, IOException, ParserConfigurationException {
+		this(xmlFile, removeStringProjVar, onlyDbo, new QueryFilter[]{});
 	}
 	
 	private void eraseEmptyresultQueries() {
-		ArrayList<QueryWrapper> validQueriesList = new ArrayList<QueryWrapper>();
+		ArrayList<Query> validQueriesList = new ArrayList<Query>();
 		int emptyQueries = 0;
 		int failedQueries = 0;
-		for (QueryWrapper queryWrapper: queries) {
+		for (Query query: queries) {
 			try {
-				Query query = QueryFactory.create(queryWrapper.getQueryString(DbpoExperimentSetup.GOLDEN_STANDARD_GRAPH));
-				QueryExecution queryExecution = QueryExecutionFactory.sparqlService(EvaluateGraph.OPS_VIRTUOSO, query);
+				Query goldenStandardQuery = (Query) query.getQueryStringWithFromClause(DbpoExperimentSetup.GOLDEN_STANDARD_GRAPH);
+				QueryExecution queryExecution = QueryExecutionFactory.sparqlService(EvaluateGraph.OPS_VIRTUOSO, goldenStandardQuery);
 				ResultSetRewindable result = ResultSetFactory.copyResults(queryExecution.execSelect());
 				if (Helper.getResultSize(result) > 0) {
-					validQueriesList.add(queryWrapper);
+					validQueriesList.add(query);
 				} else {
-					//System.out.println(queryWrapper.getQueryString(DbpoExperimentSetup.GOLDEN_STANDARD_GRAPH));
 					emptyQueries++;
 				}
 			} catch (Exception e) {
@@ -103,30 +100,24 @@ public class QaldDbpQueries implements GetQueries {
 	
 	private void doMainLoop(Node nNode) {
 		if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-			QueryWrapper evalQuery = new QueryWrapper();
 			NamedNodeMap map = nNode.getAttributes();
-			
-			
-			Node answerType = map.getNamedItem("answertype");
-			if (answerType != null) evalQuery.setAnswerType(answerType.getTextContent().trim());
-			
-			Node id = map.getNamedItem("id");
-			if (id != null) evalQuery.setQueryId(Integer.parseInt(id.getTextContent().trim()));
-			
+			boolean onlyDboVal = false;
 			Node onlyDbo = map.getNamedItem("onlydbo");
-			if (onlyDbo != null) evalQuery.setOnlyDbo(onlyDbo.getTextContent().trim().equals("true"));
-			storeQuery(evalQuery, (Element) nNode);
+			if (onlyDbo != null) onlyDboVal = onlyDbo.getTextContent().trim().equals("true");
+			
+			storeQuery(onlyDboVal, (Element) nNode);
 		}
 	}
 	
-	private void storeQuery(QueryWrapper evalQuery, Element element) {
+	private void storeQuery(boolean onlyDbo, Element element) {
 		Node queryNode = element.getElementsByTagName("query").item(0);
 		if (queryNode != null && queryNode.getTextContent().trim().length() > 0 && !queryNode.getTextContent().trim().equals(IGNORE_QUERY_STRING)) {
+			Query evalQuery;
 			try {
-				evalQuery.setQuery(queryNode.getTextContent());
+				evalQuery = Query.create(queryNode.getTextContent(), new QueryCollection());
 				if (removeStringProjVar) {
 					System.out.println("WATCH OUT!!!!!!!!!!!! Removing a project var!!!");
-					evalQuery.removeProjectVar("string");
+					evalQuery = Helper.removeProjectVarFromQuery(evalQuery, "string");
 				}
 			} catch (Exception e) {
 				invalidQueries++;
@@ -137,38 +128,19 @@ public class QaldDbpQueries implements GetQueries {
 		}
 	}
 	
-	private void filterAndStoreQuery(QueryWrapper query) {
-		if (checkFilters(query)) {
+	private void filterAndStoreQuery(Query query) {
+		//apply custom filter as well, where we filter out the onlydbo queries
+		if (checkFilters(query) || (onlyDbo && !query.isOnlyDbo())) {
 			validQueries++;
 			queries.add(query);
-			query.generateStats();
+			query.generateQueryStats();
 		} else {
 			filteredQueries++;
 		}
 			
 	}
 
-	/**
-	 * 
-	 * @param query
-	 * @return True if this query passed through all the filters, false if one of the filters matches
-	 */
-	private boolean checkFilters(QueryWrapper query) {
-		boolean passed = true;
-		try {
-			for (QueryFilter filter: filters) {
-				if (filter.filter(query)) {
-					passed = false;
-					break;
-				}
-			}
-		} catch (Exception e) {
-			System.out.println(query.toString());
-			e.printStackTrace();
-			System.exit(1);
-		}
-		return passed;
-	}
+	
 	
 	private Element getNodeAsElement(Node node) {
 		Element result = null;
@@ -205,61 +177,17 @@ public class QaldDbpQueries implements GetQueries {
 		}
 		return answers;
 	}
-	public void setMaxNQueries(int maxNum) {
-		this.maxNumQueries  = maxNum;
-	}
-
-	public ArrayList<QueryWrapper> getQueries() {
-		if (maxNumQueries > 0) {
-			maxNumQueries = Math.min(maxNumQueries,  queries.size());
-			return new ArrayList<QueryWrapper>(this.queries.subList(0, maxNumQueries));
-		} else {
-			return this.queries;
-		}
-	}
-	
-	public String toString() {
-		return "valids: " + validQueries + " invalids: " + invalidQueries + " filtered: " + filteredQueries ;
-	}
-	
-	public void saveCsvCopy(File csvFile) throws IOException {
-		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
-		writer.writeNext(new String[] { "queryId", "query" });
-		for (QueryWrapper query : queries) {
-			writer.writeNext(new String[] { Integer.toString(query.getQueryId()), query.toString() });
-		}
-		writer.close();
-	}
-	
 	
 	public static void main(String[] args)  {
 		
 		try {
 			
 			QaldDbpQueries qaldQueries = new QaldDbpQueries(QALD_2_QUERIES, true);
-			ArrayList<QueryWrapper> queries = qaldQueries.getQueries();
-			for (QueryWrapper query: queries) {
+			ArrayList<Query> queries = qaldQueries.getQueries();
+			for (Query query: queries) {
 				System.out.println(Integer.toString(query.getQueryId()));
 			}
 			
-//			qaldQueries = new QaldDbpQueries(QALD_3_QUERIES);
-//			queries = qaldQueries.getQueries();
-//			try  
-//			{
-//			    FileWriter fstream = new FileWriter("qald3.txt", true); //true tells to append data.
-//			    BufferedWriter out = new BufferedWriter(fstream);
-//				for (QueryWrapper query: queries) {
-//					    out.write("\n" + query.getQuery());
-//					}
-//				out.close();
-//					
-//				}
-//			catch (Exception e)
-//			{
-//			    System.err.println("Error: " + e.getMessage());
-//			}
-			
-//			System.out.println(qaldQueries.getQueries().size());
 		} catch (Exception e) {
 			System.out.println("bla");
 			e.printStackTrace();

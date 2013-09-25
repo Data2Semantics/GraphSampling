@@ -2,7 +2,10 @@ package com.d2s.subgraph.queries.filters;
 
 import java.util.Iterator;
 
-import com.d2s.subgraph.queries.QueryWrapper;
+import org.data2semantics.query.Query;
+import org.data2semantics.query.QueryCollection;
+import org.data2semantics.query.filters.QueryFilter;
+
 import com.hp.hpl.jena.sparql.core.TriplePath;
 import com.hp.hpl.jena.sparql.syntax.Element;
 import com.hp.hpl.jena.sparql.syntax.ElementPathBlock;
@@ -12,9 +15,9 @@ import com.hp.hpl.jena.sparql.syntax.ElementWalker;
 public class SimpleBgpFilter implements QueryFilter {
 	boolean isSimpleBgp = true;
 	boolean onlyVariables = true;
-	public boolean filter(final QueryWrapper query) {
+	public boolean filter(final Query query) {
 		isSimpleBgp = true;
-		Element qPattern = query.getQuery().getQueryPattern();
+		Element qPattern = query.getQueryPattern();
 
 		// This will walk through all parts of the query
 		ElementWalker.walk(qPattern,
@@ -42,17 +45,12 @@ public class SimpleBgpFilter implements QueryFilter {
 	
 	public static void main(String[] args)  {
 		try {
-			QueryWrapper queryWrapper = new QueryWrapper("ASK\n" + 
+			Query query = Query.create("ASK\n" + 
 					"WHERE\n" + 
-					"  { ?s ?p ?o }");
+					"  { ?s ?p ?o }", new QueryCollection());
 			SimpleBgpFilter filter = new SimpleBgpFilter();
 
-			System.out.println(filter.filter(queryWrapper));
-//			ArrayList<QueryWrapper> queries = qaldQueries.getQueries();
-			
-//			for (QueryWrapper query: queries) {
-//				System.out.println(Integer.toString(query.getQueryId()));
-//			}
+			System.out.println(filter.filter(query));
 			
 		} catch (Exception e) {
 			e.printStackTrace();
