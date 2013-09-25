@@ -8,6 +8,7 @@ import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
 
+import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 import com.d2s.subgraph.eval.experiments.Sp2bExperimentSetup;
 import com.d2s.subgraph.helpers.Helper;
@@ -26,15 +27,14 @@ public class GetTriplesFromConstruct {
 
 
 	public void run() throws RepositoryException, MalformedQueryException, QueryEvaluationException, IOException {
-		experimentSetup.getQueries().saveCsvCopy(new File(experimentSetup.getQueryTriplesDir() + "/queries.csv"));
 		File allTriples = new File(experimentSetup.getQueryTriplesDir() + "/allQueries.nt");
 		FileOutputStream allTripleOutputStream = new FileOutputStream(allTriples);
-		for (Query query : experimentSetup.getQueries().getQueries()) {
+		for (Query query : experimentSetup.getQueries().getQueryCollection().getQueries()) {
 
 			Query queryWithFromClause = Helper.addFromClauseToQuery(query, experimentSetup.getGoldenStandardGraph());
 			Query constructQuery = Helper.getAsConstructQuery(queryWithFromClause);
 			// System.out.println(constructQuery.toString());
-			Model model = Helper.executeConstruct(experimentSetup.getEndpoint(), constructQuery);
+			Model model = Helper.executeConstruct(Config.EXPERIMENT_ENDPOINT, constructQuery);
 			
 			File resultsFile = new File(experimentSetup.getQueryTriplesDir() + "/" + experimentSetup.getGraphPrefix() + "q" + Integer.toString(query.getQueryId())
 					+ ".nt");

@@ -4,7 +4,11 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+
+import org.data2semantics.query.QueryCollection;
+
 import au.com.bytecode.opencsv.CSVWriter;
+
 import com.d2s.subgraph.eval.experiments.DbpExperimentSetup;
 import com.d2s.subgraph.eval.experiments.DbpoExperimentSetup;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
@@ -12,7 +16,7 @@ import com.d2s.subgraph.eval.experiments.LgdExperimentSetup;
 import com.d2s.subgraph.eval.experiments.LmdbExperimentSetup;
 import com.d2s.subgraph.eval.experiments.Sp2bExperimentSetup;
 import com.d2s.subgraph.eval.experiments.SwdfExperimentSetup;
-import com.d2s.subgraph.queries.GetQueries;
+import com.d2s.subgraph.queries.QueryFetcher;
 
 
 public class GetQueryProperties {
@@ -28,14 +32,14 @@ public class GetQueryProperties {
 		
 		writer.writeNext(new String[]{"graph", "numJoins", "numNonOptTriplePatterns", "numCcv", "numCvv", "numVcc"});
 		for (ExperimentSetup experimentSetup: experimentSetups) {
-			ArrayList<Query> queries = experimentSetup.getQueries().getQueries();
+			QueryCollection<Query> queries = experimentSetup.getQueries().getQueryCollection();
 			int numJoins = 0;
 			int numLeftJoins = 0;
 			int numNonOptTriplePatterns = 0;
 			int patternCountCcv = 0;
 			int patternCountCvv = 0;
 			int patternCountVcc = 0;
-			for (Query query: queries) {
+			for (Query query: queries.getQueries()) {
 				numJoins += query.joinCount.getTotalJoins();
 				numNonOptTriplePatterns += query.getNumberOfNonOptionalTriplePatterns();
 				patternCountCcv += query.triplePatternCountCcv;

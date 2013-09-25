@@ -1,4 +1,4 @@
-package com.d2s.subgraph.eval;
+package com.d2s.subgraph.eval.generation;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -16,13 +16,14 @@ import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
 import org.xml.sax.SAXException;
 
+import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 import com.d2s.subgraph.eval.experiments.SwdfExperimentSetup;
 import com.d2s.subgraph.eval.results.BatchResults;
 import com.d2s.subgraph.eval.results.GraphResults;
 import com.d2s.subgraph.eval.results.GraphResultsSample;
 import com.d2s.subgraph.helpers.Helper;
-import com.d2s.subgraph.queries.GetQueries;
+import com.d2s.subgraph.queries.QueryFetcher;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -36,7 +37,7 @@ public class EvaluateGraphs {
 	private File resultsDir;
 	private ExperimentSetup experimentSetup;
 	private BatchResults batchResults;
-	private GetQueries queries;
+	private QueryFetcher queries;
 	private ArrayList<String> graphs = new ArrayList<String>();;
 	private HashMap<String,ArrayList<String>> sampleGraphs = new HashMap<String,ArrayList<String>>();
 	public EvaluateGraphs(ExperimentSetup experimentSetup) throws IOException {
@@ -58,7 +59,7 @@ public class EvaluateGraphs {
 		System.out.println("Running evaluation for graphs " + graphs.toString());
 		for (String graph: graphs) {
 			System.out.println("evaluating for graph " + graph);
-			EvaluateGraph eval = new EvaluateGraph(queries, EvaluateGraph.OPS_VIRTUOSO, experimentSetup, graph);
+			EvaluateGraph eval = new EvaluateGraph(queries, Config.EXPERIMENT_ENDPOINT, experimentSetup, graph);
 			eval.run();
 			GraphResults results = eval.getResults();
 			batchResults.add(results);
@@ -70,7 +71,7 @@ public class EvaluateGraphs {
 				GraphResultsSample sampleGraphResultsCombined = new GraphResultsSample();
 				ArrayList<GraphResults> sampleGraphResults = new ArrayList<GraphResults>();
 				for (String sampleGraph: entry.getValue()) {
-					EvaluateGraph eval = new EvaluateGraph(queries, EvaluateGraph.OPS_VIRTUOSO, experimentSetup, sampleGraph);
+					EvaluateGraph eval = new EvaluateGraph(queries, Config.EXPERIMENT_ENDPOINT, experimentSetup, sampleGraph);
 					eval.run();
 					sampleGraphResults.add(eval.getResults());
 				}
@@ -97,7 +98,7 @@ public class EvaluateGraphs {
 				"}";
 		System.out.println(queryString);
 		Query query = QueryFactory.create(queryString);
-		QueryExecution queryExecution = QueryExecutionFactory.sparqlService(EvaluateGraph.OPS_VIRTUOSO, query);
+		QueryExecution queryExecution = QueryExecutionFactory.sparqlService(Config.EXPERIMENT_ENDPOINT, query);
 		ResultSetRewindable queryResults =  ResultSetFactory.copyResults(queryExecution.execSelect());
 		while (queryResults.hasNext()) {
 			QuerySolution solution = queryResults.next();

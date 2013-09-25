@@ -14,32 +14,24 @@ import org.apache.commons.lang.StringEscapeUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
-import com.d2s.subgraph.eval.EvaluateGraph;
+import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
-import com.d2s.subgraph.eval.results.GraphResults;
 import com.d2s.subgraph.helpers.Helper;
 import com.d2s.subgraph.helpers.RHelper;
-import com.d2s.subgraph.queries.GetQueries;
+import com.d2s.subgraph.queries.QueryFetcher;
 import com.d2s.subgraph.queries.Query;
 
 public class BatchResults {
 	private File resultsDir;
 	private ArrayList<GraphResults> batchResults = new ArrayList<GraphResults>();
-	private GetQueries queries;
+	private QueryFetcher qFetcher;
 	private ExperimentSetup experimentSetup;
-	private static String FILE_CSV_SUMMARY = "summary.csv";
-	private static String FILE_CSV_QUERY_SUMMARY = "querySummary.csv";
-	private static String FILE_HTML_SUMMARY = "results.html";
-	private static String FILE_CSV_FULL_LIST = "list.csv";
-	private static String FILE_CSV_FLAT_FULL_LIST = "flatlist.csv";
-	private static String FILE_CSV_REWR_VS_ALGS = "rewrVsAlgs.csv";
-	private static String FILE_CSV_AVG_RECALL_PER_QUERY = "avgRecallPerQuery.csv";
-	private static String FILE_CSV_BEST_RECALL_PER_ALG = "bestRecallPerAlgorithm.csv";
+
 	private HashMap<String, Boolean> modesImported = new HashMap<String, Boolean>();
 	
-	public BatchResults(ExperimentSetup experimentSetup, GetQueries queries) throws IOException {
+	public BatchResults(ExperimentSetup experimentSetup, QueryFetcher qFetcher) throws IOException {
 		this.experimentSetup = experimentSetup;
-		this.queries = queries;
+		this.qFetcher = qFetcher;
 		this.resultsDir = new File(experimentSetup.getEvalResultsDir());
 		FileUtils.deleteDirectory(resultsDir);
 		resultsDir.mkdir();
@@ -79,13 +71,13 @@ public class BatchResults {
 	
 	
 	private void outputBestRecallPerAlgorithm(ArrayList<String> onlyGraphsContaining) throws IOException {
-		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + FILE_CSV_BEST_RECALL_PER_ALG);
+		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + Config.FILE_CSV_BEST_RECALL_PER_ALG);
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
 		writer.writeNext(new String[]{"queryId", "algorithm", "bestRecall", "avgQueryRecall"});
 		int[] algorithms = new int[]{Helper.ALG_BETWEENNESS, Helper.ALG_EIGENVECTOR, Helper.ALG_INDEGREE, Helper.ALG_OUTDEGREE, Helper.ALG_PAGERANK};
 		int[] rewrMethods = new int[]{Helper.REWRITE_NODE1, Helper.REWRITE_NODE2, Helper.REWRITE_NODE3, Helper.REWRITE_NODE4, Helper.REWRITE_PATH};
 		
-		for (Query query: queries.getQueries()) {
+		for (Query query: qFetcher.getQueryCollection().getQueries()) {
 			ArrayList<ArrayList<String>> rows = new ArrayList<ArrayList<String>>();
 			int queryId = query.getQueryId();
 			
@@ -127,10 +119,10 @@ public class BatchResults {
 	}
 
 	private void outputAverageRecallPerQuery(ArrayList<String> onlyGraphsContaining) throws IOException {
-		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + FILE_CSV_AVG_RECALL_PER_QUERY);
+		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + Config.FILE_CSV_AVG_RECALL_PER_QUERY);
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
 		writer.writeNext(new String[]{"queryId", "avgRecall"});
-		for (Query query: queries.getQueries()) {
+		for (Query query: qFetcher.getQueryCollection().getQueries()) {
 			int queryId = query.getQueryId();
 			
 			double totalRecall = 0.0;// totalrecall!
@@ -168,7 +160,7 @@ public class BatchResults {
 	}
 	private void writeSummaryCsv() throws IOException {
 		System.out.println("writing summary CSV");
-		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + FILE_CSV_SUMMARY);
+		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + Config.FILE_CSV_SUMMARY);
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
 		writer.writeNext(new String[]{"graph", "avg recall", "median recall", "std recall", "recallOnAllQueries", "goldenSize", "truePositives", "rewrMethod", "algorithm"});
 		for (GraphResults graphResults: batchResults) {
@@ -189,7 +181,7 @@ public class BatchResults {
 	
 	private void writeQuerySummaryCsv() throws IOException {
 		System.out.println("writing query summary CSV");
-		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + FILE_CSV_QUERY_SUMMARY);
+		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + Config.FILE_CSV_QUERY_SUMMARY);
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
 		ArrayList<String> headers = new ArrayList<String>();
 		headers.add("queryId");
@@ -197,7 +189,7 @@ public class BatchResults {
 			headers.add(graphResults.getProperName());
 		}
 		writer.writeNext(headers.toArray(new String[headers.size()]));
-		for (Query query: queries.getQueries()) {
+		for (Query query: qFetcher.getQueryCollection().getQueries()) {
 			ArrayList<String> row = new ArrayList<String>();
 			int queryId = query.getQueryId();
 			row.add(Integer.toString(queryId));
@@ -217,7 +209,7 @@ public class BatchResults {
 	private void outputAsCsvTable(ArrayList<String> onlyGraphsContaining) throws IOException {
 		System.out.println("writing csv files for "  + onlyGraphsContaining);
 		HashMap<Integer, ArrayList<String>> table = new HashMap<Integer, ArrayList<String>>();
-		for (Query query: queries.getQueries()) {
+		for (Query query: qFetcher.getQueryCollection().getQueries()) {
 			int queryId = query.getQueryId();
 			
 			ArrayList<String> row = new ArrayList<String>();
@@ -227,7 +219,7 @@ public class BatchResults {
 		
 		for (GraphResults graphResults: batchResults) {
 			if (Helper.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
-				for (Query query: queries.getQueries()) {
+				for (Query query: qFetcher.getQueryCollection().getQueries()) {
 					ArrayList<String> row = table.get(query.getQueryId());
 					if (graphResults.contains(query.getQueryId())) {
 						QueryResults queryResults = graphResults.get(query.getQueryId());
@@ -239,7 +231,7 @@ public class BatchResults {
 			}
 		}
 		
-		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + onlyGraphsContaining.get(0) + "_" + FILE_CSV_FULL_LIST);
+		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + onlyGraphsContaining.get(0) + "_" + Config.FILE_CSV_FULL_LIST);
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
 		ArrayList<String> header = new ArrayList<String>();
 		header.add("queryId");
@@ -262,13 +254,13 @@ public class BatchResults {
 	 */
 	private void outputAsCsvFlatList(ArrayList<String> onlyGraphsContaining) throws IOException {
 		System.out.println("writing csv flatlist for "  + onlyGraphsContaining);
-		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + onlyGraphsContaining.get(0) + "_"+ FILE_CSV_FLAT_FULL_LIST);
+		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + onlyGraphsContaining.get(0) + "_"+ Config.FILE_CSV_FLAT_FULL_LIST);
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
 		writer.writeNext(new String[]{"queryId", "graph", "recall", "rewrMethod", "algorithm"});
 		
 		for (GraphResults graphResults: batchResults) {
 			if (Helper.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
-				for (Query query: queries.getQueries()) {
+				for (Query query: qFetcher.getQueryCollection().getQueries()) {
 					if (graphResults.contains(query.getQueryId())) {
 						writer.writeNext(new String[]{
 								Integer.toString(query.getQueryId()), 
@@ -312,7 +304,7 @@ public class BatchResults {
 				hashmapPick.put(analysisAlgorithm, graphResults.getAverageRecall());
 			}
 		}
-		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + onlyGraphsContaining.get(0) + "_"+ FILE_CSV_REWR_VS_ALGS);
+		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + onlyGraphsContaining.get(0) + "_"+ Config.FILE_CSV_REWR_VS_ALGS);
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
 		double sampleAverage = getSampleAverage("0.5");
 		writer.writeNext(new String[]{Double.toString(sampleAverage), "eigenvector", "pagerank", "betweenness", "indegree", "outdegree"});
@@ -393,7 +385,7 @@ public class BatchResults {
 	 */
 	private void outputAsHtmlTable(ArrayList<String> onlyGraphsContaining) throws IOException {
 		System.out.println("writing html files for "  + onlyGraphsContaining);
-		String encodedEndpoint = URLEncoder.encode(EvaluateGraph.OPS_VIRTUOSO, "UTF-8"); 
+		String encodedEndpoint = URLEncoder.encode(Config.EXPERIMENT_ENDPOINT, "UTF-8"); 
 		String html = "<html><head>\n" +
 				"<link rel='stylesheet' href='http://www.few.vu.nl/~lrietveld/static/style.css' type='text/css' />\n" +
 				"<script src='http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js'></script>\n" +
@@ -407,7 +399,7 @@ public class BatchResults {
 		
 		
 		//fill first two col of table (queryId and avg for this query)
-		for (Query query: queries.getQueries()) {
+		for (Query query: qFetcher.getQueryCollection().getQueries()) {
 			int queryId = query.getQueryId();
 			
 			ArrayList<String> row = new ArrayList<String>();
@@ -454,7 +446,7 @@ public class BatchResults {
 		for (GraphResults graphResults: batchResults) {
 			if (Helper.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
 				html += "\n<th>" + graphResults.getGraphName().substring("http://".length()).replace('_', '-') + "<br>(avg: " + Helper.getDoubleAsFormattedString(graphResults.getAverageRecall()) + ")</th>";
-				for (Query query: queries.getQueries()) {
+				for (Query query: qFetcher.getQueryCollection().getQueries()) {
 					ArrayList<String> row = table.get(query.getQueryId());
 					if (graphResults.contains(query.getQueryId())) {
 						QueryResults queryResults = graphResults.get(query.getQueryId());
@@ -484,7 +476,7 @@ public class BatchResults {
 			html += "</tr>";
 		}
 		html += "\n</tbody> </table></body></html>";
-		FileUtils.writeStringToFile(new File(experimentSetup.getEvalResultsDir() + "/" + onlyGraphsContaining.get(0) + "_" + FILE_HTML_SUMMARY), html);
+		FileUtils.writeStringToFile(new File(experimentSetup.getEvalResultsDir() + "/" + onlyGraphsContaining.get(0) + "_" + Config.FILE_HTML_SUMMARY), html);
 	}
 	
 

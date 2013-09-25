@@ -6,8 +6,8 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
-import com.d2s.subgraph.eval.EvaluateGraph;
-import com.d2s.subgraph.queries.GetQueries;
+import com.d2s.subgraph.eval.generation.EvaluateGraph;
+import com.d2s.subgraph.queries.QueryFetcher;
 import com.d2s.subgraph.queries.QaldDbpQueries;
 
 
@@ -24,7 +24,7 @@ public class DbpoExperimentSetup implements ExperimentSetup {
 	private static boolean PRIVATE_QUERIES = true;
 	
 	private static int MAX_NUM_QUERIES = 0;//i.e. all
-	private GetQueries queries;
+	private QueryFetcher queries;
 	private int querySelection;
 	
 	public DbpoExperimentSetup(int querySelection) throws SAXException, IOException, ParserConfigurationException, IllegalStateException {
@@ -45,7 +45,7 @@ public class DbpoExperimentSetup implements ExperimentSetup {
 	public String getGraphPrefix() {
 		return GRAPH_PREFIX;
 	}
-	public GetQueries getQueries() {
+	public QueryFetcher getQueries() {
 		return queries;
 	}
 
@@ -63,9 +63,7 @@ public class DbpoExperimentSetup implements ExperimentSetup {
 	public int getMaxNumQueries() {
 		return MAX_NUM_QUERIES;
 	}
-	public String getEndpoint() {
-		return EvaluateGraph.OPS_VIRTUOSO;
-	}
+
 	public String getQueryTriplesDir() {
 		return QUERY_TRIPLES_DIR;
 	}

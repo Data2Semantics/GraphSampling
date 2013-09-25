@@ -1,4 +1,4 @@
-package com.d2s.subgraph.eval;
+package com.d2s.subgraph.eval.generation;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,13 +8,14 @@ import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
 
+import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 import com.d2s.subgraph.eval.experiments.Sp2bExperimentSetup;
 import com.d2s.subgraph.eval.results.GraphResults;
 import com.d2s.subgraph.eval.results.GraphResultsRegular;
 import com.d2s.subgraph.eval.results.QueryResultsRegular;
 import com.d2s.subgraph.helpers.Helper;
-import com.d2s.subgraph.queries.GetQueries;
+import com.d2s.subgraph.queries.QueryFetcher;
 import com.d2s.subgraph.queries.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -24,8 +25,7 @@ import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 public class EvaluateGraph {
-	public static String OPS_VIRTUOSO = "http://ops.few.vu.nl:8890/sparql";
-	private ArrayList<Query> queries = new ArrayList<Query>();
+	private QueryCollection<Query> queryCollection;
 	private String goldenStandardGraph;
 	private String subGraph;
 	private ExperimentSetup experimentSetup;
@@ -34,8 +34,8 @@ public class EvaluateGraph {
 	private String endpoint;
 	GraphResults graphResults = new GraphResultsRegular();
 
-	public EvaluateGraph(GetQueries getQueries, String endpoint, ExperimentSetup experimentSetup, String subGraph) {
-		queries = getQueries.getQueries();
+	public EvaluateGraph(QueryFetcher getQueries, String endpoint, ExperimentSetup experimentSetup, String subGraph) {
+		queryCollection = getQueries.getQueryCollection();
 		this.endpoint = endpoint;
 		this.goldenStandardGraph = experimentSetup.getGoldenStandardGraph();
 		this.experimentSetup = experimentSetup;
@@ -52,7 +52,7 @@ public class EvaluateGraph {
 	}
 
 	public void run() throws RepositoryException, MalformedQueryException, QueryEvaluationException, IOException, IllegalStateException {
-		for (Query evalQuery : queries) {
+		for (Query evalQuery : queryCollection.getQueries()) {
 			runForQuery(evalQuery);
 		}
 		System.out.println();
@@ -241,7 +241,7 @@ public class EvaluateGraph {
 			// EvaluateGraph.OPS_VIRTUOSO, goldenStandardGraph, subgraph);
 			// EvaluateGraph evaluate = new EvaluateGraph(new SwdfQueries(new DescribeFilter(), new SimpleBgpFilter()),
 			// EvaluateGraph.OPS_VIRTUOSO, goldenStandardGraph, subgraph);
-			EvaluateGraph evaluate = new EvaluateGraph(EvaluateGraph.OPS_VIRTUOSO, new Sp2bExperimentSetup(), subgraph);
+			EvaluateGraph evaluate = new EvaluateGraph(Config.EXPERIMENT_ENDPOINT, new Sp2bExperimentSetup(), subgraph);
 			Query query = Query.create("", new QueryCollection());
 			evaluate.runForQuery(query);
 		} catch (Exception e) {

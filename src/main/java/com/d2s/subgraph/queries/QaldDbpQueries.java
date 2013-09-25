@@ -18,7 +18,8 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-import com.d2s.subgraph.eval.EvaluateGraph;
+
+import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.experiments.DbpoExperimentSetup;
 import com.d2s.subgraph.helpers.Helper;
 import com.hp.hpl.jena.query.QueryExecution;
@@ -28,7 +29,7 @@ import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 
 
-public class QaldDbpQueries extends GetQueries {
+public class QaldDbpQueries extends QueryFetcher {
 	public static String QALD_1_QUERIES = "src/main/resources/qald1-dbpedia-train.xml";
 	public static String QALD_2_QUERIES = "src/main/resources/qald2-dbpedia-train.xml";
 	public static String QALD_3_QUERIES = "src/main/resources/qald3-dbpedia-train.xml";
@@ -37,6 +38,7 @@ public class QaldDbpQueries extends GetQueries {
 	private boolean onlyDbo;
 	
 	public QaldDbpQueries(String xmlFile, boolean removeStringProjVar, boolean onlyDbo, QueryFilter... filters) throws SAXException, IOException, ParserConfigurationException {
+		super();
 		this.filters = new ArrayList<QueryFilter>(Arrays.asList(filters));
 		this.removeStringProjVar = removeStringProjVar;
 		this.onlyDbo = onlyDbo;
@@ -51,17 +53,17 @@ public class QaldDbpQueries extends GetQueries {
 		this(xmlFile, removeStringProjVar, onlyDbo, new QueryFilter[]{});
 	}
 	
-	private void eraseEmptyresultQueries() {
-		ArrayList<Query> validQueriesList = new ArrayList<Query>();
+	private void eraseEmptyresultQueries() throws IOException {
 		int emptyQueries = 0;
 		int failedQueries = 0;
-		for (Query query: queries) {
+		QueryCollection<Query> validQueryCollection = new QueryCollection<Query>();
+		for (Query query: queryCollection.getQueries()) {
 			try {
 				Query goldenStandardQuery = (Query) query.getQueryStringWithFromClause(DbpoExperimentSetup.GOLDEN_STANDARD_GRAPH);
-				QueryExecution queryExecution = QueryExecutionFactory.sparqlService(EvaluateGraph.OPS_VIRTUOSO, goldenStandardQuery);
+				QueryExecution queryExecution = QueryExecutionFactory.sparqlService(Config.EXPERIMENT_ENDPOINT, goldenStandardQuery);
 				ResultSetRewindable result = ResultSetFactory.copyResults(queryExecution.execSelect());
 				if (Helper.getResultSize(result) > 0) {
-					validQueriesList.add(query);
+					validQueryCollection.addQuery(query);
 				} else {
 					emptyQueries++;
 				}
@@ -71,7 +73,7 @@ public class QaldDbpQueries extends GetQueries {
 			}
 		}
 		System.out.println("ignored " + (emptyQueries + failedQueries) + " queries from xml. Empty queries: " + emptyQueries + ", failed queries: " + failedQueries);
-		queries = validQueriesList;
+		queryCollection = validQueryCollection;
 	}
 	private void parseXml(File xmlFile) throws SAXException, IOException, ParserConfigurationException {
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -114,7 +116,7 @@ public class QaldDbpQueries extends GetQueries {
 		if (queryNode != null && queryNode.getTextContent().trim().length() > 0 && !queryNode.getTextContent().trim().equals(IGNORE_QUERY_STRING)) {
 			Query evalQuery;
 			try {
-				evalQuery = Query.create(queryNode.getTextContent(), new QueryCollection());
+				evalQuery = Query.create(queryNode.getTextContent(), queryCollection);
 				if (removeStringProjVar) {
 					System.out.println("WATCH OUT!!!!!!!!!!!! Removing a project var!!!");
 					evalQuery = Helper.removeProjectVarFromQuery(evalQuery, "string");
@@ -128,18 +130,16 @@ public class QaldDbpQueries extends GetQueries {
 		}
 	}
 	
-	private void filterAndStoreQuery(Query query) {
+	protected void filterAndStoreQuery(Query query) {
 		//apply custom filter as well, where we filter out the onlydbo queries
 		if (checkFilters(query) || (onlyDbo && !query.isOnlyDbo())) {
-			validQueries++;
-			queries.add(query);
-			query.generateQueryStats();
+			queryCollection.addQuery(query);
 		} else {
 			filteredQueries++;
 		}
 			
 	}
-
+	
 	
 	
 	private Element getNodeAsElement(Node node) {
@@ -183,8 +183,7 @@ public class QaldDbpQueries extends GetQueries {
 		try {
 			
 			QaldDbpQueries qaldQueries = new QaldDbpQueries(QALD_2_QUERIES, true);
-			ArrayList<Query> queries = qaldQueries.getQueries();
-			for (Query query: queries) {
+			for (Query query: qaldQueries.getQueryCollection().getQueries()) {
 				System.out.println(Integer.toString(query.getQueryId()));
 			}
 			

@@ -7,28 +7,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.data2semantics.query.QueryCollection;
 import org.data2semantics.query.filters.QueryFilter;
 
-import com.d2s.subgraph.eval.experiments.Sp2bExperimentSetup;
-import com.d2s.subgraph.helpers.Helper;
-import com.hp.hpl.jena.query.QueryParseException;
-
-public class Sp2bQueries extends GetQueries {
+public class Sp2bQueries extends QueryFetcher {
 	private static String QUERY_DIR = "src/main/resources/sp2bQueries";
 	private static String QUERY_FILE_EXTENSION = "sparql";
-	private static boolean ONLY_UNIQUE = true;
 
 	public Sp2bQueries(QueryFilter... filters) throws IOException {
+		super();
 		System.out.println("parsing sp2b query logs");
 		this.filters = new ArrayList<QueryFilter>(Arrays.asList(filters));
 		parseQueryDir();
-		if (ONLY_UNIQUE) {
-			// we have stored stuff in hashmap to keep queries unique. now get them as regular queries
-			queries = new ArrayList<Query>(queriesHm.values());
-			queriesHm.clear();
-		}
 	}
 
 	private void parseQueryDir() throws IOException {
@@ -46,7 +35,7 @@ public class Sp2bQueries extends GetQueries {
 		
 		for (File queryFile: queryFiles) {
 			addQueryFileToList(queryFile);
-			if (queries.size() > maxNumQueries) {
+			if (queryCollection.getDistinctQueryCount() > maxNumQueries) {
 				break;
 			}
 			
@@ -56,36 +45,7 @@ public class Sp2bQueries extends GetQueries {
 	private void addQueryFileToList(File queryFile) throws IOException {
 		
 		String queryString = FileUtils.readFileToString(queryFile);
-		String basename = FilenameUtils.removeExtension(queryFile.getName());
-		int queryId = Integer.parseInt(basename.substring(1));
-		try {
-			Query query = Query.create(queryString, new QueryCollection());
-			query.setQueryId(queryId);
-			if (checkFilters(query)) {
-				if (ONLY_UNIQUE) {
-					if (queriesHm.containsKey(query)) {
-						duplicateQueries++;
-					} else {
-						if (hasResults(Helper.addFromClauseToQuery(query, Sp2bExperimentSetup.GOLDEN_STANDARD_GRAPH))) {
-							query.setQueryId(validQueries);
-							queriesHm.put(query, query);
-							validQueries++;
-						} else {
-							noResultsQueries++;
-						}
-					}
-				} else {
-					queries.add(query);
-					validQueries++;
-				}
-				query.generateQueryStats();
-			} else {
-				filteredQueries++;
-			}
-		} catch (QueryParseException e) {
-			// could not parse query, probably a faulty one. ignore!
-			invalidQueries++;
-		}
+		addQueryToList(queryString);
 	}
 
 

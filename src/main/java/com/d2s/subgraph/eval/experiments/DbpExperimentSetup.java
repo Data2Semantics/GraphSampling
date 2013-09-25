@@ -5,9 +5,10 @@ import java.io.IOException;
 import org.data2semantics.query.filters.ConstructFilter;
 import org.data2semantics.query.filters.DescribeFilter;
 import org.data2semantics.query.filters.GraphClauseFilter;
-import com.d2s.subgraph.eval.EvaluateGraph;
+
+import com.d2s.subgraph.eval.generation.EvaluateGraph;
 import com.d2s.subgraph.queries.DbpQueries;
-import com.d2s.subgraph.queries.GetQueries;
+import com.d2s.subgraph.queries.QueryFetcher;
 import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
 
 
@@ -20,7 +21,7 @@ public class DbpExperimentSetup implements ExperimentSetup {
 	private static String EVAL_RESULTS_DIR = "dbplResults";
 	private static boolean PRIVATE_QUERIES = false;
 	private static int MAX_NUM_QUERIES = 100;
-	private GetQueries queries;
+	private QueryFetcher queries;
 	
 	public DbpExperimentSetup() throws IOException {
 		queries = new DbpQueries(false, MAX_NUM_QUERIES, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter(), new ConstructFilter());
@@ -32,7 +33,7 @@ public class DbpExperimentSetup implements ExperimentSetup {
 	public String getGraphPrefix() {
 		return GRAPH_PREFIX;
 	}
-	public GetQueries getQueries() {
+	public QueryFetcher getQueries() {
 		return queries;
 	}
 	
@@ -42,9 +43,6 @@ public class DbpExperimentSetup implements ExperimentSetup {
 	}
 	public int getMaxNumQueries() {
 		return MAX_NUM_QUERIES;
-	}
-	public String getEndpoint() {
-		return EvaluateGraph.OPS_VIRTUOSO;
 	}
 	public String getQueryTriplesDir() {
 		return QUERY_TRIPLES_DIR;

@@ -4,8 +4,9 @@ import java.io.IOException;
 
 import org.data2semantics.query.filters.DescribeFilter;
 import org.data2semantics.query.filters.GraphClauseFilter;
-import com.d2s.subgraph.eval.EvaluateGraph;
-import com.d2s.subgraph.queries.GetQueries;
+
+import com.d2s.subgraph.eval.generation.EvaluateGraph;
+import com.d2s.subgraph.queries.QueryFetcher;
 import com.d2s.subgraph.queries.Sp2bQueries;
 import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
 
@@ -19,7 +20,7 @@ public class Sp2bExperimentSetup implements ExperimentSetup {
 	private static String QUERY_RESULTS_DIR = "sp2bQueryResults";
 	private static boolean PRIVATE_QUERIES = false;
 	private static int MAX_NUM_QUERIES = 0;
-	private GetQueries queries;
+	private QueryFetcher queries;
 	
 	public Sp2bExperimentSetup() throws IOException {
 		queries = new Sp2bQueries(new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter());
@@ -32,7 +33,7 @@ public class Sp2bExperimentSetup implements ExperimentSetup {
 	public String getGraphPrefix() {
 		return GRAPH_PREFIX;
 	}
-	public GetQueries getQueries() {
+	public QueryFetcher getQueries() {
 		return queries;
 	}
 	
@@ -48,9 +49,7 @@ public class Sp2bExperimentSetup implements ExperimentSetup {
 	public int getMaxNumQueries() {
 		return MAX_NUM_QUERIES;
 	}
-	public String getEndpoint() {
-		return EvaluateGraph.OPS_VIRTUOSO;
-	}
+
 	public String getQueryResultsDir() {
 		return QUERY_RESULTS_DIR;
 	}

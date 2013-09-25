@@ -7,8 +7,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.data2semantics.query.filters.DescribeFilter;
 import org.data2semantics.query.filters.GraphClauseFilter;
 import org.xml.sax.SAXException;
-import com.d2s.subgraph.eval.EvaluateGraph;
-import com.d2s.subgraph.queries.GetQueries;
+
+import com.d2s.subgraph.eval.generation.EvaluateGraph;
+import com.d2s.subgraph.queries.QueryFetcher;
 import com.d2s.subgraph.queries.LmdbQueries;
 import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
 
@@ -21,7 +22,7 @@ public class LmdbExperimentSetup implements ExperimentSetup {
 	private static String QUERY_RESULTS_DIR = "lmdbQueryResults";
 	private static boolean PRIVATE_QUERIES = false;
 	private static int MAX_NUM_QUERIES = 0;//i.e. all
-	private GetQueries queries;
+	private QueryFetcher queries;
 	public LmdbExperimentSetup() throws SAXException, IOException, ParserConfigurationException {
 		queries = new LmdbQueries(true, new GraphClauseFilter(), new SimpleBgpFilter(), new DescribeFilter());
 		queries.setMaxNQueries(MAX_NUM_QUERIES);
@@ -33,7 +34,7 @@ public class LmdbExperimentSetup implements ExperimentSetup {
 	public String getGraphPrefix() {
 		return GRAPH_PREFIX;
 	}
-	public GetQueries getQueries() {
+	public QueryFetcher getQueries() {
 		return queries;
 	}
 
@@ -43,9 +44,7 @@ public class LmdbExperimentSetup implements ExperimentSetup {
 	public int getMaxNumQueries() {
 		return MAX_NUM_QUERIES;
 	}
-	public String getEndpoint() {
-		return EvaluateGraph.OPS_VIRTUOSO;
-	}
+
 	public String getQueryTriplesDir() {
 		return QUERY_TRIPLES_DIR;
 	}
