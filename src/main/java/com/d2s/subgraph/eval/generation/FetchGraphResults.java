@@ -23,7 +23,7 @@ import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
-public class EvaluateGraph {
+public class FetchGraphResults {
 	private QueryCollection<Query> queryCollection;
 	private String goldenStandardGraph;
 	private String subGraph;
@@ -31,9 +31,9 @@ public class EvaluateGraph {
 	public int validCount = 0;
 	public int invalidCount = 0;
 	private String endpoint;
-	GraphResults graphResults = new GraphResultsRegular();
+	GraphResults graphResults;
 
-	public EvaluateGraph(QueryCollection<Query> queryCollection, String endpoint, ExperimentSetup experimentSetup, String subGraph) {
+	public FetchGraphResults(QueryCollection<Query> queryCollection, String endpoint, ExperimentSetup experimentSetup, String subGraph) {
 		this.queryCollection = queryCollection;
 		this.endpoint = endpoint;
 		this.goldenStandardGraph = experimentSetup.getGoldenStandardGraph();
@@ -42,7 +42,7 @@ public class EvaluateGraph {
 		graphResults.setGraphName(subGraph);
 	}
 
-	public EvaluateGraph(String endpoint, ExperimentSetup experimentSetup, String subGraph) {
+	public FetchGraphResults(String endpoint, ExperimentSetup experimentSetup, String subGraph) {
 		this.endpoint = endpoint;
 		this.goldenStandardGraph = experimentSetup.getGoldenStandardGraph();
 		this.experimentSetup = experimentSetup;
@@ -62,20 +62,20 @@ public class EvaluateGraph {
 		}
 	}
 
-	public void runForQuery(Query evalQuery) throws QueryEvaluationException {
-		if (evalQuery.isSelectType()) {
+	public void runForQuery(Query query) throws QueryEvaluationException {
+		if (query.isSelectType()) {
 			ResultSetRewindable goldenStandardResults;
 			ResultSetRewindable subgraphResults;
 			// System.out.println(evalQuery.getQueryString(subGraph));
 			try {
-				if (evalQuery.getGoldenStandardResults() == null) {
+				if (query.getGoldenStandardResults() == null) {
 					//store golden standard results, so we don't have to execute this query for every subgraph
-					goldenStandardResults = executeSelect(endpoint, Helper.addFromClauseToQuery(evalQuery, goldenStandardGraph));
-					evalQuery.setGoldenStandardResults(goldenStandardResults);
+					goldenStandardResults = executeSelect(endpoint, Helper.addFromClauseToQuery(query, goldenStandardGraph));
+					query.setGoldenStandardResults(goldenStandardResults);
 				} else {
-					goldenStandardResults = evalQuery.getGoldenStandardResults();
+					goldenStandardResults = query.getGoldenStandardResults();
 				}
-				subgraphResults = executeSelect(endpoint, Helper.addFromClauseToQuery(evalQuery, subGraph));
+				subgraphResults = executeSelect(endpoint, Helper.addFromClauseToQuery(query, subGraph));
 			} catch (Exception e) {
 				// e.printStackTrace();
 				invalidCount++;
@@ -96,20 +96,22 @@ public class EvaluateGraph {
 				// double recall = getRecallOnBindings(goldenStandardResults, subgraphResults);
 				if (recall > 1.0) {
 					System.out.println("recall higher than 1.0???? yeah, right");
-					System.out.println(Helper.addFromClauseToQuery(evalQuery, subGraph).toString());
+					System.out.println(Helper.addFromClauseToQuery(query, subGraph).toString());
 					System.exit(1);
 				}
+				
 				QueryResultsRegular result = new QueryResultsRegular();
-				result.setQuery(evalQuery);
+//				result.setQuery(evalQuery);
 				result.setPrecision(0.0);// NOTICE: set to 0.0 for now. saves us time to calculate (we don't use precision anyway)
 				result.setRecall(recall);
 				result.setGoldenStandardSize(goldenSize);
-				graphResults.add(result);
+				query.setResults(result);
+				graphResults.add(query);
 				
 				// System.out.println(result.toString());
 				System.out.print(recall + ":");
 			}
-		} else if (evalQuery.isAskType()) {
+		} else if (query.isAskType()) {
 			// todo
 		}
 	}
@@ -240,7 +242,7 @@ public class EvaluateGraph {
 			// EvaluateGraph.OPS_VIRTUOSO, goldenStandardGraph, subgraph);
 			// EvaluateGraph evaluate = new EvaluateGraph(new SwdfQueries(new DescribeFilter(), new SimpleBgpFilter()),
 			// EvaluateGraph.OPS_VIRTUOSO, goldenStandardGraph, subgraph);
-			EvaluateGraph evaluate = new EvaluateGraph(Config.EXPERIMENT_ENDPOINT, new Sp2bExperimentSetup(), subgraph);
+			FetchGraphResults evaluate = new FetchGraphResults(Config.EXPERIMENT_ENDPOINT, new Sp2bExperimentSetup(), subgraph);
 			Query query = Query.create("", new QueryCollection<Query>());
 			evaluate.runForQuery(query);
 		} catch (Exception e) {

@@ -1,17 +1,25 @@
 package com.d2s.subgraph.eval.results;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import com.d2s.subgraph.queries.Query;
+
 public class GraphResultsSample extends GraphResults{
+	public GraphResultsSample() throws IOException {
+		super();
+	}
+
 	private ArrayList<GraphResults> allGraphResults = new ArrayList<GraphResults>();
 	
-	public void add(QueryResults result) {
+	public void add(Query result) {
 		//do nothing. (this object is more of a wrapper for other graph results objects)
+		throw new UnsupportedOperationException("Adding query(results) to this method is not supported (this object is more of a wrapper for other graph results objects)");
 	}
 	
 	/**
-	 * aggregate these indivudal sample results to this one sample resultset
+	 * aggregate these individual sample results to this one sample resultset
 	 * @param individualSampleResults
 	 */
 	public void add(ArrayList<GraphResults> allGraphResults) {
@@ -25,15 +33,17 @@ public class GraphResultsSample extends GraphResults{
 		String pattern = "(.*sample)(-\\d+)(.*)"; //remove the appended number from this run
 		setGraphName(exampleGraphName.replaceAll(pattern, "$1$3")); 
 		
-		ArrayList<Integer> queryIds = allGraphResults.get(0).getQueryIds();
-		for (int queryId: queryIds) {
+		ArrayList<Query> queries = new ArrayList<Query>(allGraphResults.get(0).getQueryCollection().getQueries());
+		for (Query query: queries) {
 			QueryResultsSample queryResultsSample = new QueryResultsSample();
-			ArrayList<QueryResults> allQueryResults = new ArrayList<QueryResults>();
+			ArrayList<Query> allQueryResults = new ArrayList<Query>();
 			for (GraphResults graphResults: allGraphResults) {
-				allQueryResults.add(graphResults.get(queryId));
+				allQueryResults.add(graphResults.getQueryCollection().getQuery(query.toString()));
 			}
 			queryResultsSample.add(allQueryResults);
-			results.put(queryId, queryResultsSample);
+			query.setResults(queryResultsSample);
+//			results.put(queryId, queryResultsSample);
+			queryCollection.addQuery(query);
 		}
 	}
 	

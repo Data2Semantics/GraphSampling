@@ -19,6 +19,7 @@ public class DbpExperimentSetup implements ExperimentSetup {
 	private static String QUERY_TRIPLES_DIR = "dbplTriples";
 	private static String QUERY_RESULTS_DIR = "dbplQueryResults";
 	private static String EVAL_RESULTS_DIR = "dbplResults";
+	private static boolean UNIQUE_QUERIES = true;
 	private static boolean PRIVATE_QUERIES = false;
 	private static int MAX_NUM_QUERIES = 100;
 	private QueriesFetcher qFetcher;
@@ -52,5 +53,8 @@ public class DbpExperimentSetup implements ExperimentSetup {
 	}
 	public boolean privateQueries() {
 		return PRIVATE_QUERIES;
+	}
+	public boolean useUniqueQueries() {
+		return UNIQUE_QUERIES;
 	}
 }

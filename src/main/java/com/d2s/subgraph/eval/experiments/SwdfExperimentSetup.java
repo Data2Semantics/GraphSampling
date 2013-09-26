@@ -23,6 +23,7 @@ public class SwdfExperimentSetup implements ExperimentSetup {
 	private static boolean PRIVATE_QUERIES = true;
 	private static int MAX_NUM_QUERIES = 500;
 	private QueriesFetcher queriesFetcher;
+	private boolean UNIQUE_QUERIES = true;
 	
 	public SwdfExperimentSetup() throws IOException {
 		queriesFetcher = new SwdfQueries(true, MAX_NUM_QUERIES, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter(), new ConstructFilter());
@@ -55,5 +56,8 @@ public class SwdfExperimentSetup implements ExperimentSetup {
 	}
 	public boolean privateQueries() {
 		return PRIVATE_QUERIES;
+	}
+	public boolean useUniqueQueries() {
+		return UNIQUE_QUERIES ;
 	}
 }

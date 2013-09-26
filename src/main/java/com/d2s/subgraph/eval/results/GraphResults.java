@@ -4,96 +4,95 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-
+import org.data2semantics.query.QueryCollection;
 import au.com.bytecode.opencsv.CSVWriter;
-
 import com.d2s.subgraph.helpers.Helper;
+import com.d2s.subgraph.queries.Query;
 
 
 
 public abstract class GraphResults {
 	
-	protected HashMap<Integer, QueryResults> results = new HashMap<Integer, QueryResults>();
+	protected QueryCollection<Query> queryCollection;
+//	protected HashMap<Integer, QueryResults> results = new HashMap<Integer, QueryResults>();
 	protected String graphName;
 	protected int totalTruePositives = 0;
 	protected int totalGoldenStandardSize = 0;
 	
-	public abstract void add(QueryResults result);
+	public abstract void add(Query query);
 	protected abstract String getRewriteMethod();
 	protected abstract String getAlgorithm();
 	protected abstract int getPercentage();
 	protected abstract String getShortGraphName();
 	protected abstract String getProperName();
 	
-	protected QueryResults get(int queryId) {
-		return results.get(queryId);
-	}
-	protected boolean contains(int queryId) {
-		return results.containsKey(queryId);
-	}
+//	protected QueryResults get(int queryId) {
+//		return results.get(queryId);
+//	}
+//	protected boolean contains(int queryId) {
+//		return results.containsKey(queryId);
+//	}
+//	
+//	protected boolean queryIdExists(int queryId) {
+//		return results.containsKey(queryId);
+//	}
 	
-	protected boolean queryIdExists(int queryId) {
-		return results.containsKey(queryId);
+//	
+	public GraphResults() throws IOException {
+		queryCollection = new QueryCollection<Query>();
 	}
-	
 	public void writeAsCsv(String path) throws IOException {
 		path += "/" + getGraphName().substring(7) + ".csv";//remove http://
 		File csvFile = new File(path);
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
 		writer.writeNext(new String[]{"queryId", "isAggregation", "isAsk", "isOnlyDbo", "isSelect", "recall", "query"});
-		for (QueryResults result: results.values()) {
+		for (Query query: queryCollection.getQueries()) {
+			QueryResults result = query.getResults();
 			ArrayList<String> columns = new ArrayList<String>();
-			columns.add(Integer.toString(result.getQuery().getQueryId()));
-			columns.add(Helper.boolAsString(result.getQuery().hasAggregators()));
-			columns.add(Helper.boolAsString(result.getQuery().isAskType()));
-			columns.add(Helper.boolAsString(result.getQuery().isOnlyDbo()));
-			columns.add(Helper.boolAsString(result.getQuery().isSelectType()));
+			columns.add(Integer.toString(query.getQueryId()));
+			columns.add(Helper.boolAsString(query.hasAggregators()));
+			columns.add(Helper.boolAsString(query.isAskType()));
+			columns.add(Helper.boolAsString(query.isOnlyDbo()));
+			columns.add(Helper.boolAsString(query.isSelectType()));
 			columns.add(Double.toString(result.getRecall()));
-			columns.add(result.getQuery().toString());
+			columns.add(query.toString());
 			writer.writeNext(columns.toArray(new String[columns.size()]));
 		}
+
 	    
 		writer.close();
 	}
 	
 	protected double getAveragePrecision() {
 		double totalPrecision = 0.0;
-		for (QueryResults result: results.values()) {
-			totalPrecision += result.getPrecision();
+		for (Query query: queryCollection.getQueries()) {
+			totalPrecision += query.getResults().getPrecision();
 		}
-		return totalPrecision / (double)results.size();
+		return totalPrecision / (double)queryCollection.getDistinctQueryCount();
 	}
 	
 	
 	protected double getAverageRecall() {
 		double totalRecall = 0.0;
-		for (QueryResults result: results.values()) {
-			totalRecall += result.getRecall();
+		for (Query query: queryCollection.getQueries()) {
+			totalRecall += query.getResults().getRecall();
 		}
-		return totalRecall / (double)results.size();
+		return totalRecall / (double)queryCollection.getDistinctQueryCount();
 	}
 	protected double getMedianRecall() {
 		DescriptiveStatistics recallStats = new DescriptiveStatistics();
-		for (QueryResults result: results.values()) {
-			recallStats.addValue(result.getRecall());
+		for (Query query: queryCollection.getQueries()) {
+			recallStats.addValue(query.getResults().getRecall());
 		}
 		return recallStats.getPercentile(50);
 	}
 	protected double getStdRecall() {
 		DescriptiveStatistics recallStats = new DescriptiveStatistics();
-		for (QueryResults result: results.values()) {
-			recallStats.addValue(result.getRecall());
+		for (Query query: queryCollection.getQueries()) {
+			recallStats.addValue(query.getResults().getRecall());
 		}
 		return recallStats.getStandardDeviation();
-	}
-	
-	protected int getMaxQueryId() {
-		return Collections.max(results.keySet());
 	}
 
 	protected String getGraphName() {
@@ -104,16 +103,14 @@ public abstract class GraphResults {
 		this.graphName = name;
 	}
 	
-	protected HashMap<Integer, QueryResults> getAsHashMap() {
-		return results;
-	}
 	
-	protected ArrayList<QueryResults> getAsArrayList() {
-		return new ArrayList<QueryResults>(results.values());
-	}
-	protected ArrayList<Integer> getQueryIds() {
-		return new ArrayList<Integer>(results.keySet());
-	}
+//	protected ArrayList<QueryResults> getResults() {
+//		ArrayList<QueryResults> queryResults = new ArrayList<QueryResults>();
+//		for (Query query: queryCollection.getQueries()) {
+//			queryResults.add(query.getResults());
+//		}
+//		return queryResults;
+//	}
 	public String toString() {
 		return getGraphName();
 	}
@@ -136,5 +133,7 @@ public abstract class GraphResults {
 		return (double)totalTruePositives / (double)totalGoldenStandardSize;
 	}
 
-	
+	protected QueryCollection<Query> getQueryCollection() {
+		return this.queryCollection;
+	}
 }

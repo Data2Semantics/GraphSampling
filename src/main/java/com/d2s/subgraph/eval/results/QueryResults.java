@@ -1,20 +1,11 @@
 package com.d2s.subgraph.eval.results;
 
-import com.d2s.subgraph.queries.Query;
-
 public abstract class QueryResults {
-	protected Query query;
 	protected double precision;
 	protected int goldenStandardSize;
 	protected double recall;
 	
 	
-	protected Query getQuery() {
-		return query;
-	}
-	public void setQuery(Query evalQuery) {
-		this.query = evalQuery;
-	}
 	protected double getPrecision() {
 		return precision;
 	}

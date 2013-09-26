@@ -27,6 +27,7 @@ public class DbpoExperimentSetup implements ExperimentSetup {
 	private static int MAX_NUM_QUERIES = 0;//i.e. all
 	private QueriesFetcher queriesFetcher;
 	private int querySelection;
+	private boolean UNIQUE_QUERIES = true;
 	
 	public DbpoExperimentSetup(int querySelection) throws SAXException, IOException, ParserConfigurationException, IllegalStateException {
 		this.querySelection = querySelection;
@@ -73,5 +74,8 @@ public class DbpoExperimentSetup implements ExperimentSetup {
 	}
 	public boolean privateQueries() {
 		return PRIVATE_QUERIES;
+	}
+	public boolean useUniqueQueries() {
+		return UNIQUE_QUERIES ;
 	}
 }

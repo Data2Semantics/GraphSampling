@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 import org.data2semantics.query.QueryCollection;
 
+import com.d2s.subgraph.eval.results.QueryResults;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.query.Syntax;
@@ -16,6 +17,7 @@ public class Query extends org.data2semantics.query.Query {
 	private boolean onlyDbo;
 	private ResultSetRewindable goldenStandardResults = null;
 	private ArrayList<HashMap<String, String>> answers = new ArrayList<HashMap<String, String>>();
+	private QueryResults queryResults;
 	public Query(){}
 	public Query(Prologue prologue) {
 		super(prologue);
@@ -24,7 +26,7 @@ public class Query extends org.data2semantics.query.Query {
 	public int getQueryId() {
 		return queryId;
 	}
-
+	
 	public void setQueryId(int queryId) {
 		this.queryId = queryId;
 	}
@@ -58,5 +60,11 @@ public class Query extends org.data2semantics.query.Query {
 	}
 	public static Query create(String queryString) throws IOException {
 		return create(queryString, new QueryCollection<Query>());
+	}
+	public QueryResults getResults() {
+		return this.queryResults;
+	}
+	public void setResults(QueryResults results) {
+		this.queryResults = results;
 	}
 }

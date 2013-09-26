@@ -23,6 +23,7 @@ public class LgdExperimentSetup implements ExperimentSetup {
 	private static boolean PRIVATE_QUERIES = true;
 	private static int MAX_NUM_QUERIES = 100;
 	private QueriesFetcher queriesFetcher;
+	private boolean UNIQUE_QUERIES = true;
 	
 	public LgdExperimentSetup() throws IOException {
 		queriesFetcher = new LgdQueries(true, MAX_NUM_QUERIES, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter(), new ConstructFilter());
@@ -54,5 +55,8 @@ public class LgdExperimentSetup implements ExperimentSetup {
 	}
 	public boolean privateQueries() {
 		return PRIVATE_QUERIES;
+	}
+	public boolean useUniqueQueries() {
+		return UNIQUE_QUERIES ;
 	}
 }

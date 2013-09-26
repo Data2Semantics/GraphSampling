@@ -22,6 +22,7 @@ public class Sp2bExperimentSetup implements ExperimentSetup {
 	private static boolean PRIVATE_QUERIES = false;
 	private static int MAX_NUM_QUERIES = 0;
 	private QueriesFetcher queriesFetcher;
+	private boolean UNIQUE_QUERIES = true;
 	
 	public Sp2bExperimentSetup() throws IOException {
 		queriesFetcher = new Sp2bQueries(new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter());
@@ -56,5 +57,8 @@ public class Sp2bExperimentSetup implements ExperimentSetup {
 	}
 	public boolean privateQueries() {
 		return PRIVATE_QUERIES;
+	}
+	public boolean useUniqueQueries() {
+		return UNIQUE_QUERIES ;
 	}
 }

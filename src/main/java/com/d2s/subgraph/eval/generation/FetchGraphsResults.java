@@ -32,14 +32,14 @@ import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.sparql.resultset.ResultSetRewindable;
 
 
-public class EvaluateGraphs {
+public class FetchGraphsResults {
 	private File resultsDir;
 	private ExperimentSetup experimentSetup;
 	private BatchResults batchResults;
 	private QueryCollection<Query> queryCollection;
 	private ArrayList<String> graphs = new ArrayList<String>();;
 	private HashMap<String,ArrayList<String>> sampleGraphs = new HashMap<String,ArrayList<String>>();
-	public EvaluateGraphs(ExperimentSetup experimentSetup) throws IOException {
+	public FetchGraphsResults(ExperimentSetup experimentSetup) throws IOException {
 		batchResults = new BatchResults(experimentSetup);
 		this.experimentSetup = experimentSetup;
 		this.resultsDir = new File(experimentSetup.getEvalResultsDir());
@@ -57,7 +57,7 @@ public class EvaluateGraphs {
 		System.out.println("Running evaluation for graphs " + graphs.toString());
 		for (String graph: graphs) {
 			System.out.println("evaluating for graph " + graph);
-			EvaluateGraph eval = new EvaluateGraph(queryCollection, Config.EXPERIMENT_ENDPOINT, experimentSetup, graph);
+			FetchGraphResults eval = new FetchGraphResults(queryCollection, Config.EXPERIMENT_ENDPOINT, experimentSetup, graph);
 			eval.run();
 			GraphResults results = eval.getResults();
 			batchResults.add(results);
@@ -69,7 +69,7 @@ public class EvaluateGraphs {
 				GraphResultsSample sampleGraphResultsCombined = new GraphResultsSample();
 				ArrayList<GraphResults> sampleGraphResults = new ArrayList<GraphResults>();
 				for (String sampleGraph: entry.getValue()) {
-					EvaluateGraph eval = new EvaluateGraph(queryCollection, Config.EXPERIMENT_ENDPOINT, experimentSetup, sampleGraph);
+					FetchGraphResults eval = new FetchGraphResults(queryCollection, Config.EXPERIMENT_ENDPOINT, experimentSetup, sampleGraph);
 					eval.run();
 					sampleGraphResults.add(eval.getResults());
 				}
@@ -160,13 +160,13 @@ public class EvaluateGraphs {
 	}
 
 	public static void main(String[] args) throws IOException, InterruptedException  {
-		EvaluateGraphs[] evalGraphs = null;
+		FetchGraphsResults[] evalGraphs = null;
 		try {
-			evalGraphs = new EvaluateGraphs[]{
+			evalGraphs = new FetchGraphsResults[]{
 //					new EvaluateGraphs(new DbpoExperimentSetup(DbpoExperimentSetup.QALD_REMOVE_OPTIONALS)), 
 //					new EvaluateGraphs(new DbpoExperimentSetup(DbpoExperimentSetup.QALD_KEEP_OPTIONALS)),
 //					new EvaluateGraphs(new DbpoExperimentSetup(DbpoExperimentSetup.QUERY_LOGS)),
-					new EvaluateGraphs(new SwdfExperimentSetup()),
+					new FetchGraphsResults(new SwdfExperimentSetup()),
 //					new EvaluateGraphs(new Sp2bExperimentSetup()),
 //					new EvaluateGraphs(new LmdbExperimentSetup()),
 //					new EvaluateGraphs(new LgdExperimentSetup()),

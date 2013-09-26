@@ -1,23 +1,26 @@
 package com.d2s.subgraph.eval.results;
 
 import java.util.ArrayList;
+
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
+import com.d2s.subgraph.queries.Query;
+
 public class QueryResultsSample extends QueryResults {
-	private ArrayList<QueryResults> allQueryResults = new ArrayList<QueryResults>();
+	private ArrayList<Query> allQueries = new ArrayList<Query>();
 	private DescriptiveStatistics recallStats;
 	private DescriptiveStatistics precisionStats;
 	
-	public void add(ArrayList<QueryResults> allQueryResults) {
-		this.allQueryResults = allQueryResults;
+	public void add(ArrayList<Query> allQueries) {
+		this.allQueries = allQueries;
 		aggregateToSingleObject();
 	}
 	
 
 	
 	private void aggregateToSingleObject() {
-		setQuery(allQueryResults.get(0).getQuery());
-		setGoldenStandardSize(allQueryResults.get(0).getGoldenStandardSize());
+//		setQuery(allQueryResults.get(0).getQuery());
+		setGoldenStandardSize(allQueries.get(0).getResults().getGoldenStandardSize());
 		collectStats();
 		
 		//set precision
@@ -48,7 +51,8 @@ public class QueryResultsSample extends QueryResults {
 	private void collectStats() {
 		recallStats = new DescriptiveStatistics();
 		precisionStats = new DescriptiveStatistics();
-		for (QueryResults result: allQueryResults) {
+		for (Query query: allQueries) {
+			QueryResults result = query.getResults();
 			if (result != null) {
 				precisionStats.addValue(result.getPrecision());
 				recallStats.addValue(result.getRecall());

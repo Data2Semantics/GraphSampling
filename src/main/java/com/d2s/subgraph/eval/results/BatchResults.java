@@ -90,11 +90,11 @@ public class BatchResults {
 				for (GraphResults results: batchResults) {
 					if (Helper.getAnalysisAlgorithm(results.getGraphName()) == algorithm) {
 						numGraphResultsFound++;
-						totalRecall += results.get(queryId).getRecall();
+						totalRecall += results.getQueryCollection().getQuery(query.toString()).getResults().getRecall();
 						graphCount++;
-//						int rewrMethod = Helper.getRewriteMethod(results.getGraphName());
-						if (results.get(queryId).getRecall() > bestRecall) {
-							bestRecall = results.get(queryId).getRecall();
+						double currentRecall = results.getQueryCollection().getQuery(query.toString()).getResults().getRecall();
+						if (currentRecall > bestRecall) {
+							bestRecall = currentRecall;
 						}
 					}
 				}
@@ -128,10 +128,9 @@ public class BatchResults {
 			double totalRecall = 0.0;// totalrecall!
 			int numGraphs = 0;
 			for (GraphResults results: batchResults) {
-				if (results.contains(queryId)) {
-//					if (onlyGraphsContaining.length() == 0 || results.getGraphName().contains(onlyGraphsContaining)) {
+				if (results.getQueryCollection().getQuery(query.toString()) != null) {
 					if (Helper.partialStringMatch(results.getGraphName(), onlyGraphsContaining)) {
-						QueryResults queryResults = results.get(queryId);
+						QueryResults queryResults = results.getQueryCollection().getQuery(query.toString()).getResults();
 						totalRecall += queryResults.getRecall();
 						numGraphs++;
 					}
@@ -194,7 +193,7 @@ public class BatchResults {
 			int queryId = query.getQueryId();
 			row.add(Integer.toString(queryId));
 			for (GraphResults graphResults: batchResults) {
-				row.add(Double.toString(graphResults.get(queryId).getRecall()));
+				row.add(Double.toString(graphResults.getQueryCollection().getQuery(query.toString()).getResults().getRecall()));
 			}
 			writer.writeNext(row.toArray(new String[row.size()]));
 		}
@@ -209,6 +208,7 @@ public class BatchResults {
 	private void outputAsCsvTable(ArrayList<String> onlyGraphsContaining) throws IOException {
 		System.out.println("writing csv files for "  + onlyGraphsContaining);
 		HashMap<Integer, ArrayList<String>> table = new HashMap<Integer, ArrayList<String>>();
+		
 		for (Query query: queryCollection.getQueries()) {
 			int queryId = query.getQueryId();
 			
@@ -219,10 +219,10 @@ public class BatchResults {
 		
 		for (GraphResults graphResults: batchResults) {
 			if (Helper.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
-				for (Query query: queryCollection.getQueries()) {
+				for (Query query: graphResults.getQueryCollection().getQueries()) {
 					ArrayList<String> row = table.get(query.getQueryId());
-					if (graphResults.contains(query.getQueryId())) {
-						QueryResults queryResults = graphResults.get(query.getQueryId());
+					if (query.getResults() != null) {
+						QueryResults queryResults = query.getResults();
 						row.add(Double.toString(queryResults.getRecall()));
 					} else {
 						row.add("N/A");
@@ -260,15 +260,23 @@ public class BatchResults {
 		
 		for (GraphResults graphResults: batchResults) {
 			if (Helper.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
-				for (Query query: queryCollection.getQueries()) {
-					if (graphResults.contains(query.getQueryId())) {
-						writer.writeNext(new String[]{
-								Integer.toString(query.getQueryId()), 
-								graphResults.getProperName(), 
-								Double.toString(graphResults.get(query.getQueryId()).getRecall()), 
-								graphResults.getRewriteMethod(), 
-								graphResults.getAlgorithm() + " " + Integer.toString(graphResults.getPercentage()) + "%"});
-					}
+//				for (Query query: queryCollection.getQueries()) {
+//					if (graphResults.contains(query.getQueryId())) {
+//						writer.writeNext(new String[]{
+//								Integer.toString(query.getQueryId()), 
+//								graphResults.getProperName(), 
+//								Double.toString(graphResults.get(query.getQueryId()).getRecall()), 
+//								graphResults.getRewriteMethod(), 
+//								graphResults.getAlgorithm() + " " + Integer.toString(graphResults.getPercentage()) + "%"});
+//					}
+//				}
+				for (Query query: graphResults.getQueryCollection().getQueries()) {
+					writer.writeNext(new String[]{
+							Integer.toString(query.getQueryId()), 
+							graphResults.getProperName(), 
+							Double.toString(query.getResults().getRecall()), 
+							graphResults.getRewriteMethod(), 
+							graphResults.getAlgorithm() + " " + Integer.toString(graphResults.getPercentage()) + "%"});
 				}
 			}
 		}
@@ -399,17 +407,17 @@ public class BatchResults {
 		
 		
 		//fill first two col of table (queryId and avg for this query)
-		for (Query query: queryCollection.getQueries()) {
+		for (Query query: batchResults.get(0).getQueryCollection().getQueries()) {
 			int queryId = query.getQueryId();
 			
 			ArrayList<String> row = new ArrayList<String>();
 			double totalRecall = 0.0;// totalrecall!
 			int numGraphs = 0;
 			for (GraphResults results: batchResults) {
-				if (results.contains(queryId)) {
+				if (results.getQueryCollection().getQuery(query.toString()) != null) {
 //					if (onlyGraphsContaining.length() == 0 || results.getGraphName().contains(onlyGraphsContaining)) {
 					if (Helper.partialStringMatch(results.getGraphName(), onlyGraphsContaining)) {
-						QueryResults queryResults = results.get(queryId);
+						QueryResults queryResults = results.getQueryCollection().getQuery(query.toString()).getResults();
 						totalRecall += queryResults.getRecall();
 						numGraphs++;
 					}
@@ -419,12 +427,12 @@ public class BatchResults {
 			double avgRecall = totalRecall / (double)numGraphs;
 			int goldenStandardSize = 0;
 			String url = "#";
-			if (batchResults.get(0).contains(queryId)) {
-				Query queryObj = batchResults.get(0).get(queryId).getQuery();
-				goldenStandardSize = batchResults.get(0).get(queryId).getGoldenStandardSize();
-				String encodedQuery = URLEncoder.encode(Helper.addFromClauseToQuery(queryObj, experimentSetup.getGoldenStandardGraph()).toString(), "UTF-8");
-				url = "http://yasgui.laurensrietveld.nl?endpoint=" + encodedEndpoint + "&query=" + encodedQuery + "&tabTitle=" + queryObj.getQueryId();
-			}
+//			if (batchResults.get(0).contains(queryId)) {
+//				Query queryObj = batchResults.get(0).get(queryId).getQuery();
+				goldenStandardSize = query.getResults().getGoldenStandardSize();
+				String encodedQuery = URLEncoder.encode(Helper.addFromClauseToQuery(query, experimentSetup.getGoldenStandardGraph()).toString(), "UTF-8");
+				url = "http://yasgui.laurensrietveld.nl?endpoint=" + encodedEndpoint + "&query=" + encodedQuery + "&tabTitle=" + query.getQueryId();
+//			}
 			row.add("<td>" + queryId + "</td>");
 			if (experimentSetup.privateQueries()) {
 				row.add("<td>" + Helper.getDoubleAsFormattedString(avgRecall) + " (n:" + goldenStandardSize + ")</td>");
@@ -446,13 +454,14 @@ public class BatchResults {
 		for (GraphResults graphResults: batchResults) {
 			if (Helper.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
 				html += "\n<th>" + graphResults.getGraphName().substring("http://".length()).replace('_', '-') + "<br>(avg: " + Helper.getDoubleAsFormattedString(graphResults.getAverageRecall()) + ")</th>";
-				for (Query query: queryCollection.getQueries()) {
+//				for (Query query: queryCollection.getQueries()) {
+				for (Query query: graphResults.getQueryCollection().getQueries()) {
 					ArrayList<String> row = table.get(query.getQueryId());
-					if (graphResults.contains(query.getQueryId())) {
-						QueryResults queryResults = graphResults.get(query.getQueryId());
-						String queryString = Helper.addFromClauseToQuery(queryResults.getQuery(), graphResults.getGraphName()).toString();
+					if (query.getResults() != null) {
+						QueryResults queryResults = query.getResults();
+						String queryString = Helper.addFromClauseToQuery(query, graphResults.getGraphName()).toString();
 						String encodedQuery = URLEncoder.encode(queryString, "UTF-8");
-						String url = "http://yasgui.laurensrietveld.nl?endpoint=" + encodedEndpoint + "&query=" + encodedQuery + "&tabTitle=" + queryResults.getQuery().getQueryId();
+						String url = "http://yasgui.laurensrietveld.nl?endpoint=" + encodedEndpoint + "&query=" + encodedQuery + "&tabTitle=" + query.getQueryId();
 						String title = StringEscapeUtils.escapeHtml(queryString);
 						String cell = "<td title='" + title + "'><a href='" + url + "' target='_blank'>" + Helper.getDoubleAsFormattedString(queryResults.getRecall()) + "</a></td>";
 						if (experimentSetup.privateQueries()) {

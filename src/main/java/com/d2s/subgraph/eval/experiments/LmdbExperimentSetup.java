@@ -24,6 +24,7 @@ public class LmdbExperimentSetup implements ExperimentSetup {
 	private static boolean PRIVATE_QUERIES = false;
 	private static int MAX_NUM_QUERIES = 0;//i.e. all
 	private QueriesFetcher queriesFetcher;
+	private boolean UNIQUE_QUERIES = true;
 	public LmdbExperimentSetup() throws SAXException, IOException, ParserConfigurationException {
 		queriesFetcher = new LmdbQueries(true, new GraphClauseFilter(), new SimpleBgpFilter(), new DescribeFilter());
 		queriesFetcher.setMaxNQueries(MAX_NUM_QUERIES);
@@ -54,5 +55,8 @@ public class LmdbExperimentSetup implements ExperimentSetup {
 	}
 	public boolean privateQueries() {
 		return PRIVATE_QUERIES;
+	}
+	public boolean useUniqueQueries() {
+		return UNIQUE_QUERIES ;
 	}
 }

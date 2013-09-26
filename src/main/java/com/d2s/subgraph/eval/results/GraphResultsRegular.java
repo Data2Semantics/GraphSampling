@@ -1,13 +1,18 @@
 package com.d2s.subgraph.eval.results;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import com.d2s.subgraph.helpers.Helper;
+import com.d2s.subgraph.queries.Query;
 
 public class GraphResultsRegular extends GraphResults {
-	public void add(QueryResults result) {
-		results.put(result.getQuery().getQueryId(), result);
+	public GraphResultsRegular() throws IOException {
+		super();
+	}
+	public void add(Query query) {
+		queryCollection.addQuery(query);
 	}
 	protected String getRewriteMethod() {
 		String rewriteMethod = Helper.getRewriteMethodAsString(graphName);
@@ -83,4 +88,5 @@ public class GraphResultsRegular extends GraphResults {
 		trailingBit = trailingBit.replace(".nt", "");
 		return Integer.parseInt(trailingBit);
 	}
+
 }
