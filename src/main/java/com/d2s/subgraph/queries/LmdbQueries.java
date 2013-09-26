@@ -22,7 +22,7 @@ import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QueryParseException;
 import com.hp.hpl.jena.sparql.engine.http.QueryExceptionHTTP;
 
-public class LmdbQueries extends QueryFetcher {
+public class LmdbQueries extends QueriesFetcher {
 	public static String QUERY_FILE = "src/main/resources/lmdbQueries.txt";
 	public static String CSV_COPY = "src/main/resources/lmdb_queries.csv";
 	public static String PARSE_QUERIES_FILE = "src/main/resources/lmdb_queries.arraylist";

@@ -21,7 +21,7 @@ import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.sparql.engine.http.QueryExceptionHTTP;
 
 
-public abstract class QueryFetcher {
+public abstract class QueriesFetcher {
 	protected ArrayList<QueryFilter> filters;
 	protected int maxNumQueries = 0;
 	protected QueryCollection<Query> queryCollection;
@@ -30,7 +30,7 @@ public abstract class QueryFetcher {
 	protected int duplicateQueries;
 	protected int noResultsQueries;
 	
-	public QueryFetcher() throws IOException {
+	public QueriesFetcher() throws IOException {
 		queryCollection = new QueryCollection<Query>();
 	}
 	/**

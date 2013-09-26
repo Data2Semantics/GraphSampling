@@ -1,6 +1,7 @@
 package com.d2s.subgraph.eval.experiments;
 
-import com.d2s.subgraph.queries.QueryFetcher;
+import org.data2semantics.query.QueryCollection;
+import com.d2s.subgraph.queries.Query;
 
 
 public interface ExperimentSetup {
@@ -9,7 +10,7 @@ public interface ExperimentSetup {
 	
 	public String getGoldenStandardGraph();
 	public String getGraphPrefix();
-	public QueryFetcher getQueries();
+	public QueryCollection<Query> getQueryCollection();
 	public String getEvalResultsDir();
 	public int getMaxNumQueries();
 	public String getQueryTriplesDir();

@@ -29,7 +29,7 @@ public class GetTriplesFromConstruct {
 	public void run() throws RepositoryException, MalformedQueryException, QueryEvaluationException, IOException {
 		File allTriples = new File(experimentSetup.getQueryTriplesDir() + "/allQueries.nt");
 		FileOutputStream allTripleOutputStream = new FileOutputStream(allTriples);
-		for (Query query : experimentSetup.getQueries().getQueryCollection().getQueries()) {
+		for (Query query : experimentSetup.getQueryCollection().getQueries()) {
 
 			Query queryWithFromClause = Helper.addFromClauseToQuery(query, experimentSetup.getGoldenStandardGraph());
 			Query constructQuery = Helper.getAsConstructQuery(queryWithFromClause);

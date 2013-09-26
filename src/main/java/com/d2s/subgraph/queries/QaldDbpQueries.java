@@ -29,7 +29,7 @@ import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 
 
-public class QaldDbpQueries extends QueryFetcher {
+public class QaldDbpQueries extends QueriesFetcher {
 	public static String QALD_1_QUERIES = "src/main/resources/qald1-dbpedia-train.xml";
 	public static String QALD_2_QUERIES = "src/main/resources/qald2-dbpedia-train.xml";
 	public static String QALD_3_QUERIES = "src/main/resources/qald3-dbpedia-train.xml";

@@ -2,13 +2,13 @@ package com.d2s.subgraph.eval.experiments;
 
 import java.io.IOException;
 
+import org.data2semantics.query.QueryCollection;
 import org.data2semantics.query.filters.ConstructFilter;
 import org.data2semantics.query.filters.DescribeFilter;
 import org.data2semantics.query.filters.GraphClauseFilter;
-
-import com.d2s.subgraph.eval.generation.EvaluateGraph;
 import com.d2s.subgraph.queries.DbpQueries;
-import com.d2s.subgraph.queries.QueryFetcher;
+import com.d2s.subgraph.queries.QueriesFetcher;
+import com.d2s.subgraph.queries.Query;
 import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
 
 
@@ -21,10 +21,10 @@ public class DbpExperimentSetup implements ExperimentSetup {
 	private static String EVAL_RESULTS_DIR = "dbplResults";
 	private static boolean PRIVATE_QUERIES = false;
 	private static int MAX_NUM_QUERIES = 100;
-	private QueryFetcher queries;
+	private QueriesFetcher qFetcher;
 	
 	public DbpExperimentSetup() throws IOException {
-		queries = new DbpQueries(false, MAX_NUM_QUERIES, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter(), new ConstructFilter());
+		qFetcher = new DbpQueries(false, MAX_NUM_QUERIES, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter(), new ConstructFilter());
 	}
 	
 	public String getGoldenStandardGraph() {
@@ -33,8 +33,8 @@ public class DbpExperimentSetup implements ExperimentSetup {
 	public String getGraphPrefix() {
 		return GRAPH_PREFIX;
 	}
-	public QueryFetcher getQueries() {
-		return queries;
+	public QueryCollection<Query> getQueryCollection() {
+		return qFetcher.getQueryCollection();
 	}
 	
 

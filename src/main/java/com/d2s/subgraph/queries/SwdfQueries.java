@@ -14,7 +14,7 @@ import org.data2semantics.query.filters.QueryFilter;
 
 import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
 
-public class SwdfQueries extends QueryFetcher {
+public class SwdfQueries extends QueriesFetcher {
 	public static String QUERY_FILE = "src/main/resources/swdf_queries.log";
 	public static String CSV_COPY = "src/main/resources/swdf_queries.csv";
 	public static String PARSE_QUERIES_FILE = "src/main/resources/swdf_queries.arraylist";

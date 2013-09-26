@@ -11,6 +11,7 @@ import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.data2semantics.query.QueryCollection;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
@@ -23,11 +24,9 @@ import com.d2s.subgraph.eval.results.BatchResults;
 import com.d2s.subgraph.eval.results.GraphResults;
 import com.d2s.subgraph.eval.results.GraphResultsSample;
 import com.d2s.subgraph.helpers.Helper;
-import com.d2s.subgraph.queries.QueryFetcher;
-import com.hp.hpl.jena.query.Query;
+import com.d2s.subgraph.queries.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.sparql.resultset.ResultSetRewindable;
@@ -37,12 +36,11 @@ public class EvaluateGraphs {
 	private File resultsDir;
 	private ExperimentSetup experimentSetup;
 	private BatchResults batchResults;
-	private QueryFetcher queries;
+	private QueryCollection<Query> queryCollection;
 	private ArrayList<String> graphs = new ArrayList<String>();;
 	private HashMap<String,ArrayList<String>> sampleGraphs = new HashMap<String,ArrayList<String>>();
 	public EvaluateGraphs(ExperimentSetup experimentSetup) throws IOException {
-		queries = experimentSetup.getQueries();
-		batchResults = new BatchResults(experimentSetup, queries);
+		batchResults = new BatchResults(experimentSetup);
 		this.experimentSetup = experimentSetup;
 		this.resultsDir = new File(experimentSetup.getEvalResultsDir());
 		if (!(resultsDir.exists() && resultsDir.isDirectory())) {
@@ -59,7 +57,7 @@ public class EvaluateGraphs {
 		System.out.println("Running evaluation for graphs " + graphs.toString());
 		for (String graph: graphs) {
 			System.out.println("evaluating for graph " + graph);
-			EvaluateGraph eval = new EvaluateGraph(queries, Config.EXPERIMENT_ENDPOINT, experimentSetup, graph);
+			EvaluateGraph eval = new EvaluateGraph(queryCollection, Config.EXPERIMENT_ENDPOINT, experimentSetup, graph);
 			eval.run();
 			GraphResults results = eval.getResults();
 			batchResults.add(results);
@@ -71,7 +69,7 @@ public class EvaluateGraphs {
 				GraphResultsSample sampleGraphResultsCombined = new GraphResultsSample();
 				ArrayList<GraphResults> sampleGraphResults = new ArrayList<GraphResults>();
 				for (String sampleGraph: entry.getValue()) {
-					EvaluateGraph eval = new EvaluateGraph(queries, Config.EXPERIMENT_ENDPOINT, experimentSetup, sampleGraph);
+					EvaluateGraph eval = new EvaluateGraph(queryCollection, Config.EXPERIMENT_ENDPOINT, experimentSetup, sampleGraph);
 					eval.run();
 					sampleGraphResults.add(eval.getResults());
 				}
@@ -86,7 +84,7 @@ public class EvaluateGraphs {
 	
 	
 	@SuppressWarnings("unused")
-	private ArrayList<String> getGraphsToEvaluateViaSparql() {
+	private ArrayList<String> getGraphsToEvaluateViaSparql() throws IOException {
 		ArrayList<String> graphs = new ArrayList<String>();
 		System.out.println("retrieving graphs");
 		String queryString = "SELECT DISTINCT ?graph\n" + 
@@ -97,7 +95,7 @@ public class EvaluateGraphs {
 				"  }\n" + 
 				"}";
 		System.out.println(queryString);
-		Query query = QueryFactory.create(queryString);
+		Query query = Query.create(queryString);
 		QueryExecution queryExecution = QueryExecutionFactory.sparqlService(Config.EXPERIMENT_ENDPOINT, query);
 		ResultSetRewindable queryResults =  ResultSetFactory.copyResults(queryExecution.execSelect());
 		while (queryResults.hasNext()) {

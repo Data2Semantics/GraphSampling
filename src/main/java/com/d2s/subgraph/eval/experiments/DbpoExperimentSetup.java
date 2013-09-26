@@ -4,11 +4,12 @@ import java.io.IOException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.data2semantics.query.QueryCollection;
 import org.xml.sax.SAXException;
 
-import com.d2s.subgraph.eval.generation.EvaluateGraph;
-import com.d2s.subgraph.queries.QueryFetcher;
 import com.d2s.subgraph.queries.QaldDbpQueries;
+import com.d2s.subgraph.queries.QueriesFetcher;
+import com.d2s.subgraph.queries.Query;
 
 
 public class DbpoExperimentSetup implements ExperimentSetup {
@@ -24,19 +25,19 @@ public class DbpoExperimentSetup implements ExperimentSetup {
 	private static boolean PRIVATE_QUERIES = true;
 	
 	private static int MAX_NUM_QUERIES = 0;//i.e. all
-	private QueryFetcher queries;
+	private QueriesFetcher queriesFetcher;
 	private int querySelection;
 	
 	public DbpoExperimentSetup(int querySelection) throws SAXException, IOException, ParserConfigurationException, IllegalStateException {
 		this.querySelection = querySelection;
 		if (querySelection == QALD_KEEP_OPTIONALS || querySelection == QALD_REMOVE_OPTIONALS) {
-			queries = new QaldDbpQueries(QaldDbpQueries.QALD_2_QUERIES, (querySelection == QALD_REMOVE_OPTIONALS? true: false), true);
+			queriesFetcher = new QaldDbpQueries(QaldDbpQueries.QALD_2_QUERIES, (querySelection == QALD_REMOVE_OPTIONALS? true: false), true);
 		} else if (querySelection == QUERY_LOGS) {
 			throw new IllegalStateException("No implemented yet");
 		} else {
 			throw new IllegalStateException("Illegal query selection mode passed to dbpo experiment setup");
 		}
-		queries.setMaxNQueries(MAX_NUM_QUERIES);
+		queriesFetcher.setMaxNQueries(MAX_NUM_QUERIES);
 	}
 	
 	public String getGoldenStandardGraph() {
@@ -45,8 +46,8 @@ public class DbpoExperimentSetup implements ExperimentSetup {
 	public String getGraphPrefix() {
 		return GRAPH_PREFIX;
 	}
-	public QueryFetcher getQueries() {
-		return queries;
+	public QueryCollection<Query> getQueryCollection() {
+		return queriesFetcher.getQueryCollection();
 	}
 
 	public String getEvalResultsDir() {

@@ -2,11 +2,12 @@ package com.d2s.subgraph.eval.experiments;
 
 import java.io.IOException;
 
+import org.data2semantics.query.QueryCollection;
 import org.data2semantics.query.filters.DescribeFilter;
 import org.data2semantics.query.filters.GraphClauseFilter;
 
-import com.d2s.subgraph.eval.generation.EvaluateGraph;
-import com.d2s.subgraph.queries.QueryFetcher;
+import com.d2s.subgraph.queries.QueriesFetcher;
+import com.d2s.subgraph.queries.Query;
 import com.d2s.subgraph.queries.Sp2bQueries;
 import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
 
@@ -20,11 +21,11 @@ public class Sp2bExperimentSetup implements ExperimentSetup {
 	private static String QUERY_RESULTS_DIR = "sp2bQueryResults";
 	private static boolean PRIVATE_QUERIES = false;
 	private static int MAX_NUM_QUERIES = 0;
-	private QueryFetcher queries;
+	private QueriesFetcher queriesFetcher;
 	
 	public Sp2bExperimentSetup() throws IOException {
-		queries = new Sp2bQueries(new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter());
-		queries.setMaxNQueries(MAX_NUM_QUERIES);
+		queriesFetcher = new Sp2bQueries(new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter());
+		queriesFetcher.setMaxNQueries(MAX_NUM_QUERIES);
 	}
 	
 	public String getGoldenStandardGraph() {
@@ -33,8 +34,8 @@ public class Sp2bExperimentSetup implements ExperimentSetup {
 	public String getGraphPrefix() {
 		return GRAPH_PREFIX;
 	}
-	public QueryFetcher getQueries() {
-		return queries;
+	public QueryCollection<Query> getQueryCollection() {
+		return queriesFetcher.getQueryCollection();
 	}
 	
 

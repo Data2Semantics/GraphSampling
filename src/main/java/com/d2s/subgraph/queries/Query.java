@@ -1,5 +1,6 @@
 package com.d2s.subgraph.queries;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -36,7 +37,7 @@ public class Query extends org.data2semantics.query.Query {
 	}
 	
 	
-	public static Query create(String queryString, QueryCollection queryCollection) {
+	public static Query create(String queryString, QueryCollection<Query> queryCollection) {
 		Query query = new Query();
 		query = (Query)(QueryFactory.parse(query, queryString, null, Syntax.defaultQuerySyntax));
 		query.setQueryCollection(queryCollection);
@@ -54,5 +55,8 @@ public class Query extends org.data2semantics.query.Query {
 	}
 	public void setGoldenStandardResults(ResultSetRewindable goldenStandardResults) {
 		this.goldenStandardResults = goldenStandardResults;
+	}
+	public static Query create(String queryString) throws IOException {
+		return create(queryString, new QueryCollection<Query>());
 	}
 }

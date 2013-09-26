@@ -16,7 +16,7 @@ import com.d2s.subgraph.eval.experiments.LgdExperimentSetup;
 import com.d2s.subgraph.eval.experiments.LmdbExperimentSetup;
 import com.d2s.subgraph.eval.experiments.Sp2bExperimentSetup;
 import com.d2s.subgraph.eval.experiments.SwdfExperimentSetup;
-import com.d2s.subgraph.queries.QueryFetcher;
+import com.d2s.subgraph.queries.QueriesFetcher;
 
 
 public class GetQueryProperties {
@@ -32,7 +32,7 @@ public class GetQueryProperties {
 		
 		writer.writeNext(new String[]{"graph", "numJoins", "numNonOptTriplePatterns", "numCcv", "numCvv", "numVcc"});
 		for (ExperimentSetup experimentSetup: experimentSetups) {
-			QueryCollection<Query> queries = experimentSetup.getQueries().getQueryCollection();
+			QueryCollection<Query> queries = experimentSetup.getQueryCollection();
 			int numJoins = 0;
 			int numLeftJoins = 0;
 			int numNonOptTriplePatterns = 0;

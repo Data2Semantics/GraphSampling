@@ -4,13 +4,14 @@ import java.io.IOException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.data2semantics.query.QueryCollection;
 import org.data2semantics.query.filters.DescribeFilter;
 import org.data2semantics.query.filters.GraphClauseFilter;
 import org.xml.sax.SAXException;
 
-import com.d2s.subgraph.eval.generation.EvaluateGraph;
-import com.d2s.subgraph.queries.QueryFetcher;
 import com.d2s.subgraph.queries.LmdbQueries;
+import com.d2s.subgraph.queries.QueriesFetcher;
+import com.d2s.subgraph.queries.Query;
 import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
 
 
@@ -22,10 +23,10 @@ public class LmdbExperimentSetup implements ExperimentSetup {
 	private static String QUERY_RESULTS_DIR = "lmdbQueryResults";
 	private static boolean PRIVATE_QUERIES = false;
 	private static int MAX_NUM_QUERIES = 0;//i.e. all
-	private QueryFetcher queries;
+	private QueriesFetcher queriesFetcher;
 	public LmdbExperimentSetup() throws SAXException, IOException, ParserConfigurationException {
-		queries = new LmdbQueries(true, new GraphClauseFilter(), new SimpleBgpFilter(), new DescribeFilter());
-		queries.setMaxNQueries(MAX_NUM_QUERIES);
+		queriesFetcher = new LmdbQueries(true, new GraphClauseFilter(), new SimpleBgpFilter(), new DescribeFilter());
+		queriesFetcher.setMaxNQueries(MAX_NUM_QUERIES);
 	}
 	
 	public String getGoldenStandardGraph() {
@@ -34,8 +35,8 @@ public class LmdbExperimentSetup implements ExperimentSetup {
 	public String getGraphPrefix() {
 		return GRAPH_PREFIX;
 	}
-	public QueryFetcher getQueries() {
-		return queries;
+	public QueryCollection<Query> getQueryCollection() {
+		return queriesFetcher.getQueryCollection();
 	}
 
 	public String getEvalResultsDir() {

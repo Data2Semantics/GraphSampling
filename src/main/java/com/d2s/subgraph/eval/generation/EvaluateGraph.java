@@ -15,7 +15,6 @@ import com.d2s.subgraph.eval.results.GraphResults;
 import com.d2s.subgraph.eval.results.GraphResultsRegular;
 import com.d2s.subgraph.eval.results.QueryResultsRegular;
 import com.d2s.subgraph.helpers.Helper;
-import com.d2s.subgraph.queries.QueryFetcher;
 import com.d2s.subgraph.queries.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -34,8 +33,8 @@ public class EvaluateGraph {
 	private String endpoint;
 	GraphResults graphResults = new GraphResultsRegular();
 
-	public EvaluateGraph(QueryFetcher getQueries, String endpoint, ExperimentSetup experimentSetup, String subGraph) {
-		queryCollection = getQueries.getQueryCollection();
+	public EvaluateGraph(QueryCollection<Query> queryCollection, String endpoint, ExperimentSetup experimentSetup, String subGraph) {
+		this.queryCollection = queryCollection;
 		this.endpoint = endpoint;
 		this.goldenStandardGraph = experimentSetup.getGoldenStandardGraph();
 		this.experimentSetup = experimentSetup;
@@ -242,7 +241,7 @@ public class EvaluateGraph {
 			// EvaluateGraph evaluate = new EvaluateGraph(new SwdfQueries(new DescribeFilter(), new SimpleBgpFilter()),
 			// EvaluateGraph.OPS_VIRTUOSO, goldenStandardGraph, subgraph);
 			EvaluateGraph evaluate = new EvaluateGraph(Config.EXPERIMENT_ENDPOINT, new Sp2bExperimentSetup(), subgraph);
-			Query query = Query.create("", new QueryCollection());
+			Query query = Query.create("", new QueryCollection<Query>());
 			evaluate.runForQuery(query);
 		} catch (Exception e) {
 			e.printStackTrace();

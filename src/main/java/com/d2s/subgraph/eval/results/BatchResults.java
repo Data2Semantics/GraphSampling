@@ -11,6 +11,7 @@ import java.util.HashMap;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.data2semantics.query.QueryCollection;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
@@ -18,20 +19,19 @@ import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 import com.d2s.subgraph.helpers.Helper;
 import com.d2s.subgraph.helpers.RHelper;
-import com.d2s.subgraph.queries.QueryFetcher;
 import com.d2s.subgraph.queries.Query;
 
 public class BatchResults {
 	private File resultsDir;
 	private ArrayList<GraphResults> batchResults = new ArrayList<GraphResults>();
-	private QueryFetcher qFetcher;
+	private QueryCollection<Query> queryCollection;
 	private ExperimentSetup experimentSetup;
 
 	private HashMap<String, Boolean> modesImported = new HashMap<String, Boolean>();
 	
-	public BatchResults(ExperimentSetup experimentSetup, QueryFetcher qFetcher) throws IOException {
+	public BatchResults(ExperimentSetup experimentSetup) throws IOException {
 		this.experimentSetup = experimentSetup;
-		this.qFetcher = qFetcher;
+		this.queryCollection = experimentSetup.getQueryCollection();
 		this.resultsDir = new File(experimentSetup.getEvalResultsDir());
 		FileUtils.deleteDirectory(resultsDir);
 		resultsDir.mkdir();
@@ -77,7 +77,7 @@ public class BatchResults {
 		int[] algorithms = new int[]{Helper.ALG_BETWEENNESS, Helper.ALG_EIGENVECTOR, Helper.ALG_INDEGREE, Helper.ALG_OUTDEGREE, Helper.ALG_PAGERANK};
 		int[] rewrMethods = new int[]{Helper.REWRITE_NODE1, Helper.REWRITE_NODE2, Helper.REWRITE_NODE3, Helper.REWRITE_NODE4, Helper.REWRITE_PATH};
 		
-		for (Query query: qFetcher.getQueryCollection().getQueries()) {
+		for (Query query: queryCollection.getQueries()) {
 			ArrayList<ArrayList<String>> rows = new ArrayList<ArrayList<String>>();
 			int queryId = query.getQueryId();
 			
@@ -122,7 +122,7 @@ public class BatchResults {
 		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + Config.FILE_CSV_AVG_RECALL_PER_QUERY);
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
 		writer.writeNext(new String[]{"queryId", "avgRecall"});
-		for (Query query: qFetcher.getQueryCollection().getQueries()) {
+		for (Query query: queryCollection.getQueries()) {
 			int queryId = query.getQueryId();
 			
 			double totalRecall = 0.0;// totalrecall!
@@ -189,7 +189,7 @@ public class BatchResults {
 			headers.add(graphResults.getProperName());
 		}
 		writer.writeNext(headers.toArray(new String[headers.size()]));
-		for (Query query: qFetcher.getQueryCollection().getQueries()) {
+		for (Query query: queryCollection.getQueries()) {
 			ArrayList<String> row = new ArrayList<String>();
 			int queryId = query.getQueryId();
 			row.add(Integer.toString(queryId));
@@ -209,7 +209,7 @@ public class BatchResults {
 	private void outputAsCsvTable(ArrayList<String> onlyGraphsContaining) throws IOException {
 		System.out.println("writing csv files for "  + onlyGraphsContaining);
 		HashMap<Integer, ArrayList<String>> table = new HashMap<Integer, ArrayList<String>>();
-		for (Query query: qFetcher.getQueryCollection().getQueries()) {
+		for (Query query: queryCollection.getQueries()) {
 			int queryId = query.getQueryId();
 			
 			ArrayList<String> row = new ArrayList<String>();
@@ -219,7 +219,7 @@ public class BatchResults {
 		
 		for (GraphResults graphResults: batchResults) {
 			if (Helper.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
-				for (Query query: qFetcher.getQueryCollection().getQueries()) {
+				for (Query query: queryCollection.getQueries()) {
 					ArrayList<String> row = table.get(query.getQueryId());
 					if (graphResults.contains(query.getQueryId())) {
 						QueryResults queryResults = graphResults.get(query.getQueryId());
@@ -260,7 +260,7 @@ public class BatchResults {
 		
 		for (GraphResults graphResults: batchResults) {
 			if (Helper.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
-				for (Query query: qFetcher.getQueryCollection().getQueries()) {
+				for (Query query: queryCollection.getQueries()) {
 					if (graphResults.contains(query.getQueryId())) {
 						writer.writeNext(new String[]{
 								Integer.toString(query.getQueryId()), 
@@ -399,7 +399,7 @@ public class BatchResults {
 		
 		
 		//fill first two col of table (queryId and avg for this query)
-		for (Query query: qFetcher.getQueryCollection().getQueries()) {
+		for (Query query: queryCollection.getQueries()) {
 			int queryId = query.getQueryId();
 			
 			ArrayList<String> row = new ArrayList<String>();
@@ -446,7 +446,7 @@ public class BatchResults {
 		for (GraphResults graphResults: batchResults) {
 			if (Helper.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
 				html += "\n<th>" + graphResults.getGraphName().substring("http://".length()).replace('_', '-') + "<br>(avg: " + Helper.getDoubleAsFormattedString(graphResults.getAverageRecall()) + ")</th>";
-				for (Query query: qFetcher.getQueryCollection().getQueries()) {
+				for (Query query: queryCollection.getQueries()) {
 					ArrayList<String> row = table.get(query.getQueryId());
 					if (graphResults.contains(query.getQueryId())) {
 						QueryResults queryResults = graphResults.get(query.getQueryId());

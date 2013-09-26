@@ -9,7 +9,7 @@ import java.util.Arrays;
 import org.apache.commons.io.FileUtils;
 import org.data2semantics.query.filters.QueryFilter;
 
-public class Sp2bQueries extends QueryFetcher {
+public class Sp2bQueries extends QueriesFetcher {
 	private static String QUERY_DIR = "src/main/resources/sp2bQueries";
 	private static String QUERY_FILE_EXTENSION = "sparql";
 

@@ -22,7 +22,7 @@ import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
 import com.d2s.subgraph.queries.filters.SimpleDbpFilter;
 import com.hp.hpl.jena.query.QueryParseException;
 
-public class DbpQueries extends QueryFetcher {
+public class DbpQueries extends QueriesFetcher {
 	public static String QUERY_FILE = "src/main/resources/dbpl_queries.log";
 	public static String CSV_COPY = "src/main/resources/dbpl_queries.csv";
 	public static String PARSE_QUERIES_FILE = "src/main/resources/dbpl_queries.arraylist";
