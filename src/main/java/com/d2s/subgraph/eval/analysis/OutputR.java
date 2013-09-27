@@ -1,27 +1,33 @@
-package com.d2s.subgraph.util;
+package com.d2s.subgraph.eval.analysis;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.RandomStringUtils;
+import org.data2semantics.query.QueryCollection;
 import org.rosuda.JRI.Rengine;
 
-public class RUtils {
+import com.d2s.subgraph.eval.experiments.ExperimentSetup;
+import com.d2s.subgraph.eval.results.GraphResults;
+import com.d2s.subgraph.queries.Query;
+
+public class OutputR extends OutputWrapper {
 	private static String TEMP_DIR = ".tmp";
 	private static String TMP_FILE_POSTFIX = "rScript.R";
 	private static String SCRIPT_DRAW_PLOTS = "src/main/resources/rScripts/drawPlots.R";
 	File tempDir;
-
-	public RUtils() {
+	
+	public OutputR(ExperimentSetup experimentSetup, ArrayList<GraphResults> allGraphResults, QueryCollection<Query> queryCollection, File resultsDir) {
+		super(experimentSetup, allGraphResults, queryCollection, resultsDir);
 		tempDir = new File(TEMP_DIR);
 		if (!tempDir.exists()) {
 			tempDir.mkdir();
 		}
 	}
-
 	private void execute(String script) throws IOException, InterruptedException {
 		execute(script, null);
 	}
@@ -66,11 +72,13 @@ public class RUtils {
 		execute(rScript);
 	}
 	
-	public void drawPlots(File directory) throws IOException, InterruptedException {
-		String rScript = "setwd(\"" + directory.getAbsolutePath() + "\")\n";
+	
+	public void drawPlots() throws IOException, InterruptedException {
+		System.out.println("drawing all R plots");
+		String rScript = "setwd(\"" + resultsDir.getAbsolutePath() + "\")\n";
 		File drawPlotsFile =  new File(SCRIPT_DRAW_PLOTS);
 		execute(rScript, drawPlotsFile);
-		FileUtils.copyFile(drawPlotsFile, new File(directory.getAbsolutePath() +  "/" + drawPlotsFile.getName()));
+		FileUtils.copyFile(drawPlotsFile, new File(resultsDir.getAbsolutePath() +  "/" + drawPlotsFile.getName()));
 	}
 	
 	
@@ -81,12 +89,6 @@ public class RUtils {
 			throw new InstantiationException("Unable to start R Engine");
 		}
 		return re;
-	}
-
-	public static void main(String[] args) throws IOException, InterruptedException {
-		RUtils rHelper = new RUtils();
-		rHelper.plotRecallBoxPlots(new File("swdfResults/flatlist.csv"), new File("swdfResults/boxplots.pdf"));
-
 	}
 	
 }

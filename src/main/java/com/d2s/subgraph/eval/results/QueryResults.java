@@ -27,7 +27,7 @@ public abstract class QueryResults {
 		this.goldenStandardSize = resultSize;
 		
 	}
-	protected int getGoldenStandardSize() {
+	public int getGoldenStandardSize() {
 		return goldenStandardSize;
 	}
 }

@@ -1,7 +1,11 @@
 package com.d2s.subgraph.util;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+
+import com.d2s.subgraph.eval.results.GraphResultsRegular;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
@@ -17,15 +21,16 @@ public class Utils {
 	public static int ALG_BETWEENNESS = 2;
 	public static int ALG_INDEGREE = 3;
 	public static int ALG_OUTDEGREE = 4;
-	
+
 	public static void executeCommand(String[] args) throws IOException, InterruptedException {
 		ProcessBuilder ps = new ProcessBuilder(args);
 		Process pr = ps.start();
 		pr.waitFor();
 	}
-	
+
 	public static void writeRow(Collection<String> row, CSVWriter writer) {
 		writer.writeNext(row.toArray(new String[row.size()]));
 	}
-	
+
+
 }

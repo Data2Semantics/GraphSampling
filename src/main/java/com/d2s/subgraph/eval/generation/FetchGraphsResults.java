@@ -6,12 +6,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.data2semantics.query.QueryCollection;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
@@ -19,11 +16,7 @@ import org.xml.sax.SAXException;
 
 import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
-import com.d2s.subgraph.eval.experiments.SwdfExperimentSetup;
-import com.d2s.subgraph.eval.results.GraphResults;
-import com.d2s.subgraph.eval.results.GraphResultsSample;
 import com.d2s.subgraph.queries.Query;
-import com.d2s.subgraph.util.Utils;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QuerySolution;
@@ -34,12 +27,8 @@ import com.hp.hpl.jena.sparql.resultset.ResultSetRewindable;
 public class FetchGraphsResults {
 	private File resultsDir;
 	private ExperimentSetup experimentSetup;
-//	private BatchResults batchResults;
-	private QueryCollection<Query> queryCollection;
 	private ArrayList<String> graphs = new ArrayList<String>();;
-	private HashMap<String,ArrayList<String>> sampleGraphs = new HashMap<String,ArrayList<String>>();
 	public FetchGraphsResults(ExperimentSetup experimentSetup) throws IOException {
-//		batchResults = new BatchResults(experimentSetup);
 		this.experimentSetup = experimentSetup;
 		this.resultsDir = new File(experimentSetup.getEvalResultsDir());
 		if (!(resultsDir.exists() && resultsDir.isDirectory())) {
@@ -57,25 +46,7 @@ public class FetchGraphsResults {
 		for (String graph: graphs) {
 			System.out.println("evaluating for graph " + graph);
 			FetchGraphResults eval = new FetchGraphResults(experimentSetup, graph);
-			eval.run();
-			GraphResults results = eval.getResults();
-//			batchResults.add(results);
-			results.writeAsCsv(resultsDir.getAbsolutePath());
-		}
-		if (sampleGraphs.size() > 0) {
-			for (Map.Entry<String, ArrayList<String>> entry : sampleGraphs.entrySet()) {
-				System.out.println("evaluating for " + sampleGraphs.size() + " samplegraphs (" + entry.getKey() + ")");
-				GraphResultsSample sampleGraphResultsCombined = new GraphResultsSample();
-				ArrayList<GraphResults> sampleGraphResults = new ArrayList<GraphResults>();
-				for (String sampleGraph: entry.getValue()) {
-					FetchGraphResults eval = new FetchGraphResults(experimentSetup, sampleGraph);
-					eval.run();
-					sampleGraphResults.add(eval.getResults());
-				}
-//				sampleGraphResultsCombined.add(sampleGraphResults);
-//				sampleGraphResultsCombined.writeAsCsv(resultsDir.getAbsolutePath());
-//				batchResults.add(sampleGraphResultsCombined);
-			}
+			eval.runAndStore();
 		}
 	}
 	
@@ -123,78 +94,60 @@ public class FetchGraphsResults {
 		while ((line = in.readLine()) != null) {
 			line = line.trim();
 			if (line.startsWith("http://" + experimentSetup.getGraphPrefix())) {
-				if (line.toLowerCase().contains("sample")) {
-					if (line.contains("0.2")) {
-//						if (!sampleGraphs.containsKey("0.2")) {
-//							sampleGraphs.put("0.2", new ArrayList<String>());
-//						}
-//						sampleGraphs.get("0.2").add(line);
-					} else if (line.contains("0.5")) {
-						if (!sampleGraphs.containsKey("0.5")) {
-							sampleGraphs.put("0.5", new ArrayList<String>());
-						}
-						sampleGraphs.get("0.5").add(line);
-					} else {
-						System.out.println("couldnt detect mode to run in for sample graph " + line);
-						System.exit(1);
-					}
-					
-				} else {
-					graphs.add(line);
-				}
+				graphs.add(line);
 			}
 		}
 		pr.waitFor();
 		in.close();
 		
-		if (graphs.size() == 0 && sampleGraphs.size() == 0) {
+		if (graphs.size() == 0) {
 			throw new IllegalStateException("No graphs retrieved from ops via ssh. OPS down? no internet connection?");
-		}
-		for (ArrayList<String> sampleGraphsArray: sampleGraphs.values()) {
-			Collections.sort(sampleGraphsArray);
 		}
 		Collections.sort(graphs);
 		return graphs;
 	}
-
-	public static void main(String[] args) throws IOException, InterruptedException  {
-		FetchGraphsResults[] evalGraphs = null;
-		try {
-			evalGraphs = new FetchGraphsResults[]{
-//					new EvaluateGraphs(new DbpoExperimentSetup(DbpoExperimentSetup.QALD_REMOVE_OPTIONALS)), 
-//					new EvaluateGraphs(new DbpoExperimentSetup(DbpoExperimentSetup.QALD_KEEP_OPTIONALS)),
-//					new EvaluateGraphs(new DbpoExperimentSetup(DbpoExperimentSetup.QUERY_LOGS)),
-					new FetchGraphsResults(new SwdfExperimentSetup()),
-//					new EvaluateGraphs(new Sp2bExperimentSetup()),
-//					new EvaluateGraphs(new LmdbExperimentSetup()),
-//					new EvaluateGraphs(new LgdExperimentSetup()),
-//					new EvaluateGraphs(new DbpExperimentSetup()),
-			};
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		if (evalGraphs != null) {
-			int processIndex = 0;
-			int retryAttempts = 0;
-			while (processIndex <  evalGraphs.length && retryAttempts < 3) {
-				try {
-					evalGraphs[processIndex].run();
-					processIndex++;
-				} catch (IllegalStateException e) {
-					System.out.println(e.getMessage());
-					System.out.println("restarting virtuoso, and retrying analysis of graph");
-					retryAttempts++;
-					Utils.executeCommand(new String[]{ "ssh", "ops.few.vu.nl", "subgraphSelection/bin/virtuoso/restartVirtuosoIfNeeded.sh" });
-				} catch (Exception e) {
-					e.printStackTrace();
-					System.exit(1);
-				}
-			}
-			if (retryAttempts == 3) {
-				System.out.println("Too many retries");
-			}
-		}
+	public static void doFetch(ExperimentSetup experimentSetup) throws IOException {
+		new FetchGraphsResults(experimentSetup);
 	}
+
+//	public static void main(String[] args) throws IOException, InterruptedException  {
+//		FetchGraphsResults[] evalGraphs = null;
+//		try {
+//			evalGraphs = new FetchGraphsResults[]{
+////					new EvaluateGraphs(new DbpoExperimentSetup(DbpoExperimentSetup.QALD_REMOVE_OPTIONALS)), 
+////					new EvaluateGraphs(new DbpoExperimentSetup(DbpoExperimentSetup.QALD_KEEP_OPTIONALS)),
+////					new EvaluateGraphs(new DbpoExperimentSetup(DbpoExperimentSetup.QUERY_LOGS)),
+//					new FetchGraphsResults(new SwdfExperimentSetup()),
+////					new EvaluateGraphs(new Sp2bExperimentSetup()),
+////					new EvaluateGraphs(new LmdbExperimentSetup()),
+////					new EvaluateGraphs(new LgdExperimentSetup()),
+////					new EvaluateGraphs(new DbpExperimentSetup()),
+//			};
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		
+//		if (evalGraphs != null) {
+//			int processIndex = 0;
+//			int retryAttempts = 0;
+//			while (processIndex <  evalGraphs.length && retryAttempts < 3) {
+//				try {
+//					evalGraphs[processIndex].run();
+//					processIndex++;
+//				} catch (IllegalStateException e) {
+//					System.out.println(e.getMessage());
+//					System.out.println("restarting virtuoso, and retrying analysis of graph");
+//					retryAttempts++;
+//					Utils.executeCommand(new String[]{ "ssh", "ops.few.vu.nl", "subgraphSelection/bin/virtuoso/restartVirtuosoIfNeeded.sh" });
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//					System.exit(1);
+//				}
+//			}
+//			if (retryAttempts == 3) {
+//				System.out.println("Too many retries");
+//			}
+//		}
+//	}
 
 }

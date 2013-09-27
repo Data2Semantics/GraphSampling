@@ -11,9 +11,9 @@ import org.openrdf.repository.RepositoryException;
 import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 import com.d2s.subgraph.eval.experiments.Sp2bExperimentSetup;
-import com.d2s.subgraph.eval.io.QResultsSaver;
 import com.d2s.subgraph.eval.results.GraphResults;
 import com.d2s.subgraph.eval.results.QueryResultsRegular;
+import com.d2s.subgraph.io.QResultsSaver;
 import com.d2s.subgraph.queries.Query;
 import com.d2s.subgraph.util.QueryUtils;
 import com.hp.hpl.jena.query.QueryExecution;
@@ -43,7 +43,7 @@ public class FetchGraphResults {
 	}
 
 
-	public void run() throws RepositoryException, MalformedQueryException, QueryEvaluationException, IOException, IllegalStateException {
+	public void runAndStore() throws RepositoryException, MalformedQueryException, QueryEvaluationException, IOException, IllegalStateException {
 		for (Query evalQuery : experimentSetup.getQueryCollection().getQueries()) {
 			runForQuery(evalQuery);
 		}

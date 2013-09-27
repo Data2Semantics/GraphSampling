@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.data2semantics.query.QueryCollection;
+
 import com.d2s.subgraph.queries.Query;
 import com.d2s.subgraph.util.StringUtils;
 import com.d2s.subgraph.util.Utils;
@@ -15,7 +17,7 @@ public class GraphResultsRegular extends GraphResults {
 	public void add(Query query) {
 		queryCollection.addQuery(query);
 	}
-	protected String getRewriteMethod() {
+	public String getRewriteMethod() {
 		String rewriteMethod = StringUtils.getRewriteMethodAsString(graphName);
 		if (rewriteMethod.length() == 0) {
 			if (graphName.contains("Baseline")) {
@@ -27,7 +29,7 @@ public class GraphResultsRegular extends GraphResults {
 		return rewriteMethod;
 	}
 	
-	protected String getProperName() {
+	public String getProperName() {
 		int rewriteMethod = StringUtils.getRewriteMethod(getGraphName());
 		int analysisAlg = StringUtils.getAnalysisAlgorithm(getGraphName());
 		String properName = "";
@@ -56,7 +58,7 @@ public class GraphResultsRegular extends GraphResults {
 		properName += " " + getPercentage() + "%";
 		return properName;
 	}
-	protected String getShortGraphName() {
+	public String getShortGraphName() {
 		String graphName = getGraphName();
 		graphName = graphName.replace("unweighted_", "");
 		graphName = graphName.replace(".nt", "");
@@ -70,7 +72,7 @@ public class GraphResultsRegular extends GraphResults {
 		return shortGraphname;
 		
 	}
-	protected String getAlgorithm() {
+	public String getAlgorithm() {
 		String algorithm = StringUtils.getAlgorithmAsString(graphName);
 		if (algorithm.length() == 0) {
 			algorithm = graphName;
@@ -82,12 +84,14 @@ public class GraphResultsRegular extends GraphResults {
 		}
 		return algorithm;
 	}
-	protected int getPercentage() {
+	public int getPercentage() {
 		String graphName = getGraphName();
 		ArrayList<String> parts = new ArrayList<String>(Arrays.asList( graphName.split("-")));
 		String trailingBit = parts.get(parts.size()-1);
 		trailingBit = trailingBit.replace(".nt", "");
 		return Integer.parseInt(trailingBit);
 	}
-
+	public void setQueryCollection(QueryCollection<Query> queryCollection) {
+		this.queryCollection = queryCollection;
+	}
 }
