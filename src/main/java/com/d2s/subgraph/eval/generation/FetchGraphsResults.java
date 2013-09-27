@@ -20,11 +20,10 @@ import org.xml.sax.SAXException;
 import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 import com.d2s.subgraph.eval.experiments.SwdfExperimentSetup;
-import com.d2s.subgraph.eval.results.BatchResults;
 import com.d2s.subgraph.eval.results.GraphResults;
 import com.d2s.subgraph.eval.results.GraphResultsSample;
 import com.d2s.subgraph.queries.Query;
-import com.d2s.subgraph.util.Helper;
+import com.d2s.subgraph.util.Utils;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QuerySolution;
@@ -186,7 +185,7 @@ public class FetchGraphsResults {
 					System.out.println(e.getMessage());
 					System.out.println("restarting virtuoso, and retrying analysis of graph");
 					retryAttempts++;
-					Helper.executeCommand(new String[]{ "ssh", "ops.few.vu.nl", "subgraphSelection/bin/virtuoso/restartVirtuosoIfNeeded.sh" });
+					Utils.executeCommand(new String[]{ "ssh", "ops.few.vu.nl", "subgraphSelection/bin/virtuoso/restartVirtuosoIfNeeded.sh" });
 				} catch (Exception e) {
 					e.printStackTrace();
 					System.exit(1);

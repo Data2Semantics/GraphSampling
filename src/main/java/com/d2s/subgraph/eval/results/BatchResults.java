@@ -18,8 +18,10 @@ import au.com.bytecode.opencsv.CSVWriter;
 import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 import com.d2s.subgraph.queries.Query;
-import com.d2s.subgraph.util.Helper;
-import com.d2s.subgraph.util.RHelper;
+import com.d2s.subgraph.util.QueryUtils;
+import com.d2s.subgraph.util.StringUtils;
+import com.d2s.subgraph.util.Utils;
+import com.d2s.subgraph.util.RUtils;
 
 public class BatchResults {
 	private File resultsDir;
@@ -74,8 +76,8 @@ public class BatchResults {
 		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + Config.FILE_CSV_BEST_RECALL_PER_ALG);
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
 		writer.writeNext(new String[]{"queryId", "algorithm", "bestRecall", "avgQueryRecall"});
-		int[] algorithms = new int[]{Helper.ALG_BETWEENNESS, Helper.ALG_EIGENVECTOR, Helper.ALG_INDEGREE, Helper.ALG_OUTDEGREE, Helper.ALG_PAGERANK};
-		int[] rewrMethods = new int[]{Helper.REWRITE_NODE1, Helper.REWRITE_NODE2, Helper.REWRITE_NODE3, Helper.REWRITE_NODE4, Helper.REWRITE_PATH};
+		int[] algorithms = new int[]{Utils.ALG_BETWEENNESS, Utils.ALG_EIGENVECTOR, Utils.ALG_INDEGREE, Utils.ALG_OUTDEGREE, Utils.ALG_PAGERANK};
+		int[] rewrMethods = new int[]{Utils.REWRITE_NODE1, Utils.REWRITE_NODE2, Utils.REWRITE_NODE3, Utils.REWRITE_NODE4, Utils.REWRITE_PATH};
 		
 		for (Query query: queryCollection.getQueries()) {
 			ArrayList<ArrayList<String>> rows = new ArrayList<ArrayList<String>>();
@@ -88,7 +90,7 @@ public class BatchResults {
 				double bestRecall = 0.0;
 				int numGraphResultsFound = 0;
 				for (GraphResults results: batchResults) {
-					if (Helper.getAnalysisAlgorithm(results.getGraphName()) == algorithm) {
+					if (StringUtils.getAnalysisAlgorithm(results.getGraphName()) == algorithm) {
 						numGraphResultsFound++;
 						totalRecall += results.getQueryCollection().getQuery(query.toString()).getResults().getRecall();
 						graphCount++;
@@ -103,7 +105,7 @@ public class BatchResults {
 					System.exit(1);
 				} else {
 					row.add(Integer.toString(queryId));
-					row.add(Helper.getAlgorithmAsString(algorithm));
+					row.add(StringUtils.getAlgorithmAsString(algorithm));
 					row.add(Double.toString(bestRecall));
 					rows.add(row);
 				}
@@ -129,7 +131,7 @@ public class BatchResults {
 			int numGraphs = 0;
 			for (GraphResults results: batchResults) {
 				if (results.getQueryCollection().getQuery(query.toString()) != null) {
-					if (Helper.partialStringMatch(results.getGraphName(), onlyGraphsContaining)) {
+					if (StringUtils.partialStringMatch(results.getGraphName(), onlyGraphsContaining)) {
 						QueryResults queryResults = results.getQueryCollection().getQuery(query.toString()).getResults();
 						totalRecall += queryResults.getRecall();
 						numGraphs++;
@@ -154,7 +156,7 @@ public class BatchResults {
 	
 	private void drawPlots() throws IOException, InterruptedException {
 		System.out.println("drawing plots");
-		RHelper rHelper = new RHelper();
+		RUtils rHelper = new RUtils();
 		rHelper.drawPlots(resultsDir);
 	}
 	private void writeSummaryCsv() throws IOException {
@@ -218,7 +220,7 @@ public class BatchResults {
 		}
 		
 		for (GraphResults graphResults: batchResults) {
-			if (Helper.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
+			if (StringUtils.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
 				for (Query query: graphResults.getQueryCollection().getQueries()) {
 					ArrayList<String> row = table.get(query.getQueryId());
 					if (query.getResults() != null) {
@@ -236,7 +238,7 @@ public class BatchResults {
 		ArrayList<String> header = new ArrayList<String>();
 		header.add("queryId");
 		for (GraphResults graphResults: batchResults) {
-			if (Helper.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
+			if (StringUtils.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
 				header.add(graphResults.getShortGraphName());
 			}
 			
@@ -259,7 +261,7 @@ public class BatchResults {
 		writer.writeNext(new String[]{"queryId", "graph", "recall", "rewrMethod", "algorithm"});
 		
 		for (GraphResults graphResults: batchResults) {
-			if (Helper.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
+			if (StringUtils.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
 //				for (Query query: queryCollection.getQueries()) {
 //					if (graphResults.contains(query.getQueryId())) {
 //						writer.writeNext(new String[]{
@@ -293,18 +295,18 @@ public class BatchResults {
 		
 		for (GraphResults graphResults: batchResults) {
 			String graphName = graphResults.getGraphName();
-			if (Helper.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining) && !graphName.contains("sample") && !graphName.contains("Baseline")) {
+			if (StringUtils.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining) && !graphName.contains("sample") && !graphName.contains("Baseline")) {
 				HashMap<Integer, Double> hashmapPick = null;
-				int rewriteMethod = Helper.getRewriteMethod(graphName);
-				int analysisAlgorithm = Helper.getAnalysisAlgorithm(graphName);
+				int rewriteMethod = StringUtils.getRewriteMethod(graphName);
+				int analysisAlgorithm = StringUtils.getAnalysisAlgorithm(graphName);
 				
 				
 				
-				if (rewriteMethod == Helper.REWRITE_NODE1) hashmapPick = node1;
-				if (rewriteMethod == Helper.REWRITE_NODE2) hashmapPick = node2;
-				if (rewriteMethod == Helper.REWRITE_NODE3) hashmapPick = node3;
-				if (rewriteMethod == Helper.REWRITE_NODE4) hashmapPick = node4;
-				if (rewriteMethod == Helper.REWRITE_PATH) hashmapPick = path;
+				if (rewriteMethod == Utils.REWRITE_NODE1) hashmapPick = node1;
+				if (rewriteMethod == Utils.REWRITE_NODE2) hashmapPick = node2;
+				if (rewriteMethod == Utils.REWRITE_NODE3) hashmapPick = node3;
+				if (rewriteMethod == Utils.REWRITE_NODE4) hashmapPick = node4;
+				if (rewriteMethod == Utils.REWRITE_PATH) hashmapPick = path;
 				if (hashmapPick == null || analysisAlgorithm == -1) {
 					System.out.println("Not able to detect rewrite method or analysis of graph " + graphName);
 					System.exit(1);
@@ -360,28 +362,28 @@ public class BatchResults {
 	
 	private ArrayList<String> getHashMapAsArrayRow(HashMap<Integer, Double> hm) {
 		ArrayList<String> row = new ArrayList<String>();
-		if (hm.containsKey(Helper.ALG_EIGENVECTOR)) {
-			row.add(Double.toString(hm.get(Helper.ALG_EIGENVECTOR)));
+		if (hm.containsKey(Utils.ALG_EIGENVECTOR)) {
+			row.add(Double.toString(hm.get(Utils.ALG_EIGENVECTOR)));
 		} else {
 			row.add("");
 		}
-		if (hm.containsKey(Helper.ALG_PAGERANK)) {
-			row.add(Double.toString(hm.get(Helper.ALG_PAGERANK)));
+		if (hm.containsKey(Utils.ALG_PAGERANK)) {
+			row.add(Double.toString(hm.get(Utils.ALG_PAGERANK)));
 		} else {
 			row.add("");
 		}
-		if (hm.containsKey(Helper.ALG_BETWEENNESS)) {
-			row.add(Double.toString(hm.get(Helper.ALG_BETWEENNESS)));
+		if (hm.containsKey(Utils.ALG_BETWEENNESS)) {
+			row.add(Double.toString(hm.get(Utils.ALG_BETWEENNESS)));
 		} else {
 			row.add("");
 		}
-		if (hm.containsKey(Helper.ALG_INDEGREE)) {
-			row.add(Double.toString(hm.get(Helper.ALG_INDEGREE)));
+		if (hm.containsKey(Utils.ALG_INDEGREE)) {
+			row.add(Double.toString(hm.get(Utils.ALG_INDEGREE)));
 		} else {
 			row.add("");
 		}
-		if (hm.containsKey(Helper.ALG_OUTDEGREE)) {
-			row.add(Double.toString(hm.get(Helper.ALG_OUTDEGREE)));
+		if (hm.containsKey(Utils.ALG_OUTDEGREE)) {
+			row.add(Double.toString(hm.get(Utils.ALG_OUTDEGREE)));
 		} else {
 			row.add("");
 		}
@@ -416,7 +418,7 @@ public class BatchResults {
 			for (GraphResults results: batchResults) {
 				if (results.getQueryCollection().getQuery(query.toString()) != null) {
 //					if (onlyGraphsContaining.length() == 0 || results.getGraphName().contains(onlyGraphsContaining)) {
-					if (Helper.partialStringMatch(results.getGraphName(), onlyGraphsContaining)) {
+					if (StringUtils.partialStringMatch(results.getGraphName(), onlyGraphsContaining)) {
 						QueryResults queryResults = results.getQueryCollection().getQuery(query.toString()).getResults();
 						totalRecall += queryResults.getRecall();
 						numGraphs++;
@@ -430,14 +432,14 @@ public class BatchResults {
 //			if (batchResults.get(0).contains(queryId)) {
 //				Query queryObj = batchResults.get(0).get(queryId).getQuery();
 				goldenStandardSize = query.getResults().getGoldenStandardSize();
-				String encodedQuery = URLEncoder.encode(Helper.addFromClauseToQuery(query, experimentSetup.getGoldenStandardGraph()).toString(), "UTF-8");
+				String encodedQuery = URLEncoder.encode(QueryUtils.addFromClauseToQuery(query, experimentSetup.getGoldenStandardGraph()).toString(), "UTF-8");
 				url = "http://yasgui.laurensrietveld.nl?endpoint=" + encodedEndpoint + "&query=" + encodedQuery + "&tabTitle=" + query.getQueryId();
 //			}
 			row.add("<td>" + queryId + "</td>");
 			if (experimentSetup.privateQueries()) {
-				row.add("<td>" + Helper.getDoubleAsFormattedString(avgRecall) + " (n:" + goldenStandardSize + ")</td>");
+				row.add("<td>" + StringUtils.getDoubleAsFormattedString(avgRecall) + " (n:" + goldenStandardSize + ")</td>");
 			} else {
-				row.add("<td><a href='" + url + "' target='_blank'>" + Helper.getDoubleAsFormattedString(avgRecall) + " (n:" + goldenStandardSize + ")</a></td>");
+				row.add("<td><a href='" + url + "' target='_blank'>" + StringUtils.getDoubleAsFormattedString(avgRecall) + " (n:" + goldenStandardSize + ")</a></td>");
 			}
 			
 			row.add("<td>" + query.getNumberOfNonOptionalTriplePatterns() + "</td>");//non optional triple patterns
@@ -452,20 +454,20 @@ public class BatchResults {
 		html += "<th>queryId</th><th>avg</th><th>#tp's<br>(non opt)<br><th>#ccv<br></th><th>#cvv<br></th><th>#vcc<br></th>";
 		
 		for (GraphResults graphResults: batchResults) {
-			if (Helper.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
-				html += "\n<th>" + graphResults.getGraphName().substring("http://".length()).replace('_', '-') + "<br>(avg: " + Helper.getDoubleAsFormattedString(graphResults.getAverageRecall()) + ")</th>";
+			if (StringUtils.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
+				html += "\n<th>" + graphResults.getGraphName().substring("http://".length()).replace('_', '-') + "<br>(avg: " + StringUtils.getDoubleAsFormattedString(graphResults.getAverageRecall()) + ")</th>";
 //				for (Query query: queryCollection.getQueries()) {
 				for (Query query: graphResults.getQueryCollection().getQueries()) {
 					ArrayList<String> row = table.get(query.getQueryId());
 					if (query.getResults() != null) {
 						QueryResults queryResults = query.getResults();
-						String queryString = Helper.addFromClauseToQuery(query, graphResults.getGraphName()).toString();
+						String queryString = QueryUtils.addFromClauseToQuery(query, graphResults.getGraphName()).toString();
 						String encodedQuery = URLEncoder.encode(queryString, "UTF-8");
 						String url = "http://yasgui.laurensrietveld.nl?endpoint=" + encodedEndpoint + "&query=" + encodedQuery + "&tabTitle=" + query.getQueryId();
 						String title = StringEscapeUtils.escapeHtml(queryString);
-						String cell = "<td title='" + title + "'><a href='" + url + "' target='_blank'>" + Helper.getDoubleAsFormattedString(queryResults.getRecall()) + "</a></td>";
+						String cell = "<td title='" + title + "'><a href='" + url + "' target='_blank'>" + StringUtils.getDoubleAsFormattedString(queryResults.getRecall()) + "</a></td>";
 						if (experimentSetup.privateQueries()) {
-							row.add("<td>" + Helper.getDoubleAsFormattedString(queryResults.getRecall()) + "</td>");
+							row.add("<td>" + StringUtils.getDoubleAsFormattedString(queryResults.getRecall()) + "</td>");
 						} else {
 							row.add(cell);
 						}

@@ -3,24 +3,15 @@ package com.d2s.subgraph.queries;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Scanner;
 
-import org.data2semantics.query.QueryCollection;
 import org.data2semantics.query.filters.DescribeFilter;
 import org.data2semantics.query.filters.GraphClauseFilter;
 import org.data2semantics.query.filters.QueryFilter;
 
 import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
-import com.hp.hpl.jena.query.QueryBuildException;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.QueryParseException;
-import com.hp.hpl.jena.sparql.engine.http.QueryExceptionHTTP;
 
 public class LmdbQueries extends QueriesFetcher {
 	public static String QUERY_FILE = "src/main/resources/lmdbQueries.txt";

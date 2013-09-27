@@ -14,7 +14,7 @@ import org.data2semantics.query.QueryCollection;
 import org.data2semantics.query.filters.QueryFilter;
 
 import com.d2s.subgraph.eval.Config;
-import com.d2s.subgraph.util.Helper;
+import com.d2s.subgraph.util.QueryUtils;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryParseException;
@@ -68,7 +68,7 @@ public abstract class QueriesFetcher {
 		try {
 			QueryExecution queryExecution = QueryExecutionFactory.sparqlService(Config.EXPERIMENT_ENDPOINT, query);
 			ResultSetRewindable result = ResultSetFactory.copyResults(queryExecution.execSelect());
-			if (Helper.getResultSize(result) > 0) {
+			if (QueryUtils.getResultSize(result) > 0) {
 				return true;
 			}
 		} catch (QueryExceptionHTTP e) {

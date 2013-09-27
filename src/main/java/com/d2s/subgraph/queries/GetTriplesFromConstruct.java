@@ -11,7 +11,7 @@ import org.openrdf.repository.RepositoryException;
 import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 import com.d2s.subgraph.eval.experiments.Sp2bExperimentSetup;
-import com.d2s.subgraph.util.Helper;
+import com.d2s.subgraph.util.QueryUtils;
 import com.hp.hpl.jena.rdf.model.Model;
 
 public class GetTriplesFromConstruct {
@@ -31,10 +31,10 @@ public class GetTriplesFromConstruct {
 		FileOutputStream allTripleOutputStream = new FileOutputStream(allTriples);
 		for (Query query : experimentSetup.getQueryCollection().getQueries()) {
 
-			Query queryWithFromClause = Helper.addFromClauseToQuery(query, experimentSetup.getGoldenStandardGraph());
-			Query constructQuery = Helper.getAsConstructQuery(queryWithFromClause);
+			Query queryWithFromClause = QueryUtils.addFromClauseToQuery(query, experimentSetup.getGoldenStandardGraph());
+			Query constructQuery = QueryUtils.getAsConstructQuery(queryWithFromClause);
 			// System.out.println(constructQuery.toString());
-			Model model = Helper.executeConstruct(Config.EXPERIMENT_ENDPOINT, constructQuery);
+			Model model = QueryUtils.executeConstruct(Config.EXPERIMENT_ENDPOINT, constructQuery);
 			
 			File resultsFile = new File(experimentSetup.getQueryTriplesDir() + "/" + experimentSetup.getGraphPrefix() + "q" + Integer.toString(query.getQueryId())
 					+ ".nt");

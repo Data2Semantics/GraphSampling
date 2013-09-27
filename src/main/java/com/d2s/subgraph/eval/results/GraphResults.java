@@ -11,7 +11,7 @@ import org.data2semantics.query.QueryCollection;
 import au.com.bytecode.opencsv.CSVWriter;
 
 import com.d2s.subgraph.queries.Query;
-import com.d2s.subgraph.util.Helper;
+import com.d2s.subgraph.util.StringUtils;
 
 
 
@@ -54,10 +54,10 @@ public abstract class GraphResults {
 			QueryResults result = query.getResults();
 			ArrayList<String> columns = new ArrayList<String>();
 			columns.add(Integer.toString(query.getQueryId()));
-			columns.add(Helper.boolAsString(query.hasAggregators()));
-			columns.add(Helper.boolAsString(query.isAskType()));
-			columns.add(Helper.boolAsString(query.isOnlyDbo()));
-			columns.add(Helper.boolAsString(query.isSelectType()));
+			columns.add(StringUtils.boolAsString(query.hasAggregators()));
+			columns.add(StringUtils.boolAsString(query.isAskType()));
+			columns.add(StringUtils.boolAsString(query.isOnlyDbo()));
+			columns.add(StringUtils.boolAsString(query.isSelectType()));
 			columns.add(Double.toString(result.getRecall()));
 			columns.add(query.toString());
 			writer.writeNext(columns.toArray(new String[columns.size()]));

@@ -15,7 +15,7 @@ import com.d2s.subgraph.eval.io.QResultsSaver;
 import com.d2s.subgraph.eval.results.GraphResults;
 import com.d2s.subgraph.eval.results.QueryResultsRegular;
 import com.d2s.subgraph.queries.Query;
-import com.d2s.subgraph.util.Helper;
+import com.d2s.subgraph.util.QueryUtils;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QuerySolution;
@@ -66,18 +66,18 @@ public class FetchGraphResults {
 			try {
 				if (query.getGoldenStandardResults() == null) {
 					//store golden standard results, so we don't have to execute this query for every subgraph
-					goldenStandardResults = executeSelect(Config.EXPERIMENT_ENDPOINT, Helper.addFromClauseToQuery(query, goldenStandardGraph));
+					goldenStandardResults = executeSelect(Config.EXPERIMENT_ENDPOINT, QueryUtils.addFromClauseToQuery(query, goldenStandardGraph));
 					query.setGoldenStandardResults(goldenStandardResults);
 				} else {
 					goldenStandardResults = query.getGoldenStandardResults();
 				}
-				subgraphResults = executeSelect(Config.EXPERIMENT_ENDPOINT, Helper.addFromClauseToQuery(query, subGraph));
+				subgraphResults = executeSelect(Config.EXPERIMENT_ENDPOINT, QueryUtils.addFromClauseToQuery(query, subGraph));
 			} catch (Exception e) {
 				// e.printStackTrace();
 				invalidCount++;
 				return;
 			}
-			int goldenSize = Helper.getResultSize(goldenStandardResults);
+			int goldenSize = QueryUtils.getResultSize(goldenStandardResults);
 			if (goldenSize == 0) {
 				// System.out.println("no results retrieved for query " + evalQuery.getQueryString(goldenStandardGraph));
 				invalidCount++;
@@ -92,7 +92,7 @@ public class FetchGraphResults {
 				// double recall = getRecallOnBindings(goldenStandardResults, subgraphResults);
 				if (recall > 1.0) {
 					System.out.println("recall higher than 1.0???? yeah, right");
-					System.out.println(Helper.addFromClauseToQuery(query, subGraph).toString());
+					System.out.println(QueryUtils.addFromClauseToQuery(query, subGraph).toString());
 					System.exit(1);
 				}
 				
@@ -198,7 +198,7 @@ public class FetchGraphResults {
 			truePositives += maxTruePositives;
 		}
 		double recall = 0;
-		double totalSize = (double)(Helper.getResultSize(goldenStandard) * projectionVars.size());
+		double totalSize = (double)(QueryUtils.getResultSize(goldenStandard) * projectionVars.size());
 		graphResults.addRecallGoldenStandardSize((int)totalSize);
 		graphResults.addRecallTruePositives((int)truePositives);
 		//divide by projection vars size, so we don't give too strong of an influence to queries with lots of projection vars

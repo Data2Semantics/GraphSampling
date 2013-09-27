@@ -9,13 +9,13 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.rosuda.JRI.Rengine;
 
-public class RHelper {
+public class RUtils {
 	private static String TEMP_DIR = ".tmp";
 	private static String TMP_FILE_POSTFIX = "rScript.R";
 	private static String SCRIPT_DRAW_PLOTS = "src/main/resources/rScripts/drawPlots.R";
 	File tempDir;
 
-	public RHelper() {
+	public RUtils() {
 		tempDir = new File(TEMP_DIR);
 		if (!tempDir.exists()) {
 			tempDir.mkdir();
@@ -84,8 +84,9 @@ public class RHelper {
 	}
 
 	public static void main(String[] args) throws IOException, InterruptedException {
-		RHelper rHelper = new RHelper();
+		RUtils rHelper = new RUtils();
 		rHelper.plotRecallBoxPlots(new File("swdfResults/flatlist.csv"), new File("swdfResults/boxplots.pdf"));
 
 	}
+	
 }

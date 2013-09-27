@@ -3,20 +3,16 @@ package com.d2s.subgraph.queries;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 
 import org.data2semantics.query.QueryCollection;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
-import com.d2s.subgraph.eval.experiments.DbpExperimentSetup;
 import com.d2s.subgraph.eval.experiments.DbpoExperimentSetup;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
-import com.d2s.subgraph.eval.experiments.LgdExperimentSetup;
 import com.d2s.subgraph.eval.experiments.LmdbExperimentSetup;
 import com.d2s.subgraph.eval.experiments.Sp2bExperimentSetup;
 import com.d2s.subgraph.eval.experiments.SwdfExperimentSetup;
-import com.d2s.subgraph.queries.QueriesFetcher;
 
 
 public class GetQueryProperties {

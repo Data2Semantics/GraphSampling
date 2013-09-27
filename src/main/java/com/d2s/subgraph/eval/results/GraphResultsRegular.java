@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import com.d2s.subgraph.queries.Query;
-import com.d2s.subgraph.util.Helper;
+import com.d2s.subgraph.util.StringUtils;
+import com.d2s.subgraph.util.Utils;
 
 public class GraphResultsRegular extends GraphResults {
 	public GraphResultsRegular() throws IOException {
@@ -15,7 +16,7 @@ public class GraphResultsRegular extends GraphResults {
 		queryCollection.addQuery(query);
 	}
 	protected String getRewriteMethod() {
-		String rewriteMethod = Helper.getRewriteMethodAsString(graphName);
+		String rewriteMethod = StringUtils.getRewriteMethodAsString(graphName);
 		if (rewriteMethod.length() == 0) {
 			if (graphName.contains("Baseline")) {
 				rewriteMethod = "Baseline";
@@ -27,29 +28,29 @@ public class GraphResultsRegular extends GraphResults {
 	}
 	
 	protected String getProperName() {
-		int rewriteMethod = Helper.getRewriteMethod(getGraphName());
-		int analysisAlg = Helper.getAnalysisAlgorithm(getGraphName());
+		int rewriteMethod = StringUtils.getRewriteMethod(getGraphName());
+		int analysisAlg = StringUtils.getAnalysisAlgorithm(getGraphName());
 		String properName = "";
-		if (rewriteMethod == Helper.REWRITE_NODE1) {
+		if (rewriteMethod == Utils.REWRITE_NODE1) {
 			properName += "Node1";
-		} else if (rewriteMethod == Helper.REWRITE_NODE2) {
+		} else if (rewriteMethod == Utils.REWRITE_NODE2) {
 			properName += "Node2";
-		} else if (rewriteMethod == Helper.REWRITE_NODE3) {
+		} else if (rewriteMethod == Utils.REWRITE_NODE3) {
 			properName += "Node3";
-		} else if (rewriteMethod == Helper.REWRITE_NODE4) {
+		} else if (rewriteMethod == Utils.REWRITE_NODE4) {
 			properName += "Node4";
-		} else if (rewriteMethod == Helper.REWRITE_PATH) {
+		} else if (rewriteMethod == Utils.REWRITE_PATH) {
 			properName += "Path";
 		}
-		if (analysisAlg == Helper.ALG_BETWEENNESS) {
+		if (analysisAlg == Utils.ALG_BETWEENNESS) {
 			properName += " betweenness";
-		} else if (analysisAlg == Helper.ALG_EIGENVECTOR) {
+		} else if (analysisAlg == Utils.ALG_EIGENVECTOR) {
 			properName += " eigenvector";
-		} else if (analysisAlg == Helper.ALG_INDEGREE) {
+		} else if (analysisAlg == Utils.ALG_INDEGREE) {
 			properName += " indegree";
-		} else if (analysisAlg == Helper.ALG_OUTDEGREE) {
+		} else if (analysisAlg == Utils.ALG_OUTDEGREE) {
 			properName += " outdegree";
-		} else if (analysisAlg == Helper.ALG_PAGERANK) {
+		} else if (analysisAlg == Utils.ALG_PAGERANK) {
 			properName += " pagerank";
 		}
 		properName += " " + getPercentage() + "%";
@@ -70,7 +71,7 @@ public class GraphResultsRegular extends GraphResults {
 		
 	}
 	protected String getAlgorithm() {
-		String algorithm = Helper.getAlgorithmAsString(graphName);
+		String algorithm = StringUtils.getAlgorithmAsString(graphName);
 		if (algorithm.length() == 0) {
 			algorithm = graphName;
 			if (graphName.contains("Baseline")) {

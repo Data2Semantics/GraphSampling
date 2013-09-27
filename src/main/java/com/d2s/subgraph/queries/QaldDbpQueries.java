@@ -21,7 +21,7 @@ import org.xml.sax.SAXException;
 
 import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.experiments.DbpoExperimentSetup;
-import com.d2s.subgraph.util.Helper;
+import com.d2s.subgraph.util.QueryUtils;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryParseException;
@@ -62,7 +62,7 @@ public class QaldDbpQueries extends QueriesFetcher {
 				Query goldenStandardQuery = (Query) query.getQueryStringWithFromClause(DbpoExperimentSetup.GOLDEN_STANDARD_GRAPH);
 				QueryExecution queryExecution = QueryExecutionFactory.sparqlService(Config.EXPERIMENT_ENDPOINT, goldenStandardQuery);
 				ResultSetRewindable result = ResultSetFactory.copyResults(queryExecution.execSelect());
-				if (Helper.getResultSize(result) > 0) {
+				if (QueryUtils.getResultSize(result) > 0) {
 					validQueryCollection.addQuery(query);
 				} else {
 					emptyQueries++;
@@ -119,7 +119,7 @@ public class QaldDbpQueries extends QueriesFetcher {
 				evalQuery = Query.create(queryNode.getTextContent(), queryCollection);
 				if (removeStringProjVar) {
 					System.out.println("WATCH OUT!!!!!!!!!!!! Removing a project var!!!");
-					evalQuery = Helper.removeProjectVarFromQuery(evalQuery, "string");
+					evalQuery = QueryUtils.removeProjectVarFromQuery(evalQuery, "string");
 				}
 				evalQuery.setAnswers(getAnswersList(element));
 				filterAndStoreQuery(evalQuery);
