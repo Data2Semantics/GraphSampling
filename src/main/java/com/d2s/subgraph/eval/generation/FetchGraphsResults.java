@@ -23,8 +23,8 @@ import com.d2s.subgraph.eval.experiments.SwdfExperimentSetup;
 import com.d2s.subgraph.eval.results.BatchResults;
 import com.d2s.subgraph.eval.results.GraphResults;
 import com.d2s.subgraph.eval.results.GraphResultsSample;
-import com.d2s.subgraph.helpers.Helper;
 import com.d2s.subgraph.queries.Query;
+import com.d2s.subgraph.util.Helper;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QuerySolution;
@@ -35,12 +35,12 @@ import com.hp.hpl.jena.sparql.resultset.ResultSetRewindable;
 public class FetchGraphsResults {
 	private File resultsDir;
 	private ExperimentSetup experimentSetup;
-	private BatchResults batchResults;
+//	private BatchResults batchResults;
 	private QueryCollection<Query> queryCollection;
 	private ArrayList<String> graphs = new ArrayList<String>();;
 	private HashMap<String,ArrayList<String>> sampleGraphs = new HashMap<String,ArrayList<String>>();
 	public FetchGraphsResults(ExperimentSetup experimentSetup) throws IOException {
-		batchResults = new BatchResults(experimentSetup);
+//		batchResults = new BatchResults(experimentSetup);
 		this.experimentSetup = experimentSetup;
 		this.resultsDir = new File(experimentSetup.getEvalResultsDir());
 		if (!(resultsDir.exists() && resultsDir.isDirectory())) {
@@ -57,10 +57,10 @@ public class FetchGraphsResults {
 		System.out.println("Running evaluation for graphs " + graphs.toString());
 		for (String graph: graphs) {
 			System.out.println("evaluating for graph " + graph);
-			FetchGraphResults eval = new FetchGraphResults(queryCollection, Config.EXPERIMENT_ENDPOINT, experimentSetup, graph);
+			FetchGraphResults eval = new FetchGraphResults(experimentSetup, graph);
 			eval.run();
 			GraphResults results = eval.getResults();
-			batchResults.add(results);
+//			batchResults.add(results);
 			results.writeAsCsv(resultsDir.getAbsolutePath());
 		}
 		if (sampleGraphs.size() > 0) {
@@ -69,16 +69,15 @@ public class FetchGraphsResults {
 				GraphResultsSample sampleGraphResultsCombined = new GraphResultsSample();
 				ArrayList<GraphResults> sampleGraphResults = new ArrayList<GraphResults>();
 				for (String sampleGraph: entry.getValue()) {
-					FetchGraphResults eval = new FetchGraphResults(queryCollection, Config.EXPERIMENT_ENDPOINT, experimentSetup, sampleGraph);
+					FetchGraphResults eval = new FetchGraphResults(experimentSetup, sampleGraph);
 					eval.run();
 					sampleGraphResults.add(eval.getResults());
 				}
-				sampleGraphResultsCombined.add(sampleGraphResults);
-				sampleGraphResultsCombined.writeAsCsv(resultsDir.getAbsolutePath());
-				batchResults.add(sampleGraphResultsCombined);
+//				sampleGraphResultsCombined.add(sampleGraphResults);
+//				sampleGraphResultsCombined.writeAsCsv(resultsDir.getAbsolutePath());
+//				batchResults.add(sampleGraphResultsCombined);
 			}
 		}
-		batchResults.writeOutput();
 	}
 	
 	

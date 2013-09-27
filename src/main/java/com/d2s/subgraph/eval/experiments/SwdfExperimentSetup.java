@@ -14,7 +14,7 @@ import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
 
 
 
-public class SwdfExperimentSetup implements ExperimentSetup {
+public class SwdfExperimentSetup extends ExperimentSetup {
 	public static String GOLDEN_STANDARD_GRAPH = "http://swdf";
 	private static String GRAPH_PREFIX = "df_";
 	private static String QUERY_TRIPLES_DIR = "swdfQueryTriples";

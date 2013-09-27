@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import com.d2s.subgraph.helpers.Helper;
 import com.d2s.subgraph.queries.Query;
+import com.d2s.subgraph.util.Helper;
 
 public class GraphResultsRegular extends GraphResults {
 	public GraphResultsRegular() throws IOException {

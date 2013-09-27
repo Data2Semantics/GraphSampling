@@ -14,7 +14,7 @@ import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
 
 
 
-public class LgdExperimentSetup implements ExperimentSetup {
+public class LgdExperimentSetup extends ExperimentSetup {
 	public static String GOLDEN_STANDARD_GRAPH = "http://lgd";
 	private static String GRAPH_PREFIX = "lgd_";
 	private static String QUERY_TRIPLES_DIR = "lgdQueryTriples";

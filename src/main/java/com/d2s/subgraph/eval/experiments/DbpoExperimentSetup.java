@@ -12,7 +12,7 @@ import com.d2s.subgraph.queries.QueriesFetcher;
 import com.d2s.subgraph.queries.Query;
 
 
-public class DbpoExperimentSetup implements ExperimentSetup {
+public class DbpoExperimentSetup extends ExperimentSetup {
 	public static int QALD_REMOVE_OPTIONALS = 1;
 	public static int QALD_KEEP_OPTIONALS = 2;
 	public static int QUERY_LOGS = 3;

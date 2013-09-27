@@ -21,7 +21,7 @@ import org.xml.sax.SAXException;
 
 import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.experiments.DbpoExperimentSetup;
-import com.d2s.subgraph.helpers.Helper;
+import com.d2s.subgraph.util.Helper;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryParseException;
@@ -121,12 +121,12 @@ public class QaldDbpQueries extends QueriesFetcher {
 					System.out.println("WATCH OUT!!!!!!!!!!!! Removing a project var!!!");
 					evalQuery = Helper.removeProjectVarFromQuery(evalQuery, "string");
 				}
+				evalQuery.setAnswers(getAnswersList(element));
+				filterAndStoreQuery(evalQuery);
 			} catch (Exception e) {
 				invalidQueries++;
 				return;
 			}
-			evalQuery.setAnswers(getAnswersList(element));
-			filterAndStoreQuery(evalQuery);
 		}
 	}
 	
@@ -183,12 +183,12 @@ public class QaldDbpQueries extends QueriesFetcher {
 		try {
 			
 			QaldDbpQueries qaldQueries = new QaldDbpQueries(QALD_2_QUERIES, true);
-			for (Query query: qaldQueries.getQueryCollection().getQueries()) {
-				System.out.println(Integer.toString(query.getQueryId()));
-			}
+			System.out.println("number of stored queries: " + qaldQueries.getQueryCollection().getDistinctQueryCount());
+//			for (Query query: qaldQueries.getQueryCollection().getQueries()) {
+//				System.out.println(Integer.toString(query.getQueryId()));
+//			}
 			
 		} catch (Exception e) {
-			System.out.println("bla");
 			e.printStackTrace();
 		}
 	}

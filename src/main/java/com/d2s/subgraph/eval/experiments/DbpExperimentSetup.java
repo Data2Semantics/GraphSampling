@@ -13,7 +13,8 @@ import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
 
 
 
-public class DbpExperimentSetup implements ExperimentSetup {
+public class DbpExperimentSetup extends ExperimentSetup {
+	
 	public static String GOLDEN_STANDARD_GRAPH = "http://dbpl";
 	private static String GRAPH_PREFIX = "dbpl_";
 	private static String QUERY_TRIPLES_DIR = "dbplTriples";
@@ -56,5 +57,9 @@ public class DbpExperimentSetup implements ExperimentSetup {
 	}
 	public boolean useUniqueQueries() {
 		return UNIQUE_QUERIES;
+	}
+	public String getId() {
+		return this.getClass().getSimpleName();
+		
 	}
 }

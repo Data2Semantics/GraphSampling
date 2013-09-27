@@ -1,4 +1,4 @@
-package com.d2s.subgraph.helpers;
+package com.d2s.subgraph.util;
 
 import java.io.BufferedReader;
 import java.io.File;

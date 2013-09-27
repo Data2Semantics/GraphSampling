@@ -17,9 +17,9 @@ import au.com.bytecode.opencsv.CSVWriter;
 
 import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
-import com.d2s.subgraph.helpers.Helper;
-import com.d2s.subgraph.helpers.RHelper;
 import com.d2s.subgraph.queries.Query;
+import com.d2s.subgraph.util.Helper;
+import com.d2s.subgraph.util.RHelper;
 
 public class BatchResults {
 	private File resultsDir;

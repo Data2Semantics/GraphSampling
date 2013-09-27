@@ -11,11 +11,11 @@ import org.openrdf.repository.RepositoryException;
 import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 import com.d2s.subgraph.eval.experiments.Sp2bExperimentSetup;
+import com.d2s.subgraph.eval.io.QResultsSaver;
 import com.d2s.subgraph.eval.results.GraphResults;
-import com.d2s.subgraph.eval.results.GraphResultsRegular;
 import com.d2s.subgraph.eval.results.QueryResultsRegular;
-import com.d2s.subgraph.helpers.Helper;
 import com.d2s.subgraph.queries.Query;
+import com.d2s.subgraph.util.Helper;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QuerySolution;
@@ -24,34 +24,27 @@ import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 public class FetchGraphResults {
-	private QueryCollection<Query> queryCollection;
 	private String goldenStandardGraph;
 	private String subGraph;
 	private ExperimentSetup experimentSetup;
 	public int validCount = 0;
 	public int invalidCount = 0;
-	private String endpoint;
 	GraphResults graphResults;
 
-	public FetchGraphResults(QueryCollection<Query> queryCollection, String endpoint, ExperimentSetup experimentSetup, String subGraph) {
-		this.queryCollection = queryCollection;
-		this.endpoint = endpoint;
+	public FetchGraphResults(ExperimentSetup experimentSetup, String subGraph) {
 		this.goldenStandardGraph = experimentSetup.getGoldenStandardGraph();
 		this.experimentSetup = experimentSetup;
 		this.subGraph = subGraph;
 		graphResults.setGraphName(subGraph);
 	}
 
-	public FetchGraphResults(String endpoint, ExperimentSetup experimentSetup, String subGraph) {
-		this.endpoint = endpoint;
-		this.goldenStandardGraph = experimentSetup.getGoldenStandardGraph();
-		this.experimentSetup = experimentSetup;
-		this.subGraph = subGraph;
-		graphResults.setGraphName(subGraph);
+	public ExperimentSetup getExperimentSetup() {
+		return this.experimentSetup;
 	}
+
 
 	public void run() throws RepositoryException, MalformedQueryException, QueryEvaluationException, IOException, IllegalStateException {
-		for (Query evalQuery : queryCollection.getQueries()) {
+		for (Query evalQuery : experimentSetup.getQueryCollection().getQueries()) {
 			runForQuery(evalQuery);
 		}
 		System.out.println();
@@ -60,7 +53,10 @@ public class FetchGraphResults {
 		if (validCount == 0 && invalidCount > 0) {
 			throw new IllegalStateException("Something wrong. only invalids. OPS down? No internet connection?");
 		}
+		QResultsSaver.write(this);
 	}
+
+	
 
 	public void runForQuery(Query query) throws QueryEvaluationException {
 		if (query.isSelectType()) {
@@ -70,12 +66,12 @@ public class FetchGraphResults {
 			try {
 				if (query.getGoldenStandardResults() == null) {
 					//store golden standard results, so we don't have to execute this query for every subgraph
-					goldenStandardResults = executeSelect(endpoint, Helper.addFromClauseToQuery(query, goldenStandardGraph));
+					goldenStandardResults = executeSelect(Config.EXPERIMENT_ENDPOINT, Helper.addFromClauseToQuery(query, goldenStandardGraph));
 					query.setGoldenStandardResults(goldenStandardResults);
 				} else {
 					goldenStandardResults = query.getGoldenStandardResults();
 				}
-				subgraphResults = executeSelect(endpoint, Helper.addFromClauseToQuery(query, subGraph));
+				subgraphResults = executeSelect(Config.EXPERIMENT_ENDPOINT, Helper.addFromClauseToQuery(query, subGraph));
 			} catch (Exception e) {
 				// e.printStackTrace();
 				invalidCount++;
@@ -242,7 +238,7 @@ public class FetchGraphResults {
 			// EvaluateGraph.OPS_VIRTUOSO, goldenStandardGraph, subgraph);
 			// EvaluateGraph evaluate = new EvaluateGraph(new SwdfQueries(new DescribeFilter(), new SimpleBgpFilter()),
 			// EvaluateGraph.OPS_VIRTUOSO, goldenStandardGraph, subgraph);
-			FetchGraphResults evaluate = new FetchGraphResults(Config.EXPERIMENT_ENDPOINT, new Sp2bExperimentSetup(), subgraph);
+			FetchGraphResults evaluate = new FetchGraphResults(new Sp2bExperimentSetup(), subgraph);
 			Query query = Query.create("", new QueryCollection<Query>());
 			evaluate.runForQuery(query);
 		} catch (Exception e) {

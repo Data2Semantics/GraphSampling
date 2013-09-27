@@ -6,13 +6,13 @@ public abstract class QueryResults {
 	protected double recall;
 	
 	
-	protected double getPrecision() {
+	public double getPrecision() {
 		return precision;
 	}
 	public void setPrecision(double precision) {
 		this.precision = precision;
 	}
-	protected double getRecall() {
+	public double getRecall() {
 		return recall;
 	}
 	public void setRecall(double recall) {

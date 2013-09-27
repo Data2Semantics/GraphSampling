@@ -13,7 +13,7 @@ import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
 
 
 
-public class Sp2bExperimentSetup implements ExperimentSetup {
+public class Sp2bExperimentSetup extends ExperimentSetup {
 	public static String GOLDEN_STANDARD_GRAPH = "http://sp2b";
 	private static String GRAPH_PREFIX = "sp2b_";
 	private static String EVAL_RESULTS_DIR = "sp2bResults";

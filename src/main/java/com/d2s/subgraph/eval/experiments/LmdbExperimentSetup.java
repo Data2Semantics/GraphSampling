@@ -15,7 +15,7 @@ import com.d2s.subgraph.queries.Query;
 import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
 
 
-public class LmdbExperimentSetup implements ExperimentSetup {
+public class LmdbExperimentSetup extends ExperimentSetup {
 	public static String GOLDEN_STANDARD_GRAPH = "http://lmdb";
 	private static String GRAPH_PREFIX = "lmdb_";
 	private static String EVAL_RESULTS_DIR = "lmdbResults";

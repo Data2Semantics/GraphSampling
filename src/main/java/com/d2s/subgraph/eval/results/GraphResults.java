@@ -4,11 +4,14 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.data2semantics.query.QueryCollection;
+
 import au.com.bytecode.opencsv.CSVWriter;
-import com.d2s.subgraph.helpers.Helper;
+
 import com.d2s.subgraph.queries.Query;
+import com.d2s.subgraph.util.Helper;
 
 
 
@@ -95,7 +98,7 @@ public abstract class GraphResults {
 		return recallStats.getStandardDeviation();
 	}
 
-	protected String getGraphName() {
+	public String getGraphName() {
 		return graphName;
 	}
 
@@ -133,7 +136,7 @@ public abstract class GraphResults {
 		return (double)totalTruePositives / (double)totalGoldenStandardSize;
 	}
 
-	protected QueryCollection<Query> getQueryCollection() {
+	public QueryCollection<Query> getQueryCollection() {
 		return this.queryCollection;
 	}
 }

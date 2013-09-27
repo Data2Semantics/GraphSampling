@@ -9,10 +9,12 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
+
 import org.data2semantics.query.QueryCollection;
 import org.data2semantics.query.filters.QueryFilter;
+
 import com.d2s.subgraph.eval.Config;
-import com.d2s.subgraph.helpers.Helper;
+import com.d2s.subgraph.util.Helper;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryParseException;
