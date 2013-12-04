@@ -46,6 +46,7 @@ public class Query extends org.data2semantics.query.Query {
 		query.generateQueryStats();
 		return query;
 	}
+	
 	public ArrayList<HashMap<String, String>> getAnswers() {
 		return answers;
 	}
