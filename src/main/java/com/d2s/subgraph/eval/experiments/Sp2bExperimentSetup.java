@@ -25,7 +25,7 @@ public class Sp2bExperimentSetup extends ExperimentSetup {
 	private boolean UNIQUE_QUERIES = true;
 	
 	public Sp2bExperimentSetup() throws IOException {
-		queriesFetcher = new Sp2bQueries(new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter());
+		queriesFetcher = new Sp2bQueries(this, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter());
 		queriesFetcher.setMaxNQueries(MAX_NUM_QUERIES);
 	}
 	

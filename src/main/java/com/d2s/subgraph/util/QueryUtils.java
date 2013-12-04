@@ -77,12 +77,6 @@ public class QueryUtils {
 		return queryExecution.execConstruct();
 	}
 	
-	public static Query addFromClauseToQuery(Query query, String fromGraph) {
-		Query queryWithFromClause = (Query) query.cloneQuery();
-		queryWithFromClause.addGraphURI(fromGraph);
-		return queryWithFromClause;
-	}
-	
 
 	public static Query removeProjectVarFromQuery(Query origQuery, String varToRemove) throws IOException {
 		if (!origQuery.isSelectType()) {

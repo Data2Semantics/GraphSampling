@@ -11,6 +11,7 @@ import org.data2semantics.query.filters.DescribeFilter;
 import org.data2semantics.query.filters.GraphClauseFilter;
 import org.data2semantics.query.filters.QueryFilter;
 
+import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
 
 public class LmdbQueries extends QueriesFetcher {
@@ -18,12 +19,12 @@ public class LmdbQueries extends QueriesFetcher {
 	public static String CSV_COPY = "src/main/resources/lmdb_queries.csv";
 	public static String PARSE_QUERIES_FILE = "src/main/resources/lmdb_queries.arraylist";
 
-	public LmdbQueries(QueryFilter... filters) throws IOException {
-		this(true, filters);
+	public LmdbQueries(ExperimentSetup experimentSetup, QueryFilter... filters) throws IOException {
+		this(experimentSetup, true, filters);
 	}
 
-	public LmdbQueries(boolean useCacheFile, QueryFilter... filters) throws IOException {
-		super();
+	public LmdbQueries(ExperimentSetup experimentSetup, boolean useCacheFile, QueryFilter... filters) throws IOException {
+		super(experimentSetup);
 		File cacheFile = new File(PARSE_QUERIES_FILE);
 		if (useCacheFile && cacheFile.exists()) {
 			System.out.println("WATCH OUT! getting queries from cache file. might be outdated!");
@@ -58,8 +59,8 @@ public class LmdbQueries extends QueriesFetcher {
 
 		try {
 
-			LmdbQueries lmdbQueries = new LmdbQueries(false, new GraphClauseFilter(), new SimpleBgpFilter(), new DescribeFilter());
-			System.out.println(lmdbQueries.toString());
+//			LmdbQueries lmdbQueries = new LmdbQueries(false, new GraphClauseFilter(), new SimpleBgpFilter(), new DescribeFilter());
+//			System.out.println(lmdbQueries.toString());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -32,7 +32,7 @@ public class TestExperimentSetup extends ExperimentSetup {
 	public TestExperimentSetup(int querySelection) throws SAXException, IOException, ParserConfigurationException, IllegalStateException {
 		this.querySelection = querySelection;
 		if (querySelection == QALD_KEEP_OPTIONALS || querySelection == QALD_REMOVE_OPTIONALS) {
-			queriesFetcher = new QaldDbpQueries(QaldDbpQueries.QALD_2_QUERIES, (querySelection == QALD_REMOVE_OPTIONALS? true: false), true);
+			queriesFetcher = new QaldDbpQueries(this, QaldDbpQueries.QALD_2_QUERIES, (querySelection == QALD_REMOVE_OPTIONALS? true: false), true);
 		} else if (querySelection == QUERY_LOGS) {
 			throw new IllegalStateException("No implemented yet");
 		} else {

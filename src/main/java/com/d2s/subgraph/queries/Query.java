@@ -2,6 +2,7 @@ package com.d2s.subgraph.queries;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 import org.data2semantics.query.QueryCollection;
@@ -18,7 +19,9 @@ public class Query extends org.data2semantics.query.Query {
 	private ResultSetRewindable goldenStandardResults = null;
 	private ArrayList<HashMap<String, String>> answers = new ArrayList<HashMap<String, String>>();
 	private QueryResults queryResults;
+	private Date goldenStandardDuration;
 	public Query(){}
+
 	public Query(Prologue prologue) {
 		super(prologue);
 	}
@@ -38,6 +41,12 @@ public class Query extends org.data2semantics.query.Query {
 		this.onlyDbo = onlyDbo;
 	}
 	
+	public void setGoldenStandardDuration(Date date) {
+		this.goldenStandardDuration = date;
+	}
+	public Date getGoldenStandardDuration(Date date) {
+		return this.goldenStandardDuration;
+	}
 	
 	public static Query create(String queryString, QueryCollection<Query> queryCollection) {
 		Query query = new Query();
@@ -68,4 +77,12 @@ public class Query extends org.data2semantics.query.Query {
 	public void setResults(QueryResults results) {
 		this.queryResults = results;
 	}
+	
+	public Query getQueryWithFromClause(String fromGraph) throws IOException {
+		//crude, using the tostring instead of clone, but this is how the jena clone works as well!
+		Query queryWithFromClause = Query.create(this.toString());
+		queryWithFromClause.addGraphURI(fromGraph);
+		return queryWithFromClause;
+	}
+	
 }

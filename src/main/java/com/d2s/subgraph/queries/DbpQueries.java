@@ -12,6 +12,7 @@ import org.data2semantics.query.filters.DescribeFilter;
 import org.data2semantics.query.filters.GraphClauseFilter;
 import org.data2semantics.query.filters.QueryFilter;
 
+import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
 import com.d2s.subgraph.queries.filters.SimpleDbpFilter;
 
@@ -21,12 +22,12 @@ public class DbpQueries extends QueriesFetcher {
 	public static String PARSE_QUERIES_FILE = "src/main/resources/dbpl_queries.arraylist";
 	
 
-	public DbpQueries(QueryFilter... filters) throws IOException {
-		this(true, 0, filters);
+	public DbpQueries(ExperimentSetup experimentSetup, QueryFilter... filters) throws IOException {
+		this(experimentSetup, true, 0, filters);
 	}
 
-	public DbpQueries(boolean useCacheFile, int maxNumQueries, QueryFilter... filters) throws IOException {
-		super();
+	public DbpQueries(ExperimentSetup experimentSetup, boolean useCacheFile, int maxNumQueries, QueryFilter... filters) throws IOException {
+		super(experimentSetup);
 		this.maxNumQueries = maxNumQueries;
 		File cacheFile = new File(PARSE_QUERIES_FILE);
 		if (useCacheFile && cacheFile.exists()) {
@@ -72,8 +73,8 @@ public class DbpQueries extends QueriesFetcher {
 
 		try {
 
-			DbpQueries queries = new DbpQueries(false, 10, new SimpleDbpFilter(), new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter());
-			System.out.println(queries.toString());
+//			DbpQueries queries = new DbpQueries(false, 10, new SimpleDbpFilter(), new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter());
+//			System.out.println(queries.toString());
 
 		} catch (Exception e) {
 			e.printStackTrace();

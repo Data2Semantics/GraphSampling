@@ -26,7 +26,7 @@ public class DbpExperimentSetup extends ExperimentSetup {
 	private QueriesFetcher qFetcher;
 	
 	public DbpExperimentSetup() throws IOException {
-		qFetcher = new DbpQueries(false, MAX_NUM_QUERIES, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter(), new ConstructFilter());
+		qFetcher = new DbpQueries(this, false, MAX_NUM_QUERIES, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter(), new ConstructFilter());
 	}
 	
 	public String getGoldenStandardGraph() {

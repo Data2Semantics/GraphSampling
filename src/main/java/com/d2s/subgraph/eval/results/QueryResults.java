@@ -1,10 +1,13 @@
 package com.d2s.subgraph.eval.results;
 
+import java.util.Date;
+
 public abstract class QueryResults {
 	protected double precision;
 	protected int goldenStandardSize;
 	protected double recall;
-	
+	protected Date goldenStandardDuration = null;
+	protected Date subgraphDuration = null;
 	
 	public double getPrecision() {
 		return precision;
@@ -29,5 +32,12 @@ public abstract class QueryResults {
 	}
 	public int getGoldenStandardSize() {
 		return goldenStandardSize;
+	}
+	
+	public void setSubgraphDuration(Date date) {
+		this.subgraphDuration = date;
+	}
+	public Date getGoldenStandardDuration(Date date) {
+		return this.goldenStandardDuration;
 	}
 }

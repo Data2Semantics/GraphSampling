@@ -12,6 +12,7 @@ import org.data2semantics.query.filters.DescribeFilter;
 import org.data2semantics.query.filters.GraphClauseFilter;
 import org.data2semantics.query.filters.QueryFilter;
 
+import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
 
 public class LgdQueries extends QueriesFetcher {
@@ -19,12 +20,12 @@ public class LgdQueries extends QueriesFetcher {
 	public static String CSV_COPY = "src/main/resources/lgd_queries.csv";
 	public static String PARSE_QUERIES_FILE = "src/main/resources/lgd_queries.arraylist";
 
-	public LgdQueries(QueryFilter... filters) throws IOException {
-		this(true, 0, filters);
+	public LgdQueries(ExperimentSetup experimentSetup, QueryFilter... filters) throws IOException {
+		this(experimentSetup, true, 0, filters);
 	}
 
-	public LgdQueries(boolean useCacheFile, int maxNumQueries, QueryFilter... filters) throws IOException {
-		super();
+	public LgdQueries(ExperimentSetup experimentSetup, boolean useCacheFile, int maxNumQueries, QueryFilter... filters) throws IOException {
+		super(experimentSetup);
 		this.maxNumQueries = maxNumQueries;
 		File cacheFile = new File(PARSE_QUERIES_FILE);
 		if (useCacheFile && cacheFile.exists()) {
@@ -71,8 +72,8 @@ public class LgdQueries extends QueriesFetcher {
 
 		try {
 
-			LgdQueries swdfQueries = new LgdQueries(false, 100, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter());
-			System.out.println(swdfQueries.toString());
+//			LgdQueries swdfQueries = new LgdQueries(false, 100, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter());
+//			System.out.println(swdfQueries.toString());
 
 		} catch (Exception e) {
 			e.printStackTrace();

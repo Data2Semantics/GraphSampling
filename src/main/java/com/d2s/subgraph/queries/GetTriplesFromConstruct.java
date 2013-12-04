@@ -31,7 +31,7 @@ public class GetTriplesFromConstruct {
 		FileOutputStream allTripleOutputStream = new FileOutputStream(allTriples);
 		for (Query query : experimentSetup.getQueryCollection().getQueries()) {
 
-			Query queryWithFromClause = QueryUtils.addFromClauseToQuery(query, experimentSetup.getGoldenStandardGraph());
+			Query queryWithFromClause = query.getQueryWithFromClause(experimentSetup.getGoldenStandardGraph());
 			Query constructQuery = QueryUtils.getAsConstructQuery(queryWithFromClause);
 			// System.out.println(constructQuery.toString());
 			Model model = QueryUtils.executeConstruct(Config.EXPERIMENT_ENDPOINT, constructQuery);

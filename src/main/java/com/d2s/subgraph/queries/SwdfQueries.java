@@ -8,23 +8,21 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.data2semantics.query.filters.DescribeFilter;
-import org.data2semantics.query.filters.GraphClauseFilter;
 import org.data2semantics.query.filters.QueryFilter;
 
-import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
+import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 
 public class SwdfQueries extends QueriesFetcher {
 	public static String QUERY_FILE = "src/main/resources/swdf_queries.log";
 	public static String CSV_COPY = "src/main/resources/swdf_queries.csv";
 	public static String PARSE_QUERIES_FILE = "src/main/resources/swdf_queries.arraylist";
 
-	public SwdfQueries(QueryFilter... filters) throws IOException {
-		this(true, 0, filters);
+	public SwdfQueries(ExperimentSetup experimentSetup, QueryFilter... filters) throws IOException {
+		this(experimentSetup, true, 0, filters);
 	}
 
-	public SwdfQueries(boolean useCacheFile, int maxNumQueries, QueryFilter... filters) throws IOException {
-		super();
+	public SwdfQueries(ExperimentSetup experimentSetup, boolean useCacheFile, int maxNumQueries, QueryFilter... filters) throws IOException {
+		super(experimentSetup);
 		this.maxNumQueries = maxNumQueries;
 		File cacheFile = new File(PARSE_QUERIES_FILE);
 		if (useCacheFile && cacheFile.exists()) {
@@ -69,8 +67,8 @@ public class SwdfQueries extends QueriesFetcher {
 
 		try {
 
-			SwdfQueries swdfQueries = new SwdfQueries(false, 100, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter());
-			System.out.println(swdfQueries.toString());
+//			SwdfQueries swdfQueries = new SwdfQueries(false, 100, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter());
+//			System.out.println(swdfQueries.toString());
 
 		} catch (Exception e) {
 			e.printStackTrace();

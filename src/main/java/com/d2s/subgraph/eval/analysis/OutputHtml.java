@@ -65,7 +65,7 @@ public class OutputHtml extends OutputWrapper{
 //			if (batchResults.get(0).contains(queryId)) {
 //				Query queryObj = batchResults.get(0).get(queryId).getQuery();
 				goldenStandardSize = query.getResults().getGoldenStandardSize();
-				String encodedQuery = URLEncoder.encode(QueryUtils.addFromClauseToQuery(query, experimentSetup.getGoldenStandardGraph()).toString(), "UTF-8");
+				String encodedQuery = URLEncoder.encode(query.getQueryWithFromClause(experimentSetup.getGoldenStandardGraph()).toString(), "UTF-8");
 				url = "http://yasgui.laurensrietveld.nl?endpoint=" + encodedEndpoint + "&query=" + encodedQuery + "&tabTitle=" + query.getQueryId();
 //			}
 			row.add("<td>" + queryId + "</td>");
@@ -94,7 +94,7 @@ public class OutputHtml extends OutputWrapper{
 					ArrayList<String> row = table.get(query.getQueryId());
 					if (query.getResults() != null) {
 						QueryResults queryResults = query.getResults();
-						String queryString = QueryUtils.addFromClauseToQuery(query, graphResults.getGraphName()).toString();
+						String queryString = query.getQueryWithFromClause(graphResults.getGraphName()).toString();
 						String encodedQuery = URLEncoder.encode(queryString, "UTF-8");
 						String url = "http://yasgui.laurensrietveld.nl?endpoint=" + encodedEndpoint + "&query=" + encodedQuery + "&tabTitle=" + query.getQueryId();
 						String title = StringEscapeUtils.escapeHtml(queryString);

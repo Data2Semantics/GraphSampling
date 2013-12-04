@@ -25,4 +25,9 @@ public class Config {
 	 * Sample info
 	 */
 	public static String[] SAMPLE_SIZES = new String[]{"0.5"};
+	
+	/**
+	 * Time queries? (for benchmarking purposes)
+	 */
+	public static boolean TIME_QUERIES = true;
 }

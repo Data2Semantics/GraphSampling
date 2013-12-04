@@ -9,12 +9,14 @@ import java.util.Arrays;
 import org.apache.commons.io.FileUtils;
 import org.data2semantics.query.filters.QueryFilter;
 
+import com.d2s.subgraph.eval.experiments.ExperimentSetup;
+
 public class Sp2bQueries extends QueriesFetcher {
 	private static String QUERY_DIR = "src/main/resources/sp2bQueries";
 	private static String QUERY_FILE_EXTENSION = "sparql";
 
-	public Sp2bQueries(QueryFilter... filters) throws IOException {
-		super();
+	public Sp2bQueries(ExperimentSetup experimentSetup, QueryFilter... filters) throws IOException {
+		super(experimentSetup);
 		System.out.println("parsing sp2b query logs");
 		this.filters = new ArrayList<QueryFilter>(Arrays.asList(filters));
 		parseQueryDir();
@@ -54,9 +56,9 @@ public class Sp2bQueries extends QueriesFetcher {
 	public static void main(String[] args) {
 
 		try {
-			Sp2bQueries swdfQueries = new Sp2bQueries();
-//			Sp2bQueries swdfQueries = new Sp2bQueries(new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter());
-			System.out.println(swdfQueries.toString());
+//			Sp2bQueries swdfQueries = new Sp2bQueries();
+////			Sp2bQueries swdfQueries = new Sp2bQueries(new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter());
+//			System.out.println(swdfQueries.toString());
 
 
 		} catch (Exception e) {

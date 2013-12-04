@@ -26,7 +26,7 @@ public class LmdbExperimentSetup extends ExperimentSetup {
 	private QueriesFetcher queriesFetcher;
 	private boolean UNIQUE_QUERIES = true;
 	public LmdbExperimentSetup() throws SAXException, IOException, ParserConfigurationException {
-		queriesFetcher = new LmdbQueries(true, new GraphClauseFilter(), new SimpleBgpFilter(), new DescribeFilter());
+		queriesFetcher = new LmdbQueries(this, true, new GraphClauseFilter(), new SimpleBgpFilter(), new DescribeFilter());
 		queriesFetcher.setMaxNQueries(MAX_NUM_QUERIES);
 	}
 	

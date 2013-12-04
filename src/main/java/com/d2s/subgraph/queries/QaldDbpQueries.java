@@ -21,6 +21,7 @@ import org.xml.sax.SAXException;
 
 import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.experiments.DbpoExperimentSetup;
+import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 import com.d2s.subgraph.util.QueryUtils;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -37,8 +38,8 @@ public class QaldDbpQueries extends QueriesFetcher {
 	private boolean removeStringProjVar;
 	private boolean onlyDbo;
 	
-	public QaldDbpQueries(String xmlFile, boolean removeStringProjVar, boolean onlyDbo, QueryFilter... filters) throws SAXException, IOException, ParserConfigurationException {
-		super();
+	public QaldDbpQueries(ExperimentSetup experimentSetup, String xmlFile, boolean removeStringProjVar, boolean onlyDbo, QueryFilter... filters) throws SAXException, IOException, ParserConfigurationException {
+		super(experimentSetup);
 		this.filters = new ArrayList<QueryFilter>(Arrays.asList(filters));
 		this.removeStringProjVar = removeStringProjVar;
 		this.onlyDbo = onlyDbo;
@@ -46,11 +47,11 @@ public class QaldDbpQueries extends QueriesFetcher {
 		eraseEmptyresultQueries();
 	}
 
-	public QaldDbpQueries(String xmlFile, boolean removeStringProjVar) throws SAXException, IOException, ParserConfigurationException {
-		this(xmlFile, removeStringProjVar, false);
+	public QaldDbpQueries(ExperimentSetup experimentSetup, String xmlFile, boolean removeStringProjVar) throws SAXException, IOException, ParserConfigurationException {
+		this(experimentSetup, xmlFile, removeStringProjVar, false);
 	}
-	public QaldDbpQueries(String xmlFile, boolean removeStringProjVar, boolean onlyDbo) throws SAXException, IOException, ParserConfigurationException {
-		this(xmlFile, removeStringProjVar, onlyDbo, new QueryFilter[]{});
+	public QaldDbpQueries(ExperimentSetup experimentSetup, String xmlFile, boolean removeStringProjVar, boolean onlyDbo) throws SAXException, IOException, ParserConfigurationException {
+		this(experimentSetup, xmlFile, removeStringProjVar, onlyDbo, new QueryFilter[]{});
 	}
 	
 	private void eraseEmptyresultQueries() throws IOException {
@@ -59,7 +60,7 @@ public class QaldDbpQueries extends QueriesFetcher {
 		QueryCollection<Query> validQueryCollection = new QueryCollection<Query>();
 		for (Query query: queryCollection.getQueries()) {
 			try {
-				Query goldenStandardQuery = (Query) query.getQueryStringWithFromClause(DbpoExperimentSetup.GOLDEN_STANDARD_GRAPH);
+				Query goldenStandardQuery = (Query) query.getQueryWithFromClause(DbpoExperimentSetup.GOLDEN_STANDARD_GRAPH);
 				QueryExecution queryExecution = QueryExecutionFactory.sparqlService(Config.EXPERIMENT_ENDPOINT, goldenStandardQuery);
 				ResultSetRewindable result = ResultSetFactory.copyResults(queryExecution.execSelect());
 				if (QueryUtils.getResultSize(result) > 0) {
@@ -182,8 +183,8 @@ public class QaldDbpQueries extends QueriesFetcher {
 		
 		try {
 			
-			QaldDbpQueries qaldQueries = new QaldDbpQueries(QALD_2_QUERIES, true);
-			System.out.println("number of stored queries: " + qaldQueries.getQueryCollection().getDistinctQueryCount());
+//			QaldDbpQueries qaldQueries = new QaldDbpQueries(QALD_2_QUERIES, true);
+//			System.out.println("number of stored queries: " + qaldQueries.getQueryCollection().getDistinctQueryCount());
 //			for (Query query: qaldQueries.getQueryCollection().getQueries()) {
 //				System.out.println(Integer.toString(query.getQueryId()));
 //			}

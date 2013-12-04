@@ -2,6 +2,7 @@ package com.d2s.subgraph.eval.generation;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.data2semantics.query.QueryCollection;
 import org.openrdf.query.MalformedQueryException;
@@ -58,20 +59,27 @@ public class FetchGraphResults {
 
 	
 
-	public void runForQuery(Query query) throws QueryEvaluationException {
+	public void runForQuery(Query query) throws QueryEvaluationException, IOException {
 		if (query.isSelectType()) {
 			ResultSetRewindable goldenStandardResults;
 			ResultSetRewindable subgraphResults;
+			QueryResultsRegular result = new QueryResultsRegular();
 			// System.out.println(evalQuery.getQueryString(subGraph));
 			try {
 				if (query.getGoldenStandardResults() == null) {
 					//store golden standard results, so we don't have to execute this query for every subgraph
-					goldenStandardResults = executeSelect(Config.EXPERIMENT_ENDPOINT, QueryUtils.addFromClauseToQuery(query, goldenStandardGraph));
+					Date start = new Date();
+					goldenStandardResults = executeSelect(Config.EXPERIMENT_ENDPOINT, query.getQueryWithFromClause(goldenStandardGraph));
+					Date end = new Date();
+					query.setGoldenStandardDuration(new Date(start.getTime()-end.getTime()));
 					query.setGoldenStandardResults(goldenStandardResults);
 				} else {
 					goldenStandardResults = query.getGoldenStandardResults();
 				}
-				subgraphResults = executeSelect(Config.EXPERIMENT_ENDPOINT, QueryUtils.addFromClauseToQuery(query, subGraph));
+				Date start = new Date();
+				subgraphResults = executeSelect(Config.EXPERIMENT_ENDPOINT, query.getQueryWithFromClause(subGraph));
+				Date end = new Date();
+				result.setSubgraphDuration(new Date(start.getTime()-end.getTime()));
 			} catch (Exception e) {
 				// e.printStackTrace();
 				invalidCount++;
@@ -92,11 +100,10 @@ public class FetchGraphResults {
 				// double recall = getRecallOnBindings(goldenStandardResults, subgraphResults);
 				if (recall > 1.0) {
 					System.out.println("recall higher than 1.0???? yeah, right");
-					System.out.println(QueryUtils.addFromClauseToQuery(query, subGraph).toString());
+					System.out.println(query.getQueryWithFromClause(subGraph).toString());
 					System.exit(1);
 				}
 				
-				QueryResultsRegular result = new QueryResultsRegular();
 //				result.setQuery(evalQuery);
 				result.setPrecision(0.0);// NOTICE: set to 0.0 for now. saves us time to calculate (we don't use precision anyway)
 				result.setRecall(recall);

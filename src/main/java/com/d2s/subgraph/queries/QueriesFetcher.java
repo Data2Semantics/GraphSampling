@@ -10,10 +10,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
 
+import org.apache.jena.atlas.web.HttpException;
 import org.data2semantics.query.QueryCollection;
 import org.data2semantics.query.filters.QueryFilter;
 
 import com.d2s.subgraph.eval.Config;
+import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 import com.d2s.subgraph.util.QueryUtils;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -31,9 +33,11 @@ public abstract class QueriesFetcher {
 	protected int filteredQueries;
 	protected int duplicateQueries;
 	protected int noResultsQueries;
-	
-	public QueriesFetcher() throws IOException {
+	protected ExperimentSetup experimentSetup;
+	public QueriesFetcher(ExperimentSetup experimentSetup) throws IOException {
 		queryCollection = new QueryCollection<Query>();
+		this.experimentSetup = experimentSetup;
+		
 	}
 	/**
 	 * 
@@ -103,7 +107,8 @@ public abstract class QueriesFetcher {
 				} else {
 					System.out.print("+");
 					Date timeStart = new Date();
-					if (hasResults(query)) {
+//					if (hasResults(query)) {
+					if (hasResults(query.getQueryWithFromClause(experimentSetup.getGoldenStandardGraph()))) {
 						queryCollection.addQuery(query);
 					} else {
 						noResultsQueries++;
@@ -120,6 +125,10 @@ public abstract class QueriesFetcher {
 			
 		} catch (QueryParseException e) {
 			// could not parse query, probably a faulty one. ignore!
+			invalidQueries++;
+		}  catch (HttpException e) {
+			// hmm, might be something like a time-out. ignore for now, but do show this for debugging purposes
+			System.out.println(e.getMessage());
 			invalidQueries++;
 		}
 	}
