@@ -41,7 +41,9 @@ public class QResultsLoader {
 	private void readFiles() throws IOException {
 		for (File file: getFiles()) {
 			CSVReader reader = new CSVReader(new FileReader(file));
-			String[] nextLine = reader.readNext();
+			String[] nextLine = reader.readNext();//meta row
+			nextLine = reader.readNext();//header row
+			
 			if (nextLine == null) {
 				reader.close();
 				throw new IOException("unable to get first row from query results csv file");
@@ -79,7 +81,7 @@ public class QResultsLoader {
 			if (isRelevantFile(file)) relevantFiles.add(file);
 		}
 		if (relevantFiles.size() == 0) {
-			throw new IOException("unable to find any query results file for experiment " + experimentSetup.getId());
+			throw new IOException("unable to find any query results file for experiment " + experimentSetup.getId() + ". Looked in path " + Config.PATH_QUERY_RESULTS);
 		}
 		return relevantFiles;
 

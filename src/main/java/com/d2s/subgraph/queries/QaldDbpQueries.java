@@ -35,6 +35,8 @@ public class QaldDbpQueries extends QueriesFetcher {
 	public static String QALD_2_QUERIES = "src/main/resources/qald2-dbpedia-train.xml";
 	public static String QALD_3_QUERIES = "src/main/resources/qald3-dbpedia-train.xml";
 	private static String IGNORE_QUERY_STRING = "OUT OF SCOPE";
+	public static String CSV_COPY = "src/main/resources/qald_queries.csv";
+	public static String PARSE_QUERIES_FILE = "src/main/resources/qald_queries.arraylist";
 	private boolean removeStringProjVar;
 	private boolean onlyDbo;
 	
@@ -45,6 +47,8 @@ public class QaldDbpQueries extends QueriesFetcher {
 		this.onlyDbo = onlyDbo;
 		parseXml(new File(xmlFile));
 		eraseEmptyresultQueries();
+		saveQueriesToCacheFile(PARSE_QUERIES_FILE);
+		saveQueriesToCsv(CSV_COPY);
 	}
 
 	public QaldDbpQueries(ExperimentSetup experimentSetup, String xmlFile, boolean removeStringProjVar) throws SAXException, IOException, ParserConfigurationException {

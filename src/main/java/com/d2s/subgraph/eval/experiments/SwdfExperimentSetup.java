@@ -40,7 +40,6 @@ public class SwdfExperimentSetup extends ExperimentSetup {
 	public QueryCollection<Query> getQueryCollection() {
 		return queriesFetcher.getQueryCollection();
 	}
-	
 
 	public String getEvalResultsDir() {
 		return EVAL_RESULTS_DIR;

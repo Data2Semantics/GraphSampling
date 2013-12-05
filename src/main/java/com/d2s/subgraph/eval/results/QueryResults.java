@@ -6,7 +6,6 @@ public abstract class QueryResults {
 	protected double precision;
 	protected int goldenStandardSize;
 	protected double recall;
-	protected Date goldenStandardDuration = null;
 	protected Date subgraphDuration = null;
 	
 	public double getPrecision() {
@@ -31,13 +30,13 @@ public abstract class QueryResults {
 		
 	}
 	public int getGoldenStandardSize() {
-		return goldenStandardSize;
+		return this.goldenStandardSize;
 	}
 	
 	public void setSubgraphDuration(Date date) {
 		this.subgraphDuration = date;
 	}
-	public Date getGoldenStandardDuration(Date date) {
-		return this.goldenStandardDuration;
+	public Date getSubgraphDuration() {
+		return this.subgraphDuration;
 	}
 }

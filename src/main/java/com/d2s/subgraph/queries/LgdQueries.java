@@ -27,16 +27,13 @@ public class LgdQueries extends QueriesFetcher {
 	public LgdQueries(ExperimentSetup experimentSetup, boolean useCacheFile, int maxNumQueries, QueryFilter... filters) throws IOException {
 		super(experimentSetup);
 		this.maxNumQueries = maxNumQueries;
-		File cacheFile = new File(PARSE_QUERIES_FILE);
-		if (useCacheFile && cacheFile.exists()) {
-			System.out.println("WATCH OUT! getting queries from cache file. might be outdated!");
-			readQueriesFromCacheFile(PARSE_QUERIES_FILE);
-		}
-		if (queryCollection.getTotalQueryCount() == 0 || (maxNumQueries > 0 && maxNumQueries != queryCollection.getTotalQueryCount())) {
+		tryFetchingQueriesFromCache(PARSE_QUERIES_FILE);
+		if (queryCollection.getTotalQueryCount() == 0) {
 			System.out.println("parsing SWDF query logs");
 			this.filters = new ArrayList<QueryFilter>(Arrays.asList(filters));
 			parseLogFile(new File(QUERY_FILE));
 			saveQueriesToCacheFile(PARSE_QUERIES_FILE);
+			saveQueriesToCsv(CSV_COPY);
 		}
 		
 	}

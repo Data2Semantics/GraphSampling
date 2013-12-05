@@ -13,6 +13,7 @@ import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 import com.d2s.subgraph.eval.experiments.Sp2bExperimentSetup;
 import com.d2s.subgraph.eval.results.GraphResults;
+import com.d2s.subgraph.eval.results.GraphResultsRegular;
 import com.d2s.subgraph.eval.results.QueryResultsRegular;
 import com.d2s.subgraph.io.QResultsSaver;
 import com.d2s.subgraph.queries.Query;
@@ -30,12 +31,13 @@ public class FetchGraphResults {
 	private ExperimentSetup experimentSetup;
 	public int validCount = 0;
 	public int invalidCount = 0;
-	GraphResults graphResults;
+	private GraphResults graphResults;
 
-	public FetchGraphResults(ExperimentSetup experimentSetup, String subGraph) {
+	public FetchGraphResults(ExperimentSetup experimentSetup, String subGraph) throws IOException {
 		this.goldenStandardGraph = experimentSetup.getGoldenStandardGraph();
 		this.experimentSetup = experimentSetup;
 		this.subGraph = subGraph;
+		graphResults = new GraphResultsRegular();
 		graphResults.setGraphName(subGraph);
 	}
 
@@ -51,8 +53,12 @@ public class FetchGraphResults {
 		System.out.println();
 		System.out.println("Invalids (i.e. no results on golden standard, or sparql error on execution): " + Integer.toString(invalidCount)
 				+ ", valids: " + Integer.toString(validCount));
-		if (validCount == 0 && invalidCount > 0) {
-			throw new IllegalStateException("Something wrong. only invalids. OPS down? No internet connection?");
+		if (validCount == 0) {
+			if (invalidCount > 0) {
+				throw new IllegalStateException("Something wrong. only invalids. OPS down? No internet connection?");
+			} else {
+				throw new IllegalStateException("Something wrong. no queries retrieved!");
+			}
 		}
 		QResultsSaver.write(this);
 	}
@@ -68,10 +74,7 @@ public class FetchGraphResults {
 			try {
 				if (query.getGoldenStandardResults() == null) {
 					//store golden standard results, so we don't have to execute this query for every subgraph
-					Date start = new Date();
 					goldenStandardResults = executeSelect(Config.EXPERIMENT_ENDPOINT, query.getQueryWithFromClause(goldenStandardGraph));
-					Date end = new Date();
-					query.setGoldenStandardDuration(new Date(start.getTime()-end.getTime()));
 					query.setGoldenStandardResults(goldenStandardResults);
 				} else {
 					goldenStandardResults = query.getGoldenStandardResults();
@@ -79,7 +82,7 @@ public class FetchGraphResults {
 				Date start = new Date();
 				subgraphResults = executeSelect(Config.EXPERIMENT_ENDPOINT, query.getQueryWithFromClause(subGraph));
 				Date end = new Date();
-				result.setSubgraphDuration(new Date(start.getTime()-end.getTime()));
+				result.setSubgraphDuration(new Date(end.getTime() - start.getTime()));
 			} catch (Exception e) {
 				// e.printStackTrace();
 				invalidCount++;

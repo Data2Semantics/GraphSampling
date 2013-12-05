@@ -13,7 +13,7 @@ import org.data2semantics.query.filters.QueryFilter;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 
 public class SwdfQueries extends QueriesFetcher {
-	public static String QUERY_FILE = "src/main/resources/swdf_queries.log";
+	public static String QUERY_FILE = "src/main/resources/swdf_queries_small.log";
 	public static String CSV_COPY = "src/main/resources/swdf_queries.csv";
 	public static String PARSE_QUERIES_FILE = "src/main/resources/swdf_queries.arraylist";
 
@@ -24,17 +24,14 @@ public class SwdfQueries extends QueriesFetcher {
 	public SwdfQueries(ExperimentSetup experimentSetup, boolean useCacheFile, int maxNumQueries, QueryFilter... filters) throws IOException {
 		super(experimentSetup);
 		this.maxNumQueries = maxNumQueries;
-		File cacheFile = new File(PARSE_QUERIES_FILE);
-		if (useCacheFile && cacheFile.exists()) {
-			System.out.println("WATCH OUT! getting queries from cache file. might be outdated!");
-			readQueriesFromCacheFile(PARSE_QUERIES_FILE);
-		}
+		tryFetchingQueriesFromCache(PARSE_QUERIES_FILE);
 		
-		if (queryCollection.getTotalQueryCount() > 0 || (maxNumQueries > 0 && Math.abs(maxNumQueries - queryCollection.getTotalQueryCount()) > 1)) {
+		if (queryCollection.getTotalQueryCount() == 0) {
 			System.out.println("parsing SWDF query logs");
 			this.filters = new ArrayList<QueryFilter>(Arrays.asList(filters));
 			parseLogFile(new File(QUERY_FILE));
 			saveQueriesToCacheFile(PARSE_QUERIES_FILE);
+			saveQueriesToCsv(CSV_COPY);
 		}
 		
 	}

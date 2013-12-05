@@ -1,7 +1,9 @@
 package com.d2s.subgraph.queries;
 
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URLDecoder;
@@ -14,12 +16,15 @@ import org.apache.jena.atlas.web.HttpException;
 import org.data2semantics.query.QueryCollection;
 import org.data2semantics.query.filters.QueryFilter;
 
+import au.com.bytecode.opencsv.CSVWriter;
+
 import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 import com.d2s.subgraph.util.QueryUtils;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryParseException;
+import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.sparql.engine.http.QueryExceptionHTTP;
@@ -68,21 +73,33 @@ public abstract class QueriesFetcher {
 		this.maxNumQueries = maxNum;
 	}
 	
-	public boolean hasResults(Query query) {
+	/**
+	 * executes query, and stores the query duration in query object as well!
+	 * @param query
+	 * @return
+	 * @throws IllegalStateException
+	 */
+	public Query execQueryToTest(Query query) throws IllegalStateException {
 		try {
 			QueryExecution queryExecution = QueryExecutionFactory.sparqlService(Config.EXPERIMENT_ENDPOINT, query);
-			ResultSetRewindable result = ResultSetFactory.copyResults(queryExecution.execSelect());
-			if (QueryUtils.getResultSize(result) > 0) {
-				return true;
+			Date start = new Date();
+			ResultSet resultSet = queryExecution.execSelect();
+			Date end = new Date();
+			query.setGoldenStandardDuration(new Date(end.getTime() - start.getTime()));
+			ResultSetRewindable resultSetRewindable = ResultSetFactory.copyResults(resultSet);
+			if (QueryUtils.getResultSize(resultSetRewindable) > 0) {
+				return query;
+			} else {
+				throw new IllegalStateException("no results for query");
 			}
 		} catch (QueryExceptionHTTP e) {
 			e.printStackTrace();
 			System.exit(1);
 		} catch (Exception e) {
-			//query wrong or something. ignore
+			throw new IllegalStateException("no results for query");
 
 		}
-		return false;
+		throw new IllegalStateException("no results for query");
 	}
 	
 	public String toString() {
@@ -107,10 +124,11 @@ public abstract class QueriesFetcher {
 				} else {
 					System.out.print("+");
 					Date timeStart = new Date();
-//					if (hasResults(query)) {
-					if (hasResults(query.getQueryWithFromClause(experimentSetup.getGoldenStandardGraph()))) {
+					try {
+						query = execQueryToTest(query.getQueryWithFromClause(experimentSetup.getGoldenStandardGraph()));
 						queryCollection.addQuery(query);
-					} else {
+					} catch (IllegalStateException e) {
+						//no results for this query!
 						noResultsQueries++;
 					}
 					Date timeEnd = new Date();
@@ -134,10 +152,17 @@ public abstract class QueriesFetcher {
 	}
 	protected void saveQueriesToCacheFile(String file) throws IOException {
 		FileWriter writer = new FileWriter(file);
+		System.out.println("storing " + queryCollection.getQueries().size() + " queries to cache file");
 		for (Query query : queryCollection.getQueries()) {
-			for (int i = 0; i < query.getCount(); i++) {
-				writer.write(URLEncoder.encode(query.toString(), "UTF-8") + "\n");
-			}
+			writer.write(URLEncoder.encode(query.toString(), "UTF-8") + "\n");
+		}
+		writer.close();
+	}
+	protected void saveQueriesToCsv(String file) throws IOException {
+		CSVWriter writer = new CSVWriter(new FileWriter(file), ';');
+		writer.writeNext(new String[]{"query", "goldenStandardTiming"});
+		for (Query query : queryCollection.getQueries()) {
+			writer.writeNext(new String[]{URLEncoder.encode(query.toString(), "UTF-8"), Long.toString(query.getGoldenStandardDuration().getTime())});
 		}
 		writer.close();
 	}
@@ -151,6 +176,37 @@ public abstract class QueriesFetcher {
 				queryCollection.addQuery(query);
 			}
 		}
+		System.out.println("loaded " + queryCollection.getQueries().size() + " queries from cache!");
 		sc.close();
+	}
+	
+	protected void tryFetchingQueriesFromCache(String path) throws QueryParseException, IOException {
+		if (useCacheFile(path)) {
+			readQueriesFromCacheFile(path);
+		}
+	}
+	protected boolean useCacheFile(String path) {
+		File file = new File(path);
+		boolean useCacheFile = false;
+		if (file.exists()) {
+			try {
+				BufferedReader br = new BufferedReader(new FileReader(file));
+				String line;
+				while ((line = br.readLine()) != null) {
+					if (line.length() != 0) {
+						useCacheFile = true;
+						break;
+					}
+					
+				}
+				br.close();
+			} catch (Exception e) {
+				//do nothing. just dont use cache file
+			}
+		}
+		if (useCacheFile) {
+			System.out.println("using queries from our cache file!!!");
+		}
+		return useCacheFile;
 	}
 }

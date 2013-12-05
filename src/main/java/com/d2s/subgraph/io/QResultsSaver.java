@@ -34,7 +34,14 @@ public class QResultsSaver {
 		writer = new CSVWriter(new FileWriter(csvFile), ';');
 
 		writeMetaRow();
+		writeHeaderRow();
+		writeContent();
 		
+		writer.close();
+		
+	}
+	
+	private void writeContent() {
 		for (Query query: fetcher.getResults().getQueryCollection().getQueries()) {
 			QueryResults result = query.getResults();
 			ArrayList<String> row = new ArrayList<String>();
@@ -43,21 +50,30 @@ public class QResultsSaver {
 			row = addColToRow(row, QResultCols.RECALL, result.getRecall());
 			row = addColToRow(row, QResultCols.PRECISION, result.getPrecision());
 			row = addColToRow(row, QResultCols.GOLDEN_STANDARD_SIZE, result.getGoldenStandardSize());
+			row = addColToRow(row, QResultCols.QUERY_DURATION, Long.toString(result.getSubgraphDuration().getTime()));
 			Utils.writeRow(row, writer);
 		}
-		writer.close();
-		
 	}
-	
-	
 	
 	private void writeMetaRow() {
 		ArrayList<String> row = new ArrayList<String>();
 		row = addColToRow(row, QResultCols.META_GRAPH_NAME, fetcher.getResults().getGraphName());
 		row = addColToRow(row, QResultCols.META_EXPERIMENT_SETUP_ID, fetcher.getExperimentSetup().getId());
+		row = addColToRow(row, QResultCols.META_EXPERIMENT_SETUP_ID, fetcher.getExperimentSetup().getId());
 		Utils.writeRow(row, writer);
 	}
-
+	
+	private void writeHeaderRow() {
+		ArrayList<String> row = new ArrayList<String>();
+		row = addColToRow(row, QResultCols.QUERY_STRING, "query");
+		row = addColToRow(row, QResultCols.QUERY_COUNT, "query count");
+		row = addColToRow(row, QResultCols.RECALL, "recall");
+		row = addColToRow(row, QResultCols.PRECISION, "precision");
+		row = addColToRow(row, QResultCols.GOLDEN_STANDARD_SIZE, "golden standard size");
+		row = addColToRow(row, QResultCols.QUERY_DURATION, "query duration");
+		Utils.writeRow(row, writer);
+	}
+	
 	private ArrayList<String> addColToRow(ArrayList<String> row, int colIndex, String value) {
 		while (row.size() <= colIndex) {
 			row.add(null);

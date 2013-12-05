@@ -106,8 +106,9 @@ public class FetchGraphsResults {
 		Collections.sort(graphs);
 		return graphs;
 	}
-	public static void doFetch(ExperimentSetup experimentSetup) throws IOException {
-		new FetchGraphsResults(experimentSetup);
+	public static void doFetch(ExperimentSetup experimentSetup) throws IOException, RepositoryException, MalformedQueryException, QueryEvaluationException, SAXException, ParserConfigurationException, InterruptedException {
+		FetchGraphsResults fetch = new FetchGraphsResults(experimentSetup);
+		fetch.run();
 	}
 
 //	public static void main(String[] args) throws IOException, InterruptedException  {

@@ -8,13 +8,9 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.data2semantics.query.filters.DescribeFilter;
-import org.data2semantics.query.filters.GraphClauseFilter;
 import org.data2semantics.query.filters.QueryFilter;
 
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
-import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
-import com.d2s.subgraph.queries.filters.SimpleDbpFilter;
 
 public class DbpQueries extends QueriesFetcher {
 	public static String QUERY_FILE = "src/main/resources/dbpl_queries.log";
@@ -29,16 +25,13 @@ public class DbpQueries extends QueriesFetcher {
 	public DbpQueries(ExperimentSetup experimentSetup, boolean useCacheFile, int maxNumQueries, QueryFilter... filters) throws IOException {
 		super(experimentSetup);
 		this.maxNumQueries = maxNumQueries;
-		File cacheFile = new File(PARSE_QUERIES_FILE);
-		if (useCacheFile && cacheFile.exists()) {
-			System.out.println("WATCH OUT! getting queries from cache file. might be outdated!");
-			readQueriesFromCacheFile(PARSE_QUERIES_FILE);
-		}
-		if (queryCollection.getTotalQueryCount() == 0 || (maxNumQueries > 0 && maxNumQueries != queryCollection.getTotalQueryCount())) {
+		tryFetchingQueriesFromCache(PARSE_QUERIES_FILE);
+		if (queryCollection.getTotalQueryCount() == 0) {
 			System.out.println("parsing dbpl query logs");
 			this.filters = new ArrayList<QueryFilter>(Arrays.asList(filters));
 			parseLogFile(new File(QUERY_FILE));
 			saveQueriesToCacheFile(PARSE_QUERIES_FILE);
+			saveQueriesToCsv(CSV_COPY);
 		}
 		
 	}
