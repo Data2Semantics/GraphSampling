@@ -25,6 +25,7 @@ import com.d2s.subgraph.eval.generation.FetchGraphsResults;
 public class RunExperiments {
 	private static String CLI_ARG_RUN_QUERIES = "q";
 	private static String CLI_ARG_RUN_ANALYSIS = "a";
+	private static String CLI_ARG_NO_CACHE = "c";
 	private static String CLI_ARG_HELP = "h";
 
 	public static void runExperiments(ExperimentSetup experimentSetup, boolean runQueries, boolean analyzeQueries) throws Exception {
@@ -38,7 +39,7 @@ public class RunExperiments {
 	public static void runExperiments(CommandLine cmd) throws Exception {
 		for (String remainingArg : cmd.getArgs()) {
 			try {
-				runExperiments(getExperimentSetupForArg(remainingArg), cmd.hasOption(CLI_ARG_RUN_QUERIES), cmd.hasOption(CLI_ARG_RUN_ANALYSIS));
+				runExperiments(getExperimentSetupForArg(remainingArg, !cmd.hasOption(CLI_ARG_NO_CACHE)), cmd.hasOption(CLI_ARG_RUN_QUERIES), cmd.hasOption(CLI_ARG_RUN_ANALYSIS));
 			} catch (IllegalStateException e) {
 				System.out.println(e.getMessage());
 			}
@@ -47,19 +48,19 @@ public class RunExperiments {
 
 	}
 
-	private static ExperimentSetup getExperimentSetupForArg(String arg) throws IllegalStateException, IOException, SAXException, ParserConfigurationException {
+	private static ExperimentSetup getExperimentSetupForArg(String arg, boolean useQueryCacheFile) throws IllegalStateException, IOException, SAXException, ParserConfigurationException {
 		if (arg.equals("dbp")) {
-			return new DbpExperimentSetup();
+			return new DbpExperimentSetup(useQueryCacheFile);
 		} else if (arg.equals("swdf")) {
-			return new SwdfExperimentSetup();
+			return new SwdfExperimentSetup(useQueryCacheFile);
 		} else if (arg.equals("dbpo")) {
-			return new DbpoExperimentSetup(DbpoExperimentSetup.QALD_KEEP_OPTIONALS);
+			return new DbpoExperimentSetup(DbpoExperimentSetup.QALD_KEEP_OPTIONALS, useQueryCacheFile);
 		} else if (arg.equals("lgd")) {
-			return new LgdExperimentSetup();
+			return new LgdExperimentSetup(useQueryCacheFile);
 		} else if (arg.equals("lmdb")) {
-			return new LmdbExperimentSetup();
+			return new LmdbExperimentSetup(useQueryCacheFile);
 		} else if (arg.equals("sp2b")) {
-			return new Sp2bExperimentSetup();
+			return new Sp2bExperimentSetup(useQueryCacheFile);
 		} else {
 			throw new IllegalStateException("could not find an experiment setup class for argument " + arg);
 		}
@@ -72,11 +73,13 @@ public class RunExperiments {
 		// add t option
 		options.addOption(CLI_ARG_RUN_QUERIES, "query", false, "fetch and run queries on subgraphs");
 		options.addOption(CLI_ARG_RUN_ANALYSIS, "analysis", false, "run analysis (using cached query results)");
+		options.addOption(CLI_ARG_NO_CACHE, "nocache", false, "dont use the cached set of queries");
 		options.addOption(CLI_ARG_HELP, "help", false, "show this dialogue");
 
 		return options;
 	}
 
+	@SuppressWarnings("unused")
 	private static CommandLine parseOptions(String[] args) throws ParseException {
 		CommandLineParser parser = new GnuParser();
 		Options options = getCliOptions();
@@ -92,15 +95,14 @@ public class RunExperiments {
 	}
 
 	public static void main(String[] args) throws Exception {
-		getExperimentSetupForArg("dbp");
-
-		//
-		// RunExperiments.runExperiments(parseOptions(args));
-		//
-		//
-		//
-		// RunExperiments.runExperiments(new SwdfExperimentSetup(), true,
-		// false);
+//		 RunExperiments.runExperiments(parseOptions(args));
+		
+		
+		boolean useCachedQueries = false;
+		boolean execQueries = true;
+		boolean runAnalysis = false;
+		
+		 RunExperiments.runExperiments(new SwdfExperimentSetup(useCachedQueries), execQueries, runAnalysis);
 		// new EvaluateGraphs(new
 		// DbpoExperimentSetup(DbpoExperimentSetup.QALD_REMOVE_OPTIONALS)),
 		// new EvaluateGraphs(new

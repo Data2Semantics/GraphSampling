@@ -62,7 +62,7 @@ public class GetTriplesFromConstruct {
 //					new GetTriplesFromConstruct(new DbpoExperimentSetup(DbpoExperimentSetup.QALD_KEEP_OPTIONALS)),
 //					new EvaluateGraphs(new DbpoExperimentSetup(DbpoExperimentSetup.QUERY_LOGS)),
 //					new GetTriplesFromConstruct(new SwdfExperimentSetup()),
-					new GetTriplesFromConstruct(new Sp2bExperimentSetup()),
+					new GetTriplesFromConstruct(new Sp2bExperimentSetup(true)),
 //					new GetTriplesFromConstruct(new LmdbExperimentSetup()),
 			};
 		} catch (Exception e) {

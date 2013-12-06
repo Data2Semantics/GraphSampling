@@ -29,7 +29,8 @@ public class DbpoExperimentSetup extends ExperimentSetup {
 	private int querySelection;
 	private boolean UNIQUE_QUERIES = true;
 	
-	public DbpoExperimentSetup(int querySelection) throws SAXException, IOException, ParserConfigurationException, IllegalStateException {
+	public DbpoExperimentSetup(int querySelection, boolean useCacheFile) throws SAXException, IOException, ParserConfigurationException, IllegalStateException {
+		super(useCacheFile);
 		this.querySelection = querySelection;
 		if (querySelection == QALD_KEEP_OPTIONALS || querySelection == QALD_REMOVE_OPTIONALS) {
 			queriesFetcher = new QaldDbpQueries(this, QaldDbpQueries.QALD_2_QUERIES, (querySelection == QALD_REMOVE_OPTIONALS? true: false), true);

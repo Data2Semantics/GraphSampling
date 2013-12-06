@@ -248,7 +248,7 @@ public class FetchGraphResults {
 			// EvaluateGraph.OPS_VIRTUOSO, goldenStandardGraph, subgraph);
 			// EvaluateGraph evaluate = new EvaluateGraph(new SwdfQueries(new DescribeFilter(), new SimpleBgpFilter()),
 			// EvaluateGraph.OPS_VIRTUOSO, goldenStandardGraph, subgraph);
-			FetchGraphResults evaluate = new FetchGraphResults(new Sp2bExperimentSetup(), subgraph);
+			FetchGraphResults evaluate = new FetchGraphResults(new Sp2bExperimentSetup(true), subgraph);
 			Query query = Query.create("", new QueryCollection<Query>());
 			evaluate.runForQuery(query);
 		} catch (Exception e) {

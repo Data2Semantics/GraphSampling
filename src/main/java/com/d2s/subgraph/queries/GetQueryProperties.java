@@ -61,10 +61,10 @@ public class GetQueryProperties {
 		ExperimentSetup[] experimentSetups = null;
 		try {
 			experimentSetups = new ExperimentSetup[]{
-					new DbpoExperimentSetup(DbpoExperimentSetup.QALD_KEEP_OPTIONALS),
-					new SwdfExperimentSetup(),
-					new Sp2bExperimentSetup(),
-					new LmdbExperimentSetup(),
+					new DbpoExperimentSetup(DbpoExperimentSetup.QALD_KEEP_OPTIONALS, true),
+					new SwdfExperimentSetup(true),
+					new Sp2bExperimentSetup(true),
+					new LmdbExperimentSetup(true),
 //					new LgdExperimentSetup(),
 //					new DbpExperimentSetup(),
 			};

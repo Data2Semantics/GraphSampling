@@ -25,8 +25,9 @@ public class DbpExperimentSetup extends ExperimentSetup {
 	private static int MAX_NUM_QUERIES = 100;
 	private QueriesFetcher qFetcher;
 	
-	public DbpExperimentSetup() throws IOException {
-		qFetcher = new DbpQueries(this, false, MAX_NUM_QUERIES, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter(), new ConstructFilter());
+	public DbpExperimentSetup(boolean useCacheFile) throws IOException {
+		super(useCacheFile);
+		qFetcher = new DbpQueries(this, useCacheFile, MAX_NUM_QUERIES, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter(), new ConstructFilter());
 	}
 	
 	public String getGoldenStandardGraph() {
@@ -62,4 +63,6 @@ public class DbpExperimentSetup extends ExperimentSetup {
 		return this.getClass().getSimpleName();
 		
 	}
+
+
 }

@@ -24,10 +24,10 @@ public class SwdfExperimentSetup extends ExperimentSetup {
 	private static int MAX_NUM_QUERIES = 500;
 	private QueriesFetcher queriesFetcher;
 	private boolean UNIQUE_QUERIES = true;
-	private boolean USE_CACHE_FILE = true;
 	
-	public SwdfExperimentSetup() throws IOException {
-		queriesFetcher = new SwdfQueries(this, USE_CACHE_FILE, MAX_NUM_QUERIES, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter(), new ConstructFilter());
+	public SwdfExperimentSetup(boolean useQueryCacheFile) throws IOException {
+		super(useQueryCacheFile);
+		queriesFetcher = new SwdfQueries(this, useQueryCacheFile, MAX_NUM_QUERIES, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter(), new ConstructFilter());
 		queriesFetcher.setMaxNQueries(MAX_NUM_QUERIES);
 	}
 	

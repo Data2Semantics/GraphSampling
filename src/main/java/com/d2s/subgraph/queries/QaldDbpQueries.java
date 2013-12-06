@@ -41,7 +41,7 @@ public class QaldDbpQueries extends QueriesFetcher {
 	private boolean onlyDbo;
 	
 	public QaldDbpQueries(ExperimentSetup experimentSetup, String xmlFile, boolean removeStringProjVar, boolean onlyDbo, QueryFilter... filters) throws SAXException, IOException, ParserConfigurationException {
-		super(experimentSetup);
+		super(experimentSetup, false);
 		this.filters = new ArrayList<QueryFilter>(Arrays.asList(filters));
 		this.removeStringProjVar = removeStringProjVar;
 		this.onlyDbo = onlyDbo;

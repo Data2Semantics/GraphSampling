@@ -5,8 +5,11 @@ import org.data2semantics.query.QueryCollection;
 import com.d2s.subgraph.queries.Query;
 
 public abstract class ExperimentSetup {
-
-
+	protected boolean useCacheFile = true;
+	
+	public ExperimentSetup(boolean useCacheFile) {
+		this.useCacheFile = useCacheFile;
+	}
 	public abstract String getGoldenStandardGraph();
 
 	public abstract String getGraphPrefix();

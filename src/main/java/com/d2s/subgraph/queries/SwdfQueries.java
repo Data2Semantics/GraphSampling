@@ -13,7 +13,7 @@ import org.data2semantics.query.filters.QueryFilter;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 
 public class SwdfQueries extends QueriesFetcher {
-	public static String QUERY_FILE = "src/main/resources/swdf_queries_small.log";
+	public static String QUERY_FILE = "src/main/resources/swdf_queries.log";
 	public static String CSV_COPY = "src/main/resources/swdf_queries.csv";
 	public static String PARSE_QUERIES_FILE = "src/main/resources/swdf_queries.arraylist";
 
@@ -22,7 +22,7 @@ public class SwdfQueries extends QueriesFetcher {
 	}
 
 	public SwdfQueries(ExperimentSetup experimentSetup, boolean useCacheFile, int maxNumQueries, QueryFilter... filters) throws IOException {
-		super(experimentSetup);
+		super(experimentSetup, useCacheFile);
 		this.maxNumQueries = maxNumQueries;
 		tryFetchingQueriesFromCache(PARSE_QUERIES_FILE);
 		

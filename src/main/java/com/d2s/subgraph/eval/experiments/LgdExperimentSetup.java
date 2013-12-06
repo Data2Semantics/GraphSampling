@@ -25,8 +25,9 @@ public class LgdExperimentSetup extends ExperimentSetup {
 	private QueriesFetcher queriesFetcher;
 	private boolean UNIQUE_QUERIES = true;
 	
-	public LgdExperimentSetup() throws IOException {
-		queriesFetcher = new LgdQueries(this, true, MAX_NUM_QUERIES, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter(), new ConstructFilter());
+	public LgdExperimentSetup(boolean useCacheFile) throws IOException {
+		super(useCacheFile);
+		queriesFetcher = new LgdQueries(this, useCacheFile, MAX_NUM_QUERIES, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter(), new ConstructFilter());
 	}
 	
 	public String getGoldenStandardGraph() {

@@ -23,7 +23,7 @@ public class DbpQueries extends QueriesFetcher {
 	}
 
 	public DbpQueries(ExperimentSetup experimentSetup, boolean useCacheFile, int maxNumQueries, QueryFilter... filters) throws IOException {
-		super(experimentSetup);
+		super(experimentSetup, useCacheFile);
 		this.maxNumQueries = maxNumQueries;
 		tryFetchingQueriesFromCache(PARSE_QUERIES_FILE);
 		if (queryCollection.getTotalQueryCount() == 0) {

@@ -21,7 +21,7 @@ public class LmdbQueries extends QueriesFetcher {
 	}
 
 	public LmdbQueries(ExperimentSetup experimentSetup, boolean useCacheFile, QueryFilter... filters) throws IOException {
-		super(experimentSetup);
+		super(experimentSetup, useCacheFile);
 		tryFetchingQueriesFromCache(PARSE_QUERIES_FILE);
 		if (queryCollection.getTotalQueryCount() == 0) {
 			System.out.println("parsing lmdb query logs");

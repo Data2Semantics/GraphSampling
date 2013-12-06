@@ -18,7 +18,7 @@ public class Sp2bQueries extends QueriesFetcher {
 	private static String QUERY_FILE_EXTENSION = "sparql";
 
 	public Sp2bQueries(ExperimentSetup experimentSetup, QueryFilter... filters) throws IOException {
-		super(experimentSetup);
+		super(experimentSetup, false);
 		System.out.println("parsing sp2b query logs");
 		this.filters = new ArrayList<QueryFilter>(Arrays.asList(filters));
 		parseQueryDir();

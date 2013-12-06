@@ -38,10 +38,12 @@ public abstract class QueriesFetcher {
 	protected int filteredQueries;
 	protected int duplicateQueries;
 	protected int noResultsQueries;
+	protected boolean useCacheFile = true;
 	protected ExperimentSetup experimentSetup;
-	public QueriesFetcher(ExperimentSetup experimentSetup) throws IOException {
+	public QueriesFetcher(ExperimentSetup experimentSetup, boolean useCacheFile) throws IOException {
 		queryCollection = new QueryCollection<Query>();
 		this.experimentSetup = experimentSetup;
+		this.useCacheFile = useCacheFile;
 		
 	}
 	/**
@@ -186,26 +188,28 @@ public abstract class QueriesFetcher {
 		}
 	}
 	protected boolean useCacheFile(String path) {
-		File file = new File(path);
 		boolean useCacheFile = false;
-		if (file.exists()) {
-			try {
-				BufferedReader br = new BufferedReader(new FileReader(file));
-				String line;
-				while ((line = br.readLine()) != null) {
-					if (line.length() != 0) {
-						useCacheFile = true;
-						break;
+		if (this.useCacheFile) { 
+			File file = new File(path);
+			if (file.exists()) {
+				try {
+					BufferedReader br = new BufferedReader(new FileReader(file));
+					String line;
+					while ((line = br.readLine()) != null) {
+						if (line.length() != 0) {
+							useCacheFile = true;
+							break;
+						}
+						
 					}
-					
+					br.close();
+				} catch (Exception e) {
+					//do nothing. just dont use cache file
 				}
-				br.close();
-			} catch (Exception e) {
-				//do nothing. just dont use cache file
 			}
-		}
-		if (useCacheFile) {
-			System.out.println("using queries from our cache file!!!");
+			if (useCacheFile) {
+				System.out.println("using queries from our cache file!!!");
+			}
 		}
 		return useCacheFile;
 	}
