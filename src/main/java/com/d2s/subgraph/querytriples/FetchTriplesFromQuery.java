@@ -115,9 +115,7 @@ public class FetchTriplesFromQuery {
 	}
 
 	public static void main(String[] args) throws Exception {
-		
-		
-		boolean useCachedQueries = false;
+		boolean useCachedQueries = true;
 		ExperimentSetup experimentsetup = new SwdfExperimentSetup(useCachedQueries);
 		FetchTriplesFromQuery.fetch(experimentsetup, experimentsetup.getQueryCollection().getQueries().iterator().next(), new File("test"));
 		// new EvaluateGraphs(new

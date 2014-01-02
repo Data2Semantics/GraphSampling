@@ -2,7 +2,14 @@ package com.d2s.subgraph.querytriples;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.IOFileFilter;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.data2semantics.query.QueryCollection;
 
 import com.d2s.subgraph.eval.Config;
@@ -26,12 +33,32 @@ public class FetchTriplesFromQueries {
 		for (Query query: queries.getQueries()) {
 			FetchTriplesFromQuery.fetch(experimentSetup, query, experimentDir);
 		}
+		createUniqueFile(experimentDir);
+	}
+	
+	public static void createUniqueFile(final File experimentDir) throws IOException {
+		//We've fetch everything. Now make a list of all unique triples, so we can fetch their weight in our weighted triple set
+		Collection<File> tripleFiles = FileUtils.listFilesAndDirs(experimentDir, new IOFileFilter(){
+			public boolean myAccept(String filename) {
+				return (!filename.contains(".") && !filename.contains("-"));
+			}
+			public boolean accept(File filename) {
+				return myAccept(filename.getName());
+			}
+			public boolean accept(File dir, String filename) {
+				return myAccept(filename);
+			}}, TrueFileFilter.INSTANCE);
+		Set<String> triples = new HashSet<String>();
+		for (File file: tripleFiles) {
+			if (!file.isDirectory()) triples.addAll(FileUtils.readLines(file));
+		}
+		FileUtils.writeLines(new File(experimentDir.getPath() + "/allTriples.txt"), triples);
 	}
 
 	public static void main(String[] args) throws Exception {
 		
 		
-		boolean useCachedQueries = false;
+		boolean useCachedQueries = true;
 		
 		FetchTriplesFromQueries.fetch(new SwdfExperimentSetup(useCachedQueries));
 		// new EvaluateGraphs(new

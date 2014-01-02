@@ -118,6 +118,7 @@ public abstract class QueriesFetcher {
 	 */
 	protected void addQueryToList(String queryString) throws IOException {
 		try {
+			
 			Query query = Query.create(queryString, queryCollection);
 			if (checkFilters(query)) {
 				if (queryCollection.containsQuery(query)) {
@@ -128,6 +129,8 @@ public abstract class QueriesFetcher {
 					Date timeStart = new Date();
 					try {
 						query = execQueryToTest(query.getQueryWithFromClause(experimentSetup.getGoldenStandardGraph()));
+						System.out.println("adding");
+						System.out.println(queryString);
 						queryCollection.addQuery(query);
 					} catch (IllegalStateException e) {
 						//no results for this query!
@@ -184,18 +187,24 @@ public abstract class QueriesFetcher {
 	
 	protected void tryFetchingQueriesFromCache(String path) throws QueryParseException, IOException {
 		if (useCacheFile(path)) {
+			System.out.println("using cache file");
 			readQueriesFromCacheFile(path);
+		} else {
+			System.out.println("not using cache file");
 		}
 	}
 	protected boolean useCacheFile(String path) {
 		boolean useCacheFile = false;
 		if (this.useCacheFile) { 
+			System.out.println("this set");
 			File file = new File(path);
 			if (file.exists()) {
+				System.out.println("file exists");
 				try {
 					BufferedReader br = new BufferedReader(new FileReader(file));
 					String line;
 					while ((line = br.readLine()) != null) {
+						System.out.println("has file length");
 						if (line.length() != 0) {
 							useCacheFile = true;
 							break;
@@ -204,6 +213,7 @@ public abstract class QueriesFetcher {
 					}
 					br.close();
 				} catch (Exception e) {
+					System.out.println("exception");
 					//do nothing. just dont use cache file
 				}
 			}
@@ -211,6 +221,16 @@ public abstract class QueriesFetcher {
 				System.out.println("using queries from our cache file!!!");
 			}
 		}
+		
 		return useCacheFile;
+	}
+	
+	public static void main(String[] args) throws IOException {
+		String query = "SELECT DISTINCT ?p ?o\n" + 
+				"FROM <http://swdf>\n" + 
+				"WHERE\n" + 
+				"  { <http://data.semanticweb.org/ns/swc/ontology> ?p ?o }\n" + 
+				"GROUP BY ?o";
+		Query query2 = Query.create(query);
 	}
 }

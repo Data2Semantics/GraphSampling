@@ -8,8 +8,8 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.data2semantics.query.QueryCollection;
+import org.omg.CosNaming.IstringHelper;
 
-import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.results.QueryResults;
 import com.d2s.subgraph.querytriples.ExtractTriplePatternsVisitor;
 import com.d2s.subgraph.querytriples.RewriteTriplePatternsVisitor;
@@ -17,7 +17,9 @@ import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.query.QueryParseException;
 import com.hp.hpl.jena.query.QuerySolution;
+import com.hp.hpl.jena.query.QueryVisitor;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.query.Syntax;
@@ -62,8 +64,15 @@ public class Query extends org.data2semantics.query.Query {
 	}
 	
 	public static Query create(String queryString, QueryCollection<Query> queryCollection) {
+		
 		Query query = new Query();
-		query = (Query)(QueryFactory.parse(query, queryString, null, Syntax.defaultQuerySyntax));
+		query.setStrict(false);
+		try {
+			query = (Query)(QueryFactory.parse(query, queryString, null, Syntax.defaultQuerySyntax));
+		} catch (QueryParseException e) {
+			System.out.println(queryString);
+			throw e;
+		}
 		query.setQueryCollection(queryCollection);
 		query.generateQueryStats();
 		return query;
@@ -106,7 +115,28 @@ public class Query extends org.data2semantics.query.Query {
 		Query query = Query.create(this.toString());
 		query.setQueryResultStar(true);
 		query.setDistinct(true);
+		query = query.getQueryWithoutOrderBy();
 		return query;
+	}
+	
+	public Query getQueryWithoutOrderBy() {
+		//jena does not provide a way to easily -remove- an order by :(. 
+		//Instead, we should rebuild the query from scratch, and leave out the order by
+		Query query = new Query();
+		query.setDistinct(isDistinct());
+		query.setCount(getCount());
+		query.setLimit(getLimit());
+		query.setOffset(getOffset());
+		query.setPrefixMapping(getPrefixMapping());
+		query.setQueryResultStar(isQueryResultStar());
+		
+		query.setQueryPattern(getQueryPattern());
+		if (isAskType()) query.setQueryAskType();
+		if (isDescribeType()) query.setQueryDescribeType();
+		if (isConstructType()) query.setQueryConstructType();
+		if (isSelectType()) query.setQuerySelectType();
+		return query;
+		
 	}
 	
 	public Set<Triple> fetchTriplesFromPatterns(QuerySolution solution) {
@@ -130,15 +160,24 @@ public class Query extends org.data2semantics.query.Query {
 	
 	
 	public static void main(String[] args) throws IOException {
-		Query query = Query.create("SELECT ?x WHERE {?x ?jh ?j} LIMIT 10");
+		Query query = Query.create("SELECT ?x WHERE {?x ?jh ?j} GROUP BY ?x LIMIT 10");
 		
-		QueryExecution queryExecution = QueryExecutionFactory.sparqlService("http://dbpedia.org/sparql", "SELECT * WHERE {?x ?jh ?j} LIMIT 1");
-		System.out.println("exec query");
-		ResultSet result = queryExecution.execSelect();
-		for (Triple triple: query.fetchTriplesFromPatterns(result.next())) {
-			System.out.println(triple.toString());
-		}
+		/**
+		 * fetch triples based on query patterns
+		 */
+//		QueryExecution queryExecution = QueryExecutionFactory.sparqlService("http://dbpedia.org/sparql", "SELECT * WHERE {?x ?jh ?j} LIMIT 1");
+//		System.out.println("exec query");
+//		ResultSet result = queryExecution.execSelect();
+//		for (Triple triple: query.fetchTriplesFromPatterns(result.next())) {
+//			System.out.println(triple.toString());
+//		}
 		
+		
+		/**
+		 * rewrite queries for triple retrieval
+		 */
+		Query rewrittenQuery = query.getQueryForTripleRetrieval();
+		System.out.println(rewrittenQuery);
 	}
 
 
