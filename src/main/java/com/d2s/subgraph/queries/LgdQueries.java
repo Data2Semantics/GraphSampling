@@ -8,17 +8,13 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.data2semantics.query.filters.DescribeFilter;
-import org.data2semantics.query.filters.GraphClauseFilter;
 import org.data2semantics.query.filters.QueryFilter;
 
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
-import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
 
 public class LgdQueries extends QueriesFetcher {
 	public static String QUERY_FILE = "src/main/resources/lgd_queries.log";
 	public static String CSV_COPY = "src/main/resources/lgd_queries.csv";
-	public static String PARSE_QUERIES_FILE = "src/main/resources/lgd_queries.arraylist";
 
 	public LgdQueries(ExperimentSetup experimentSetup, QueryFilter... filters) throws IOException {
 		this(experimentSetup, true, 0, filters);
@@ -27,12 +23,12 @@ public class LgdQueries extends QueriesFetcher {
 	public LgdQueries(ExperimentSetup experimentSetup, boolean useCacheFile, int maxNumQueries, QueryFilter... filters) throws IOException {
 		super(experimentSetup, useCacheFile);
 		this.maxNumQueries = maxNumQueries;
-		tryFetchingQueriesFromCache(PARSE_QUERIES_FILE);
+		tryFetchingQueriesFromCache();
 		if (queryCollection.getTotalQueryCount() == 0) {
 			System.out.println("parsing SWDF query logs");
 			this.filters = new ArrayList<QueryFilter>(Arrays.asList(filters));
 			parseLogFile(new File(QUERY_FILE));
-			saveQueriesToCacheFile(PARSE_QUERIES_FILE);
+			saveQueriesToCacheFile();
 			saveQueriesToCsv(CSV_COPY);
 		}
 		

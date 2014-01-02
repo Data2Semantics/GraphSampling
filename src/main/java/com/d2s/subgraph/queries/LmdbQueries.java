@@ -14,7 +14,6 @@ import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 public class LmdbQueries extends QueriesFetcher {
 	public static String QUERY_FILE = "src/main/resources/lmdbQueries.txt";
 	public static String CSV_COPY = "src/main/resources/lmdb_queries.csv";
-	public static String PARSE_QUERIES_FILE = "src/main/resources/lmdb_queries.arraylist";
 
 	public LmdbQueries(ExperimentSetup experimentSetup, QueryFilter... filters) throws IOException {
 		this(experimentSetup, true, filters);
@@ -22,12 +21,12 @@ public class LmdbQueries extends QueriesFetcher {
 
 	public LmdbQueries(ExperimentSetup experimentSetup, boolean useCacheFile, QueryFilter... filters) throws IOException {
 		super(experimentSetup, useCacheFile);
-		tryFetchingQueriesFromCache(PARSE_QUERIES_FILE);
+		tryFetchingQueriesFromCache();
 		if (queryCollection.getTotalQueryCount() == 0) {
 			System.out.println("parsing lmdb query logs");
 			this.filters = new ArrayList<QueryFilter>(Arrays.asList(filters));
 			parseLogFile(new File(QUERY_FILE));
-			saveQueriesToCacheFile(PARSE_QUERIES_FILE);
+			saveQueriesToCacheFile();
 			saveQueriesToCsv(CSV_COPY);
 		}
 	}

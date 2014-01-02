@@ -14,7 +14,6 @@ import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 public class Sp2bQueries extends QueriesFetcher {
 	private static String QUERY_DIR = "src/main/resources/sp2bQueries";
 	public static String CSV_COPY = "src/main/resources/sp2b_queries.csv";
-	public static String PARSE_QUERIES_FILE = "src/main/resources/sp2b_queries.arraylist";
 	private static String QUERY_FILE_EXTENSION = "sparql";
 
 	public Sp2bQueries(ExperimentSetup experimentSetup, QueryFilter... filters) throws IOException {
@@ -23,7 +22,7 @@ public class Sp2bQueries extends QueriesFetcher {
 		this.filters = new ArrayList<QueryFilter>(Arrays.asList(filters));
 		parseQueryDir();
 		saveQueriesToCsv(CSV_COPY);
-		saveQueriesToCacheFile(PARSE_QUERIES_FILE);
+		saveQueriesToCacheFile();
 	}
 
 	private void parseQueryDir() throws IOException {

@@ -10,6 +10,7 @@ public abstract class ExperimentSetup {
 	public ExperimentSetup(boolean useCacheFile) {
 		this.useCacheFile = useCacheFile;
 	}
+	
 	public abstract String getGoldenStandardGraph();
 
 	public abstract String getGraphPrefix();
@@ -30,6 +31,5 @@ public abstract class ExperimentSetup {
 
 	public String getId() {
 		return this.getClass().getSimpleName();
-
 	}
 }

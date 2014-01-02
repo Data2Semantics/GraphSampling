@@ -8,19 +8,14 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.data2semantics.query.QueryCollection;
-import org.omg.CosNaming.IstringHelper;
 
 import com.d2s.subgraph.eval.results.QueryResults;
 import com.d2s.subgraph.querytriples.ExtractTriplePatternsVisitor;
 import com.d2s.subgraph.querytriples.RewriteTriplePatternsVisitor;
 import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.query.QueryExecution;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QueryParseException;
 import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.QueryVisitor;
-import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.query.Syntax;
 import com.hp.hpl.jena.rdf.model.RDFNode;

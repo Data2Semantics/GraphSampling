@@ -155,8 +155,16 @@ public abstract class QueriesFetcher {
 			invalidQueries++;
 		}
 	}
-	protected void saveQueriesToCacheFile(String file) throws IOException {
-		FileWriter writer = new FileWriter(file);
+//	protected void saveQueriesToCacheFile(String file) throws IOException {
+//		FileWriter writer = new FileWriter(file);
+//		System.out.println("storing " + queryCollection.getQueries().size() + " queries to cache file");
+//		for (Query query : queryCollection.getQueries()) {
+//			writer.write(URLEncoder.encode(query.toString(), "UTF-8") + "\n");
+//		}
+//		writer.close();
+//	}
+	protected void saveQueriesToCacheFile() throws IOException {
+		FileWriter writer = new FileWriter(Config.PATH_QUERY_CACHE + "/" + experimentSetup.getId());
 		System.out.println("storing " + queryCollection.getQueries().size() + " queries to cache file");
 		for (Query query : queryCollection.getQueries()) {
 			writer.write(URLEncoder.encode(query.toString(), "UTF-8") + "\n");
@@ -185,10 +193,18 @@ public abstract class QueriesFetcher {
 		sc.close();
 	}
 	
-	protected void tryFetchingQueriesFromCache(String path) throws QueryParseException, IOException {
-		if (useCacheFile(path)) {
+//	protected void tryFetchingQueriesFromCache(String path) throws QueryParseException, IOException {
+//		if (useCacheFile(path)) {
+//			System.out.println("using cache file");
+//			readQueriesFromCacheFile(path);
+//		} else {
+//			System.out.println("not using cache file");
+//		}
+//	}
+	protected void tryFetchingQueriesFromCache() throws QueryParseException, IOException {
+		if (useCacheFile(Config.PATH_QUERY_CACHE + "/" + experimentSetup.getId())) {
 			System.out.println("using cache file");
-			readQueriesFromCacheFile(path);
+			readQueriesFromCacheFile(Config.PATH_QUERY_CACHE + "/" + experimentSetup.getId());
 		} else {
 			System.out.println("not using cache file");
 		}
