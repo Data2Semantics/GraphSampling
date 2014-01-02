@@ -21,7 +21,7 @@ public class SwdfExperimentSetup extends ExperimentSetup {
 	private static String QUERY_RESULTS_DIR = "swdfQueryResults";
 	private static String EVAL_RESULTS_DIR = "swdfResults";
 	private static boolean PRIVATE_QUERIES = true;
-	private static int MAX_NUM_QUERIES = 500;
+	private static int MAX_NUM_QUERIES = 10;
 	private QueriesFetcher queriesFetcher;
 	private boolean UNIQUE_QUERIES = true;
 	

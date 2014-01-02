@@ -34,4 +34,4 @@ The following steps will result in a number of different samples (half the size 
 3. [http://www.python.org/](http://www.python.org/)
 4. [http://www.r-project.org/](http://www.r-project.org/)
 5. [http://igraph.sourceforge.net/](http://igraph.sourceforge.net/)
-6. [https://github.com/Data2Semantics/PigAnalysis](https://github.com/Data2Semantics/PigAnalysis)
+6. [https://github.com/Data2Semantics/PigAnalysis/releases/tag/1.0](https://github.com/Data2Semantics/PigAnalysis/releases/tag/1.0)

@@ -1,5 +1,6 @@
 package com.d2s.subgraph.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,6 +32,14 @@ public class Utils {
 	public static void writeRow(Collection<String> row, CSVWriter writer) {
 		writer.writeNext(row.toArray(new String[row.size()]));
 	}
-
+	public static File mkdir(File file) {
+		if (!file.exists()) {
+			file.mkdir();
+		}
+		return file;
+	}
+	public static File mkdir(String filePath) {
+		return mkdir(new File(filePath));
+	}
 
 }
