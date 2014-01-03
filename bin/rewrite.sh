@@ -12,23 +12,21 @@ function hadoopLs {
 
 
 
-rewriteMethods=(s-o-noLit.py s-o-litAsNode.py s-o-litAsLit.py so-so.py s-o-litWithPred.py)
-#rewriteMethods=(so-so.py)
-#rewriteMethods=(s-o-litWithPred.py)
+rewriteMethods=(resourceContext.py resourceSimple.py resourceUnique.py resourceWithoutLit.py path.py)
 if [ -z "$1" ];then
-	echo "at least 1 argument required (input). (second arg disables catting locally)"
+	echo "at least 1 argument required (input). (second arg enables catting locally)"
 	exit;
 fi
 dataset=$1
-disableCat=$2
+enableCat=$2
 
 #rewrite stuff
 for rewriteMethod in "${rewriteMethods[@]}"; do
-  pig pigAnalysis/rewrite/${rewriteMethod} $dataset/$dataset.nt;
+pig pigAnalysis/rewrite/${rewriteMethod} $dataset/$dataset.nt;
 done
 
 #get all rewritten stuff locally
-if [ -z "$disableCat" ]; then
+if [[ $enableCat ]]; then
 	hadoopLs "$dataset/rewrite";
 	for dir in "${hadoopLs[@]}"; do
 		basename=`basename "$dir"`;
