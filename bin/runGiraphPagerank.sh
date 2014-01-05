@@ -13,6 +13,10 @@ rewriteMethod=${delimited[0]}
 
 IFS='/' array=($input)
 dataset="${array[0]}"
+if [ "dataset" != "" ]; then
+	dataset="${array[3]}"#hmm, we had an absolute path here
+fi
+
 output="${dataset}/analysis/${rewriteMethod}_pagerank_long"
 
 echo "input: $input"
