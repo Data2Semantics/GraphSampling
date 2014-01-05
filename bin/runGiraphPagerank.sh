@@ -23,5 +23,5 @@ echo "input: $input"
 echo "output: $output"
 
 
-#hadoop jar giraph.jar org.apache.giraph.GiraphRunner org.data2semantics.giraph.pagerank.numerical.PageRankComputation -eif org.data2semantics.giraph.io.EdgeListLongReader  -of org.apache.giraph.io.formats.IdWithValueTextOutputFormat -mc org.data2semantics.giraph.pagerank.numerical.RandomWalkVertexMasterCompute -wc org.data2semantics.giraph.pagerank.numerical.RandomWalkWorkerContext -op $output -eip $input -w 2
+hadoop jar giraph.jar org.apache.giraph.GiraphRunner org.data2semantics.giraph.pagerank.numerical.PageRankComputation -eif org.data2semantics.giraph.io.EdgeListLongReader  -of org.apache.giraph.io.formats.IdWithValueTextOutputFormat -mc org.data2semantics.giraph.pagerank.numerical.RandomWalkVertexMasterCompute -wc org.data2semantics.giraph.pagerank.numerical.RandomWalkWorkerContext -op $output -eip $input -w 2
 
