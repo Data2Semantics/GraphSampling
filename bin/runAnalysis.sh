@@ -20,6 +20,11 @@ if [ -n "$2" ]; then
 	pattern="$2"
 fi
 
+echo "running giraph analysis"
+runGiraphAnalysis.sh $dataset "$pattern"
 
-runGiraphAnalysis.sh $dataset $pattern
-runPigAnalysis.sh $dataset $pattern
+echo "getting giraph analysis back to strings"
+runGiraphAnalysisToString.sh $dataset "$pattern"
+
+echo "running pig analysis"
+runPigAnalysis.sh $dataset "$pattern"

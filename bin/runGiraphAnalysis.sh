@@ -28,7 +28,6 @@ pattern="*"
 if [ -n "$2" ]; then
 	pattern="$2"
 fi
-
 analysisMethods=(runGiraphPagerank.sh)
 #analysisMethods=(pageRank.py)
 
@@ -38,7 +37,7 @@ for dir in "${hadoopLs[@]}"; do
 		continue
 	fi
 	#add our own custom pattern here as well. only want to perform this on longs otherwise giraph fails!
-	if [[ ! "$dir" == "*_long" ]]; then
+	if [[ ! "$dir" == *_long ]]; then
 		continue
 	fi
 	echo "running analysis for $dir"
