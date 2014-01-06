@@ -21,14 +21,13 @@ if [ -n "$2" ]; then
 fi
 
 
-hadoopLs "$dataset/rewrite/";
+hadoopLs "$dataset/analysis/";
 for dir in "${hadoopLs[@]}"; do
 	if [[ ! "$dir" == $pattern ]]; then
 		continue
 	fi
-	if [[ "$dir" == *_long ]]; then
-	    #hmm, we want to skip these! we only use the long stuff for giraph
-	else
+	if [[ ! "$dir" == *_long ]]; then
+                #hmm, we want to skip longs! we only use the long stuff for giraph
 		dirBasename=`basename $dir`
 		IFS=_ read -a delimited <<< "$dirBasename"
 		rewriteMethod=${delimited[0]}

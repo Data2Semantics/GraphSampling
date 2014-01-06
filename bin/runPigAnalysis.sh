@@ -30,7 +30,7 @@ for dir in "${hadoopLs[@]}"; do
 		if [[ ! "$dir" == *_dict ]]; then
 			#hmm, we want to skip the 'long' stuff for giraph
 			pig pigAnalysis/analysis/indegree.py $dir;
-			pig pigAnalysis/analysis/indegree.py $dir;
+			pig pigAnalysis/analysis/outdegree.py $dir;
 		fi
 	fi
 done;
