@@ -24,7 +24,7 @@ if [ -z "$1" ];then
         exit;
 fi
 dataset=$1
-pattern="*_long"
+pattern="*"
 if [ -n "$2" ]; then
 	pattern="$2"
 fi
@@ -35,6 +35,10 @@ analysisMethods=(runGiraphPagerank.sh)
 hadoopLs "$dataset/rewrite";
 for dir in "${hadoopLs[@]}"; do
 	if [[ ! "$dir" == $pattern ]]; then
+		continue
+	fi
+	#add our own custom pattern here as well. only want to perform this on longs otherwise giraph fails!
+	if [[ ! "$dir" == "*_long" ]]; then
 		continue
 	fi
 	echo "running analysis for $dir"

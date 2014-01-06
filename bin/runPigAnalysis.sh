@@ -26,6 +26,10 @@ for dir in "${hadoopLs[@]}"; do
 	if [[ ! "$dir" == $pattern ]]; then
 		continue
 	fi
-	pigAnalysis/analysis/indegree.py $dir;
-	pigAnalysis/analysis/indegree.py $dir;
+	if [[ "$dir" == *_long ]]; then
+	    #hmm, we want to skip these! we only use the long stuff for giraph
+	else
+	    pigAnalysis/analysis/indegree.py $dir;
+		pigAnalysis/analysis/indegree.py $dir;
+	fi
 done;
