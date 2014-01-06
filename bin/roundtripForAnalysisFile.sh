@@ -4,9 +4,6 @@ if [ -z "$1" ];then
 	echo "at least 1 argument required (the analysis file)"
 	exit;
 fi
-#last one is strange: it's actually: half the graph, and only retrieve weights...
-#aggregateMethods=(min max avg)
-#aggregateMethods=(avg max)
 aggregateMethods=(max)
 skipAggregateFor="so-so"
 pigRoundtripDir="$HOME/pigAnalysis/roundtrip"
