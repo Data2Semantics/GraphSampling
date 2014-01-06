@@ -37,7 +37,6 @@ for dir in "${hadoopLs[@]}"; do
 	if [[ ! "$dir" == $pattern ]]; then
 		continue
 	fi
-	
 	echo "running analysis for $dir"
 	for analysisMethod in "${analysisMethods[@]}"; do
 		echo "running $analysisMethod"

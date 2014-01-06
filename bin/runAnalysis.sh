@@ -15,20 +15,11 @@ if [ -z "$1" ];then
         exit;
 fi
 dataset=$1
-pattern="*_long"
+pattern="*"
 if [ -n "$2" ]; then
 	pattern="$2"
 fi
 
-#analysisMethods=(runGiraphPagerank.sh)
-#analysisMethods=(pageRank.py)
 
-hadoopLs "$dataset/analysis/";
-for dir in "${hadoopLs[@]}"; do
-	if [[ ! "$dir" == $pattern ]]; then
-		continue
-	fi
-	
-	echo "running giraph analysis to string for $dir"
-	pig pigAnalysis/utils/giraphAnalysisToString.py $dir;
-done;
+runGiraphAnalysis.sh $dataset $pattern
+runPigAnalysis.sh $dataset $pattern
