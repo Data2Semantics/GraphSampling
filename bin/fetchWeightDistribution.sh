@@ -21,17 +21,19 @@ if [ -n "$2" ]; then
 fi
 
 
-hadoopLs "$dataset/analysis/";
+hadoopLs "$dataset/rewrite/";
 for dir in "${hadoopLs[@]}"; do
 	if [[ ! "$dir" == $pattern ]]; then
 		continue
 	fi
 	if [[ ! "$dir" == *_long ]]; then
-                #hmm, we want to skip longs! 
-		#dirBasename=`basename $dir`
-		#IFS=_ read -a delimited <<< "$dirBasename"
-		#rewriteMethod=${delimited[0]}
-		#unset IFS
-		pig pigAnalysis/evaluation/weightDistribution.py $dir;
+		if [[ ! "$dir" == *_dict ]]; then
+                	#hmm, we want to skip longs! 
+			#dirBasename=`basename $dir`
+			#IFS=_ read -a delimited <<< "$dirBasename"
+			#rewriteMethod=${delimited[0]}
+			#unset IFS
+			pig pigAnalysis/evaluation/fetchWeightDistribution.py $dir;
+		fi
 	fi
 done;
