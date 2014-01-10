@@ -168,14 +168,6 @@ public abstract class QueriesFetcher {
 			invalidQueries++;
 		}
 	}
-//	protected void saveQueriesToCacheFile(String file) throws IOException {
-//		FileWriter writer = new FileWriter(file);
-//		System.out.println("storing " + queryCollection.getQueries().size() + " queries to cache file");
-//		for (Query query : queryCollection.getQueries()) {
-//			writer.write(URLEncoder.encode(query.toString(), "UTF-8") + "\n");
-//		}
-//		writer.close();
-//	}
 	protected void saveQueriesToCacheFile() throws IOException {
 		File cacheDir = new File(Config.PATH_QUERY_CACHE);
 		if (!cacheDir.exists()) cacheDir.mkdir();
@@ -262,7 +254,9 @@ public abstract class QueriesFetcher {
 	}
 	
 	public File getQueryCsvCopyLocation() {
-		return new File(Config.PATH_QUERY_CSV_COPY + "/" + experimentSetup.getId() + ".csv");
+		File dir = new File(Config.PATH_QUERY_CSV_COPY);
+		if (!dir.exists()) dir.mkdir();
+		return new File(dir.getPath() + "/" + experimentSetup.getId() + ".csv");
 	}
 	
 	protected void parseLogFiles(String... etensionsArray) throws IOException, ParserConfigurationException, SAXException {

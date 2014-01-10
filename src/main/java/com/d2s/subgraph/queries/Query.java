@@ -11,6 +11,7 @@ import java.util.Set;
 import org.data2semantics.query.QueryCollection;
 
 import com.d2s.subgraph.eval.results.QueryResults;
+import com.d2s.subgraph.querytriples.ExtractQueryVariablesVisitor;
 import com.d2s.subgraph.querytriples.ExtractTriplePatternsVisitor;
 import com.d2s.subgraph.querytriples.RewriteTriplePatternsVisitor;
 import com.hp.hpl.jena.graph.Triple;
@@ -21,6 +22,7 @@ import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.query.Syntax;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.sparql.core.Prologue;
+import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.syntax.Element;
 
 public class Query extends org.data2semantics.query.Query {
@@ -135,34 +137,23 @@ public class Query extends org.data2semantics.query.Query {
 		
 	}
 	
+	/**
+	 * The jena query api only allows us to retrieve all -projection- variables
+	 * The jena query solution api only allows us to retrieve all variables which are bound in the resultset
+	 * We need ALL variables used in our query
+	 * @return
+	 */
+	public Set<String> getVarnamesFromPatterns() {
+		Element queryElement = getQueryPattern();
+		ExtractQueryVariablesVisitor visitor = new ExtractQueryVariablesVisitor();
+		queryElement.visit(visitor);
+		return visitor.getVariables();
+	}
+	
 	public Set<Triple> fetchTriplesFromPatterns(QuerySolution solution) {
-//		Iterator<String> varNames = solution.varNames();
-		
-//		while (varNames.hasNext()) {
-//			System.out.println("processing var " + varNames.next());
-//		}
-//		System.out.println(toString());
-//		varNames = solution.varNames();
-//		Element queryElement;
-//		
-//		while (varNames.hasNext()) {
-//			String varName = varNames.next();
-//			System.out.println("processing var " + varName);
-//			RDFNode node = solution.get(varName);
-//			queryElement = getQueryPattern();
-//			if (queryElement == null) return null;
-//			queryElement.visit(new RewriteTriplePatternsVisitor(varName, node, this));
-//		}
-		System.out.println(toString());
-		Set<String> varNames = new HashSet<String>();
-		varNames.add("name");
-		varNames.add("mbox_sha1sum");
-		varNames.add("homepage");
-		varNames.add("page");
-		varNames.add("sameAs");
-		varNames.add("seeAlso");
 		Element queryElement;
-		for (String varName: varNames) {
+		
+		for (String varName: getVarnamesFromPatterns()) {
 			System.out.println("processing var " + varName);
 			RDFNode node = solution.get(varName);
 			if (node != null) {
@@ -175,9 +166,20 @@ public class Query extends org.data2semantics.query.Query {
 			}
 		}
 		
+		//we've rewritten the triple patterns to contain values. Now, we need to convert them to regular triples (i.e. another object in jena representation!)
 		queryElement = getQueryPattern();
 		ExtractTriplePatternsVisitor extractTriplesVisitor = new ExtractTriplePatternsVisitor();
 		queryElement.visit(extractTriplesVisitor);
+		
+		
+		
+		for (Triple triple: extractTriplesVisitor.getTriples()) {
+			System.out.println(triple.toString());
+		}
+		
+		
+		
+		
 		return extractTriplesVisitor.getTriples();
 		
 	}
