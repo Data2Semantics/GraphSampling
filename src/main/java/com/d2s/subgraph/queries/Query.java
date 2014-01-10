@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -135,17 +136,45 @@ public class Query extends org.data2semantics.query.Query {
 	}
 	
 	public Set<Triple> fetchTriplesFromPatterns(QuerySolution solution) {
-		Iterator<String> varNames = solution.varNames();
+//		Iterator<String> varNames = solution.varNames();
+		
+//		while (varNames.hasNext()) {
+//			System.out.println("processing var " + varNames.next());
+//		}
+//		System.out.println(toString());
+//		varNames = solution.varNames();
+//		Element queryElement;
+//		
+//		while (varNames.hasNext()) {
+//			String varName = varNames.next();
+//			System.out.println("processing var " + varName);
+//			RDFNode node = solution.get(varName);
+//			queryElement = getQueryPattern();
+//			if (queryElement == null) return null;
+//			queryElement.visit(new RewriteTriplePatternsVisitor(varName, node, this));
+//		}
+		System.out.println(toString());
+		Set<String> varNames = new HashSet<String>();
+		varNames.add("name");
+		varNames.add("mbox_sha1sum");
+		varNames.add("homepage");
+		varNames.add("page");
+		varNames.add("sameAs");
+		varNames.add("seeAlso");
 		Element queryElement;
-		while (varNames.hasNext()) {
-			
-			String varName = varNames.next();
+		for (String varName: varNames) {
 			System.out.println("processing var " + varName);
 			RDFNode node = solution.get(varName);
-			queryElement = getQueryPattern();
-			if (queryElement == null) return null;
-			queryElement.visit(new RewriteTriplePatternsVisitor(varName, node, this));
+			if (node != null) {
+				queryElement = getQueryPattern();
+				if (queryElement == null) return null;
+				queryElement.visit(new RewriteTriplePatternsVisitor(varName, node, this));
+			} else {
+				//we don't have a value for this variable. This probably is a value which occurs in an optional.
+				//In other words, we don't need this for answering the query
+			}
 		}
+		
 		queryElement = getQueryPattern();
 		ExtractTriplePatternsVisitor extractTriplesVisitor = new ExtractTriplePatternsVisitor();
 		queryElement.visit(extractTriplesVisitor);

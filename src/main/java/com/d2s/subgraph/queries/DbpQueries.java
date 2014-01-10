@@ -1,62 +1,35 @@
 package com.d2s.subgraph.queries;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.Arrays;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.data2semantics.query.filters.QueryFilter;
+import org.xml.sax.SAXException;
 
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
+import com.hp.hpl.jena.query.QueryParseException;
 
 public class DbpQueries extends QueriesFetcher {
 	public static String QUERY_FILE = "src/main/resources/dbpl_queries.log";
 	public static String CSV_COPY = "src/main/resources/dbpl_queries.csv";
 	
 
-	public DbpQueries(ExperimentSetup experimentSetup, QueryFilter... filters) throws IOException {
-		this(experimentSetup, true, 0, filters);
+	public DbpQueries(ExperimentSetup experimentSetup, QueryFilter... filters) throws IOException, QueryParseException, ParserConfigurationException, SAXException {
+		this(experimentSetup, true, filters);
 	}
 
-	public DbpQueries(ExperimentSetup experimentSetup, boolean useCacheFile, int maxNumQueries, QueryFilter... filters) throws IOException {
-		super(experimentSetup, useCacheFile);
-		this.maxNumQueries = maxNumQueries;
-		tryFetchingQueriesFromCache();
-		if (queryCollection.getTotalQueryCount() == 0) {
-			System.out.println("parsing dbpl query logs");
-			this.filters = new ArrayList<QueryFilter>(Arrays.asList(filters));
-			parseLogFile(new File(QUERY_FILE));
-			saveQueriesToCacheFile();
-			saveQueriesToCsv(CSV_COPY);
-		}
-		
+	public DbpQueries(ExperimentSetup experimentSetup, boolean useCacheFile, QueryFilter... filters) throws IOException, QueryParseException, ParserConfigurationException, SAXException {
+		super(experimentSetup, useCacheFile, filters);
+		fetch();
 	}
+	
+	
 
 
-	private void parseLogFile(File textFile) throws IOException {
-		BufferedReader br = new BufferedReader(new FileReader(textFile));
-		String line;
-		while ((line = br.readLine()) != null) {
-			String matchSubString = "/sparql?query=";
-			if (line.contains(matchSubString)) {
-				
-				int startIndex = line.indexOf(matchSubString);
-				startIndex += matchSubString.length();
-				String firstString = line.substring(startIndex);
-				String encodedUrlQuery = firstString.split(" ")[0];
-				// remove other args
-				String encodedSparqlQuery = encodedUrlQuery.split("&")[0];
-
-				addQueryToList(URLDecoder.decode(encodedSparqlQuery, "UTF-8"));
-				if (queryCollection.getDistinctQueryCount() > maxNumQueries) {
-					break;
-				}
-			}
-		}
-		br.close();
+	protected void parseCustomLogFile(File textFile) throws IOException {
+		//not needed (we use CLF, something we user for other parsers as well)
 	}
 
 	

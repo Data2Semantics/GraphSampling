@@ -9,6 +9,9 @@ public class Config {
 	public static String PATH_QUERY_RESULTS = "output/queryResults/";
 	public static String PATH_QUERY_TRIPLES = "output/queryTriples/";
 	public static String PATH_QUERY_CACHE = "cache/queries";
+	public static String PATH_QUERY_LOGS = "input/queryLogs";
+	public static String PATH_QUERY_CSV_COPY = "cache/queryCsvCopies";
+	
 	/**
 	 * file names
 	 */

@@ -7,6 +7,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.data2semantics.query.QueryCollection;
 import org.xml.sax.SAXException;
 
+import com.d2s.subgraph.eval.experiments.ExperimentSetup.LogType;
 import com.d2s.subgraph.queries.QaldDbpQueries;
 import com.d2s.subgraph.queries.QueriesFetcher;
 import com.d2s.subgraph.queries.Query;
@@ -39,7 +40,6 @@ public class DbpoExperimentSetup extends ExperimentSetup {
 		} else {
 			throw new IllegalStateException("Illegal query selection mode passed to dbpo experiment setup");
 		}
-		queriesFetcher.setMaxNQueries(MAX_NUM_QUERIES);
 	}
 	
 	public String getGoldenStandardGraph() {
@@ -79,4 +79,9 @@ public class DbpoExperimentSetup extends ExperimentSetup {
 	public boolean useUniqueQueries() {
 		return UNIQUE_QUERIES ;
 	}
+
+	public LogType getLogType() {
+		return LogType.OTHER;
+	}
+
 }

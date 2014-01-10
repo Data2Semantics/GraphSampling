@@ -6,6 +6,7 @@ import org.data2semantics.query.QueryCollection;
 import org.data2semantics.query.filters.DescribeFilter;
 import org.data2semantics.query.filters.GraphClauseFilter;
 
+import com.d2s.subgraph.eval.experiments.ExperimentSetup.LogType;
 import com.d2s.subgraph.queries.QueriesFetcher;
 import com.d2s.subgraph.queries.Query;
 import com.d2s.subgraph.queries.Sp2bQueries;
@@ -27,7 +28,6 @@ public class Sp2bExperimentSetup extends ExperimentSetup {
 	public Sp2bExperimentSetup(boolean useCacheFile) throws IOException {
 		super(useCacheFile);
 		queriesFetcher = new Sp2bQueries(this, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter());
-		queriesFetcher.setMaxNQueries(MAX_NUM_QUERIES);
 	}
 	
 	public String getGoldenStandardGraph() {
@@ -61,5 +61,8 @@ public class Sp2bExperimentSetup extends ExperimentSetup {
 	}
 	public boolean useUniqueQueries() {
 		return UNIQUE_QUERIES ;
+	}
+	public LogType getLogType() {
+		return LogType.OTHER;
 	}
 }
