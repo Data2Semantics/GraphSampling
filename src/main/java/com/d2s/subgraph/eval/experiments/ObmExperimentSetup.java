@@ -10,31 +10,27 @@ import org.data2semantics.query.filters.DescribeFilter;
 import org.data2semantics.query.filters.GraphClauseFilter;
 import org.xml.sax.SAXException;
 
-import com.d2s.subgraph.queries.DbpQueries;
+import com.d2s.subgraph.queries.ObmQueries;
 import com.d2s.subgraph.queries.QueriesFetcher;
 import com.d2s.subgraph.queries.Query;
 import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
-import com.hp.hpl.jena.query.QueryParseException;
 
 
 
-public class DbpExperimentSetup extends ExperimentSetup {
+public class ObmExperimentSetup extends ExperimentSetup {
+	public static String GOLDEN_STANDARD_GRAPH = "http://obm";
+	private static String GRAPH_PREFIX = "obm_";
+	private static String QUERY_RESULTS_DIR = "obmQueryResults";
+	private static String EVAL_RESULTS_DIR = "obmResults";
+	private static boolean PRIVATE_QUERIES = true;
+	private static int MAX_NUM_QUERIES = 0;
+	private QueriesFetcher queriesFetcher;
+	private boolean UNIQUE_QUERIES = true;
 	
-	public static String GOLDEN_STANDARD_GRAPH = "http://dbpedia";
-	private static String GRAPH_PREFIX = "dbpedia_";
-	private static String QUERY_TRIPLES_DIR = "dbplTriples";
-	private static String QUERY_RESULTS_DIR = "dbplQueryResults";
-	private static String EVAL_RESULTS_DIR = "dbplResults";
-	private static boolean UNIQUE_QUERIES = true;
-	private static boolean PRIVATE_QUERIES = false;
-	private static int MAX_NUM_QUERIES = 100;
-	private QueriesFetcher qFetcher;
-	
-	public DbpExperimentSetup(boolean useCacheFile) throws IOException, QueryParseException, ParserConfigurationException, SAXException {
+	public ObmExperimentSetup(boolean useCacheFile) throws IOException, ParserConfigurationException, SAXException {
 		super(useCacheFile);
-		qFetcher = new DbpQueries(this, useCacheFile, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter(), new ConstructFilter());
+		queriesFetcher = new ObmQueries(this, useCacheFile, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter(), new ConstructFilter());
 	}
-	
 	public String getGoldenStandardGraph() {
 		return GOLDEN_STANDARD_GRAPH;
 	}
@@ -42,18 +38,13 @@ public class DbpExperimentSetup extends ExperimentSetup {
 		return GRAPH_PREFIX;
 	}
 	public QueryCollection<Query> getQueryCollection() {
-		return qFetcher.getQueryCollection();
+		return queriesFetcher.getQueryCollection();
 	}
-	
-
 	public String getEvalResultsDir() {
 		return EVAL_RESULTS_DIR;
 	}
 	public int getMaxNumQueries() {
 		return MAX_NUM_QUERIES;
-	}
-	public String getQueryTriplesDir() {
-		return QUERY_TRIPLES_DIR;
 	}
 	public String getQueryResultsDir() {
 		return QUERY_RESULTS_DIR;
@@ -62,11 +53,9 @@ public class DbpExperimentSetup extends ExperimentSetup {
 		return PRIVATE_QUERIES;
 	}
 	public boolean useUniqueQueries() {
-		return UNIQUE_QUERIES;
+		return UNIQUE_QUERIES ;
 	}
-
 	public LogType getLogType() {
-		return LogType.CLF;
+		return LogType.OTHER;
 	}
-
 }

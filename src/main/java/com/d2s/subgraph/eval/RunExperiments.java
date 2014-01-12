@@ -13,7 +13,7 @@ import org.apache.commons.cli.ParseException;
 import org.xml.sax.SAXException;
 
 import com.d2s.subgraph.eval.analysis.WriteAnalysis;
-import com.d2s.subgraph.eval.experiments.DbpExperimentSetup;
+import com.d2s.subgraph.eval.experiments.DbpediaExperimentSetup;
 import com.d2s.subgraph.eval.experiments.DbpoExperimentSetup;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 import com.d2s.subgraph.eval.experiments.LgdExperimentSetup;
@@ -50,7 +50,7 @@ public class RunExperiments {
 
 	private static ExperimentSetup getExperimentSetupForArg(String arg, boolean useQueryCacheFile) throws IllegalStateException, IOException, SAXException, ParserConfigurationException {
 		if (arg.equals("dbp")) {
-			return new DbpExperimentSetup(useQueryCacheFile);
+			return new DbpediaExperimentSetup(useQueryCacheFile);
 		} else if (arg.equals("swdf")) {
 			return new SwdfExperimentSetup(useQueryCacheFile);
 		} else if (arg.equals("dbpo")) {

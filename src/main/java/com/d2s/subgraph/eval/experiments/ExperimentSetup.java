@@ -32,8 +32,6 @@ public abstract class ExperimentSetup {
 
 	public abstract int getMaxNumQueries();
 
-	public abstract String getQueryTriplesDir();
-
 	public abstract String getQueryResultsDir();
 
 	public abstract boolean privateQueries();

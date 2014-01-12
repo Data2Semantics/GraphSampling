@@ -54,7 +54,7 @@ public class Query extends org.data2semantics.query.Query {
 	}
 	
 	public void setGoldenStandardDuration(Date date) {
-		System.out.println("set duration: " + date.getTime());
+//		System.out.println("set duration: " + date.getTime());
 		this.goldenStandardDuration = date;
 	}
 	public Date getGoldenStandardDuration() {

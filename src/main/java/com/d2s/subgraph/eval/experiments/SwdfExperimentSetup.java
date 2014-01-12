@@ -20,7 +20,6 @@ import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
 public class SwdfExperimentSetup extends ExperimentSetup {
 	public static String GOLDEN_STANDARD_GRAPH = "http://df";
 	private static String GRAPH_PREFIX = "df_";
-	private static String QUERY_TRIPLES_DIR = "swdfQueryTriples";
 	private static String QUERY_RESULTS_DIR = "swdfQueryResults";
 	private static String EVAL_RESULTS_DIR = "swdfResults";
 	private static boolean PRIVATE_QUERIES = true;
@@ -50,9 +49,6 @@ public class SwdfExperimentSetup extends ExperimentSetup {
 		return MAX_NUM_QUERIES;
 	}
 
-	public String getQueryTriplesDir() {
-		return QUERY_TRIPLES_DIR;
-	}
 	public String getQueryResultsDir() {
 		return QUERY_RESULTS_DIR;
 	}

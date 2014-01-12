@@ -11,16 +11,16 @@ import org.xml.sax.SAXException;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 import com.hp.hpl.jena.query.QueryParseException;
 
-public class DbpQueries extends QueriesFetcher {
+public class DbpediaQueries extends QueriesFetcher {
 	public static String QUERY_FILE = "src/main/resources/dbpl_queries.log";
 	public static String CSV_COPY = "src/main/resources/dbpl_queries.csv";
 	
 
-	public DbpQueries(ExperimentSetup experimentSetup, QueryFilter... filters) throws IOException, QueryParseException, ParserConfigurationException, SAXException {
+	public DbpediaQueries(ExperimentSetup experimentSetup, QueryFilter... filters) throws IOException, QueryParseException, ParserConfigurationException, SAXException {
 		this(experimentSetup, true, filters);
 	}
 
-	public DbpQueries(ExperimentSetup experimentSetup, boolean useCacheFile, QueryFilter... filters) throws IOException, QueryParseException, ParserConfigurationException, SAXException {
+	public DbpediaQueries(ExperimentSetup experimentSetup, boolean useCacheFile, QueryFilter... filters) throws IOException, QueryParseException, ParserConfigurationException, SAXException {
 		super(experimentSetup, useCacheFile, filters);
 		fetch();
 	}

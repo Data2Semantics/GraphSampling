@@ -21,7 +21,6 @@ public class DbpoExperimentSetup extends ExperimentSetup {
 	public static String GOLDEN_STANDARD_GRAPH = "http://dbpo";
 	private static String GRAPH_PREFIX = "dbp_";
 	private static String EVAL_RESULTS_DIR = "dbpResults";
-	private static String QUERY_TRIPLES_DIR = "dbpQueryTriples";
 	private static String QUERY_RESULTS_DIR = "dbpQueryResults";
 	private static boolean PRIVATE_QUERIES = true;
 	
@@ -67,9 +66,6 @@ public class DbpoExperimentSetup extends ExperimentSetup {
 		return MAX_NUM_QUERIES;
 	}
 
-	public String getQueryTriplesDir() {
-		return QUERY_TRIPLES_DIR;
-	}
 	public String getQueryResultsDir() {
 		return QUERY_RESULTS_DIR;
 	}

@@ -138,12 +138,12 @@ public abstract class QueriesFetcher {
 					//already added. no need to do 'hasresults' again
 					queryCollection.addQuery(query);
 				} else {
-					System.out.print("+");
+					System.out.print("*");
 					Date timeStart = new Date();
 					try {
 						query = execQueryToTest(query.getQueryWithFromClause(experimentSetup.getGoldenStandardGraph()));
-						System.out.println("adding");
-						System.out.println(queryString);
+						System.out.print("+");
+//						System.out.println(queryString);
 						queryCollection.addQuery(query);
 					} catch (IllegalStateException e) {
 						//no results for this query!
@@ -267,7 +267,11 @@ public abstract class QueriesFetcher {
 				extensions.add("log");
 			}
 		}
-		for (File logFile: getQueryLogFiles(extensions.toArray(new String[extensions.size()]))) {
+		int iterator = 1;
+		Collection<File> logFiles = getQueryLogFiles(extensions.toArray(new String[extensions.size()]));
+		for (File logFile: logFiles) {
+			System.out.println("parsing file " + iterator + " of " + logFiles.size());
+			iterator++;
 			try {
 				parseLogFile(logFile, experimentSetup.getLogType());
 			} catch (IllegalArgumentException e) {
@@ -304,7 +308,7 @@ public abstract class QueriesFetcher {
 				String encodedSparqlQuery = encodedUrlQuery.split("&")[0];
 
 				addQueryToList(URLDecoder.decode(encodedSparqlQuery, "UTF-8"));
-				if (queryCollection.getDistinctQueryCount() > experimentSetup.getMaxNumQueries()) {
+				if (experimentSetup.getMaxNumQueries() != 0 && queryCollection.getDistinctQueryCount() > experimentSetup.getMaxNumQueries()) {
 					break;
 				}
 			}

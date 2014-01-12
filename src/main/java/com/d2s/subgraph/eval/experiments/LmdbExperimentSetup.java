@@ -20,7 +20,6 @@ public class LmdbExperimentSetup extends ExperimentSetup {
 	public static String GOLDEN_STANDARD_GRAPH = "http://lmdb";
 	private static String GRAPH_PREFIX = "lmdb_";
 	private static String EVAL_RESULTS_DIR = "lmdbResults";
-	private static String QUERY_TRIPLES_DIR = "lmdbQueryTriples";
 	private static String QUERY_RESULTS_DIR = "lmdbQueryResults";
 	private static boolean PRIVATE_QUERIES = false;
 	private static int MAX_NUM_QUERIES = 0;//i.e. all
@@ -48,9 +47,6 @@ public class LmdbExperimentSetup extends ExperimentSetup {
 		return MAX_NUM_QUERIES;
 	}
 
-	public String getQueryTriplesDir() {
-		return QUERY_TRIPLES_DIR;
-	}
 	public String getQueryResultsDir() {
 		return QUERY_RESULTS_DIR;
 	}
