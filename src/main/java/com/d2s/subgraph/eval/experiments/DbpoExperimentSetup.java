@@ -8,9 +8,9 @@ import org.data2semantics.query.QueryCollection;
 import org.xml.sax.SAXException;
 
 import com.d2s.subgraph.eval.experiments.ExperimentSetup.LogType;
-import com.d2s.subgraph.queries.QaldDbpQueries;
-import com.d2s.subgraph.queries.QueriesFetcher;
 import com.d2s.subgraph.queries.Query;
+import com.d2s.subgraph.queries.fetch.QaldDbpQueries;
+import com.d2s.subgraph.queries.fetch.QueriesFetcher;
 
 
 public class DbpoExperimentSetup extends ExperimentSetup {

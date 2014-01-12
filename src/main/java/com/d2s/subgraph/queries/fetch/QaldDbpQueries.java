@@ -1,4 +1,4 @@
-package com.d2s.subgraph.queries;
+package com.d2s.subgraph.queries.fetch;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,6 +22,7 @@ import org.xml.sax.SAXException;
 import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.experiments.DbpoExperimentSetup;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
+import com.d2s.subgraph.queries.Query;
 import com.d2s.subgraph.util.QueryUtils;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;

@@ -7,9 +7,9 @@ import org.data2semantics.query.filters.DescribeFilter;
 import org.data2semantics.query.filters.GraphClauseFilter;
 
 import com.d2s.subgraph.eval.experiments.ExperimentSetup.LogType;
-import com.d2s.subgraph.queries.QueriesFetcher;
 import com.d2s.subgraph.queries.Query;
-import com.d2s.subgraph.queries.Sp2bQueries;
+import com.d2s.subgraph.queries.fetch.QueriesFetcher;
+import com.d2s.subgraph.queries.fetch.Sp2bQueries;
 import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
 
 

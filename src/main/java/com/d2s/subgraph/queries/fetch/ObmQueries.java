@@ -1,4 +1,4 @@
-package com.d2s.subgraph.queries;
+package com.d2s.subgraph.queries.fetch;
 
 import java.io.BufferedReader;
 import java.io.File;

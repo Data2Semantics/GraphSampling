@@ -10,9 +10,9 @@ import org.data2semantics.query.filters.DescribeFilter;
 import org.data2semantics.query.filters.GraphClauseFilter;
 import org.xml.sax.SAXException;
 
-import com.d2s.subgraph.queries.DbpediaQueries;
-import com.d2s.subgraph.queries.QueriesFetcher;
 import com.d2s.subgraph.queries.Query;
+import com.d2s.subgraph.queries.fetch.DbpediaQueries;
+import com.d2s.subgraph.queries.fetch.QueriesFetcher;
 import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
 import com.hp.hpl.jena.query.QueryParseException;
 

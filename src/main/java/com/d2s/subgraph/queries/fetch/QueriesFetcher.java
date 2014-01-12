@@ -1,4 +1,4 @@
-package com.d2s.subgraph.queries;
+package com.d2s.subgraph.queries.fetch;
 
 
 import java.io.BufferedReader;
@@ -27,6 +27,7 @@ import au.com.bytecode.opencsv.CSVWriter;
 
 import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
+import com.d2s.subgraph.queries.Query;
 import com.d2s.subgraph.util.QueryUtils;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -108,11 +109,20 @@ public abstract class QueriesFetcher {
 				throw new IllegalStateException("no results for query");
 			}
 		} catch (QueryExceptionHTTP e) {
-			e.printStackTrace();
-			System.exit(1);
-		} catch (Exception e) {
+			if (e.getMessage().contains("SPARQL compiler:")) {
+				//this is a virtuoso sparql syntax error. some things might validate in jena, but not in virtuoso,
+				//e.g. virtuoso specific function such as <bif:contains>
+				//just list this as invalid query, and move on
+				invalidQueries++;
+				
+				//throw exception as well, otherwise this query gets stored anyway
+				throw new IllegalStateException("virtuoso sparql compilation error");
+			} else {
+				e.printStackTrace();
+				System.exit(1);
+			}
+		} catch (Throwable e) {
 			throw new IllegalStateException("no results for query");
-
 		}
 		throw new IllegalStateException("no results for query");
 	}
@@ -219,7 +229,6 @@ public abstract class QueriesFetcher {
 	protected boolean useCacheFile(String path) {
 		boolean useCacheFile = false;
 		if (this.useCacheFile) { 
-			System.out.println("this set");
 			File file = new File(path);
 			if (file.exists()) {
 				System.out.println("file exists");

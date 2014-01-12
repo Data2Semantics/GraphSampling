@@ -10,10 +10,10 @@ import org.data2semantics.query.filters.DescribeFilter;
 import org.data2semantics.query.filters.GraphClauseFilter;
 import org.xml.sax.SAXException;
 
-import com.d2s.subgraph.queries.Bio2RdfQueries;
-import com.d2s.subgraph.queries.LgdQueries;
-import com.d2s.subgraph.queries.QueriesFetcher;
 import com.d2s.subgraph.queries.Query;
+import com.d2s.subgraph.queries.fetch.Bio2RdfQueries;
+import com.d2s.subgraph.queries.fetch.LgdQueries;
+import com.d2s.subgraph.queries.fetch.QueriesFetcher;
 import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
 
 
