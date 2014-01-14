@@ -20,7 +20,7 @@ import com.d2s.subgraph.eval.experiments.LgdExperimentSetup;
 import com.d2s.subgraph.eval.experiments.LmdbExperimentSetup;
 import com.d2s.subgraph.eval.experiments.Sp2bExperimentSetup;
 import com.d2s.subgraph.eval.experiments.SwdfExperimentSetup;
-import com.d2s.subgraph.eval.generation.FetchGraphsResults;
+import com.d2s.subgraph.eval.recall.generation.FetchGraphsResults;
 
 public class RunExperiments {
 	private static String CLI_ARG_RUN_QUERIES = "q";

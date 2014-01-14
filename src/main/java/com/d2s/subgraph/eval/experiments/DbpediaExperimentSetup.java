@@ -11,6 +11,7 @@ import org.data2semantics.query.filters.GraphClauseFilter;
 import org.xml.sax.SAXException;
 
 import com.d2s.subgraph.queries.Query;
+import com.d2s.subgraph.queries.fetch.Bio2RdfQueries;
 import com.d2s.subgraph.queries.fetch.DbpediaQueries;
 import com.d2s.subgraph.queries.fetch.QueriesFetcher;
 import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
@@ -30,8 +31,14 @@ public class DbpediaExperimentSetup extends ExperimentSetup {
 	private QueriesFetcher qFetcher;
 	
 	public DbpediaExperimentSetup(boolean useCacheFile) throws IOException, QueryParseException, ParserConfigurationException, SAXException {
+		this(useCacheFile, false);
+	}
+	
+	public DbpediaExperimentSetup(boolean useCacheFile, boolean skipLoadingFetcher) throws IOException, ParserConfigurationException, SAXException {
 		super(useCacheFile);
-		qFetcher = new DbpediaQueries(this, useCacheFile, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter(), new ConstructFilter());
+		if (!skipLoadingFetcher) {
+			qFetcher = new DbpediaQueries(this, useCacheFile, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter(), new ConstructFilter());
+		}
 	}
 	
 	public String getGoldenStandardGraph() {

@@ -1,4 +1,4 @@
-package com.d2s.subgraph.eval.generation;
+package com.d2s.subgraph.eval.recall.generation;
 
 import java.io.IOException;
 import java.util.ArrayList;

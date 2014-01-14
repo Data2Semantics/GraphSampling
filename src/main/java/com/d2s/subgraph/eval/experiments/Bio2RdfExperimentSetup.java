@@ -12,7 +12,6 @@ import org.xml.sax.SAXException;
 
 import com.d2s.subgraph.queries.Query;
 import com.d2s.subgraph.queries.fetch.Bio2RdfQueries;
-import com.d2s.subgraph.queries.fetch.LgdQueries;
 import com.d2s.subgraph.queries.fetch.QueriesFetcher;
 import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
 
@@ -29,8 +28,13 @@ public class Bio2RdfExperimentSetup extends ExperimentSetup {
 	private boolean UNIQUE_QUERIES = true;
 	
 	public Bio2RdfExperimentSetup(boolean useCacheFile) throws IOException, ParserConfigurationException, SAXException {
+		this(useCacheFile, false);
+	}
+	public Bio2RdfExperimentSetup(boolean useCacheFile, boolean skipLoadingFetcher) throws IOException, ParserConfigurationException, SAXException {
 		super(useCacheFile);
-		queriesFetcher = new Bio2RdfQueries(this, useCacheFile, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter(), new ConstructFilter());
+		if (!skipLoadingFetcher) {
+			queriesFetcher = new Bio2RdfQueries(this, useCacheFile, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter(), new ConstructFilter());
+		}
 	}
 	public String getGoldenStandardGraph() {
 		return GOLDEN_STANDARD_GRAPH;

@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import au.com.bytecode.opencsv.CSVWriter;
 
 import com.d2s.subgraph.eval.Config;
-import com.d2s.subgraph.eval.generation.FetchGraphResults;
+import com.d2s.subgraph.eval.recall.generation.FetchGraphResults;
 import com.d2s.subgraph.eval.results.QueryResults;
 import com.d2s.subgraph.queries.Query;
 import com.d2s.subgraph.util.StringUtils;

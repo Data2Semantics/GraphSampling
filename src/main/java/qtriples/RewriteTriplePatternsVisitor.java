@@ -1,4 +1,4 @@
-package com.d2s.subgraph.queries.querytriples;
+package qtriples;
 
 import java.util.ListIterator;
 

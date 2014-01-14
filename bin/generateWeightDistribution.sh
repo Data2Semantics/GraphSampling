@@ -30,9 +30,6 @@ for dir in "${hadoopLs[@]}"; do
 		if [[ ! "$dir" == *_dict ]]; then
                 	#hmm, we want to skip longs! 
 			#dirBasename=`basename $dir`
-			#IFS=_ read -a delimited <<< "$dirBasename"
-			#rewriteMethod=${delimited[0]}
-			#unset IFS
 			pig pigAnalysis/evaluation/fetchWeightDistribution.py $dir;
 		fi
 	fi

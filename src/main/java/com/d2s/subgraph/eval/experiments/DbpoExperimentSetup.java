@@ -7,10 +7,10 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.data2semantics.query.QueryCollection;
 import org.xml.sax.SAXException;
 
-import com.d2s.subgraph.eval.experiments.ExperimentSetup.LogType;
 import com.d2s.subgraph.queries.Query;
 import com.d2s.subgraph.queries.fetch.QaldDbpQueries;
 import com.d2s.subgraph.queries.fetch.QueriesFetcher;
+import com.hp.hpl.jena.query.QueryParseException;
 
 
 public class DbpoExperimentSetup extends ExperimentSetup {
@@ -29,17 +29,25 @@ public class DbpoExperimentSetup extends ExperimentSetup {
 	private int querySelection;
 	private boolean UNIQUE_QUERIES = true;
 	
-	public DbpoExperimentSetup(int querySelection, boolean useCacheFile) throws SAXException, IOException, ParserConfigurationException, IllegalStateException {
+	
+	public DbpoExperimentSetup(int querySelection, boolean useCacheFile) throws IOException, QueryParseException, ParserConfigurationException, SAXException {
+		this(querySelection, useCacheFile, false);
+	}
+	
+	public DbpoExperimentSetup(int querySelection, boolean useCacheFile, boolean skipLoadingFetcher) throws IOException, ParserConfigurationException, SAXException {
 		super(useCacheFile);
 		this.querySelection = querySelection;
-		if (querySelection == QALD_KEEP_OPTIONALS || querySelection == QALD_REMOVE_OPTIONALS) {
-			queriesFetcher = new QaldDbpQueries(this, QaldDbpQueries.QALD_2_QUERIES, (querySelection == QALD_REMOVE_OPTIONALS? true: false), true);
-		} else if (querySelection == QUERY_LOGS) {
-			throw new IllegalStateException("No implemented yet");
-		} else {
-			throw new IllegalStateException("Illegal query selection mode passed to dbpo experiment setup");
+		if (!skipLoadingFetcher) {
+			if (querySelection == QALD_KEEP_OPTIONALS || querySelection == QALD_REMOVE_OPTIONALS) {
+				queriesFetcher = new QaldDbpQueries(this, QaldDbpQueries.QALD_2_QUERIES, (querySelection == QALD_REMOVE_OPTIONALS? true: false), true);
+			} else if (querySelection == QUERY_LOGS) {
+				throw new IllegalStateException("No implemented yet");
+			} else {
+				throw new IllegalStateException("Illegal query selection mode passed to dbpo experiment setup");
+			}
 		}
 	}
+	
 	
 	public String getGoldenStandardGraph() {
 		return GOLDEN_STANDARD_GRAPH;

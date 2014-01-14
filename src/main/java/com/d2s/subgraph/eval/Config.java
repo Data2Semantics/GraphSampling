@@ -13,6 +13,9 @@ public class Config {
 	public static String PATH_QUERY_CSV_COPY = "cache/queryCsvCopies/";
 	public static String PATH_QUERY_CONSTRUCT_TRIPLES = "output/constructTriples/";
 	public static String PATH_FAILED_QUERIES = "output/failedQueries/";
+	public static String PATH_WEIGHTED_QUERY_TRIPLES = "input/qTripleWeights/";
+	public static String PATH_WEIGHT_DISTRIBUTION = "input/weightDistribution/";
+	
 	
 	/**
 	 * file names

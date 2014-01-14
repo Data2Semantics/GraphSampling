@@ -27,9 +27,14 @@ public class SwdfExperimentSetup extends ExperimentSetup {
 	private QueriesFetcher queriesFetcher;
 	private boolean UNIQUE_QUERIES = true;
 	
-	public SwdfExperimentSetup(boolean useQueryCacheFile) throws IOException, ParserConfigurationException, SAXException {
-		super(useQueryCacheFile);
-		queriesFetcher = new SwdfQueries(this, useQueryCacheFile, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter(), new ConstructFilter());
+	public SwdfExperimentSetup(boolean useCacheFile) throws IOException, ParserConfigurationException, SAXException {
+		this(useCacheFile, false);
+	}
+	public SwdfExperimentSetup(boolean useCacheFile, boolean skipLoadingFetcher) throws IOException, ParserConfigurationException, SAXException {
+		super(useCacheFile);
+		if (!skipLoadingFetcher) {
+			queriesFetcher = new SwdfQueries(this, useCacheFile, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter(), new ConstructFilter());
+		}
 	}
 	
 	public String getGoldenStandardGraph() {

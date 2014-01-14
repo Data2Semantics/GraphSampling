@@ -2,11 +2,13 @@ package com.d2s.subgraph.eval.experiments;
 
 import java.io.IOException;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.data2semantics.query.QueryCollection;
 import org.data2semantics.query.filters.DescribeFilter;
 import org.data2semantics.query.filters.GraphClauseFilter;
+import org.xml.sax.SAXException;
 
-import com.d2s.subgraph.eval.experiments.ExperimentSetup.LogType;
 import com.d2s.subgraph.queries.Query;
 import com.d2s.subgraph.queries.fetch.QueriesFetcher;
 import com.d2s.subgraph.queries.fetch.Sp2bQueries;
@@ -24,9 +26,14 @@ public class Sp2bExperimentSetup extends ExperimentSetup {
 	private QueriesFetcher queriesFetcher;
 	private boolean UNIQUE_QUERIES = true;
 	
-	public Sp2bExperimentSetup(boolean useCacheFile) throws IOException {
+	public Sp2bExperimentSetup(boolean useCacheFile) throws IOException, ParserConfigurationException, SAXException {
+		this(useCacheFile, false);
+	}
+	public Sp2bExperimentSetup(boolean useCacheFile, boolean skipLoadingFetcher) throws IOException, ParserConfigurationException, SAXException {
 		super(useCacheFile);
-		queriesFetcher = new Sp2bQueries(this, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter());
+		if (!skipLoadingFetcher) {
+			queriesFetcher = new Sp2bQueries(this, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter());
+		}
 	}
 	
 	public String getGoldenStandardGraph() {

@@ -28,9 +28,15 @@ public class TestExperimentSetup extends ExperimentSetup {
 	private boolean UNIQUE_QUERIES = true;
 	
 	public TestExperimentSetup(boolean useCacheFile) throws IOException, ParserConfigurationException, SAXException {
-		super(useCacheFile);
-		queriesFetcher = new TestFetcher(this, useCacheFile, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter(), new ConstructFilter());
+		this(useCacheFile, false);
 	}
+	public TestExperimentSetup(boolean useCacheFile, boolean skipLoadingFetcher) throws IOException, ParserConfigurationException, SAXException {
+		super(useCacheFile);
+		if (!skipLoadingFetcher) {
+			queriesFetcher = new TestFetcher(this, useCacheFile, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter(), new ConstructFilter());
+		}
+	}
+	
 	public String getGoldenStandardGraph() {
 		return GOLDEN_STANDARD_GRAPH;
 	}

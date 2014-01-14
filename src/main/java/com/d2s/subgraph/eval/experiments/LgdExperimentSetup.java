@@ -27,10 +27,18 @@ public class LgdExperimentSetup extends ExperimentSetup {
 	private QueriesFetcher queriesFetcher;
 	private boolean UNIQUE_QUERIES = true;
 	
+	
 	public LgdExperimentSetup(boolean useCacheFile) throws IOException, ParserConfigurationException, SAXException {
-		super(useCacheFile);
-		queriesFetcher = new LgdQueries(this, useCacheFile, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter(), new ConstructFilter());
+		this(useCacheFile, false);
 	}
+	public LgdExperimentSetup(boolean useCacheFile, boolean skipLoadingFetcher) throws IOException, ParserConfigurationException, SAXException {
+		super(useCacheFile);
+		if (!skipLoadingFetcher) {
+			queriesFetcher = new LgdQueries(this, useCacheFile, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter(), new ConstructFilter());
+		}
+	}
+	
+	
 	public String getGoldenStandardGraph() {
 		return GOLDEN_STANDARD_GRAPH;
 	}

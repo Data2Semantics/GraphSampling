@@ -9,7 +9,6 @@ import org.data2semantics.query.filters.DescribeFilter;
 import org.data2semantics.query.filters.GraphClauseFilter;
 import org.xml.sax.SAXException;
 
-import com.d2s.subgraph.eval.experiments.ExperimentSetup.LogType;
 import com.d2s.subgraph.queries.Query;
 import com.d2s.subgraph.queries.fetch.LmdbQueries;
 import com.d2s.subgraph.queries.fetch.QueriesFetcher;
@@ -25,10 +24,17 @@ public class LmdbExperimentSetup extends ExperimentSetup {
 	private static int MAX_NUM_QUERIES = 0;//i.e. all
 	private QueriesFetcher queriesFetcher;
 	private boolean UNIQUE_QUERIES = true;
-	public LmdbExperimentSetup(boolean useCacheFile) throws SAXException, IOException, ParserConfigurationException {
-		super(useCacheFile);
-		queriesFetcher = new LmdbQueries(this, useCacheFile, new GraphClauseFilter(), new SimpleBgpFilter(), new DescribeFilter());
+	
+	public LmdbExperimentSetup(boolean useCacheFile) throws IOException, ParserConfigurationException, SAXException {
+		this(useCacheFile, false);
 	}
+	public LmdbExperimentSetup(boolean useCacheFile, boolean skipLoadingFetcher) throws IOException, ParserConfigurationException, SAXException {
+		super(useCacheFile);
+		if (!skipLoadingFetcher) {
+			queriesFetcher = new LmdbQueries(this, useCacheFile, new GraphClauseFilter(), new SimpleBgpFilter(), new DescribeFilter());
+		}
+	}
+	
 	
 	public String getGoldenStandardGraph() {
 		return GOLDEN_STANDARD_GRAPH;

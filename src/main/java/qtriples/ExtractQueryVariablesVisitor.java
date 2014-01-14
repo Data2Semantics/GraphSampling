@@ -1,10 +1,11 @@
-package com.d2s.subgraph.queries.querytriples;
+package qtriples;
 
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.Set;
 
+import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.sparql.core.TriplePath;
 import com.hp.hpl.jena.sparql.syntax.Element;
@@ -27,59 +28,39 @@ import com.hp.hpl.jena.sparql.syntax.ElementTriplesBlock;
 import com.hp.hpl.jena.sparql.syntax.ElementUnion;
 import com.hp.hpl.jena.sparql.syntax.ElementVisitor;
 
-public class ExtractTriplePatternsVisitor implements ElementVisitor {
-	Set<Triple> triples = new HashSet<Triple>();
-	private int optionalDepth;
-	private int unionDepth;
+public class ExtractQueryVariablesVisitor implements ElementVisitor {
+	Set<String> variables = new HashSet<String>();
+	private int unionDepth = 0;
+	private int optionalDepth = 0;
 	
-	public Set<Triple> getTriples() {
-		return this.triples;
+	public Set<String> getVariables() {
+		return this.variables;
 	}
 
 	public void visit(ElementTriplesBlock el) {
 		Iterator<Triple> it = el.getPattern().iterator();
 		while (it.hasNext()) {
-			fetchFromTriple(it.next());
+			Triple triple = it.next();
+			addVarFromNode(triple.getSubject());
+			addVarFromNode(triple.getPredicate());
+			addVarFromNode(triple.getObject());
 		}
 	}
 
 	public void visit(ElementPathBlock el) {
-
 		ListIterator<TriplePath> it = el.getPattern().iterator();
-		
 		while (it.hasNext()) {
-			final TriplePath origTriple = it.next();
-			try {
-				fetchFromTriple(origTriple.asTriple());
-			} catch (IllegalArgumentException e) {
-				System.out.println(e.getMessage());
-			}
-//			if (!added) {
-//				System.out.println(origTriple.toString() + " is not a triple!");
-//			}
-			
+			final TriplePath triple = it.next();
+			addVarFromNode(triple.getSubject());
+			addVarFromNode(triple.getPredicate());
+			addVarFromNode(triple.getObject());
 		}
 	}
 	
-	public void fetchFromTriple(Triple triple) {
-		if (triple != null) {
-			if (tripleContainsVar(triple)) {
-				if (optionalDepth > 0) {
-					//this means we don't have an answer for this optional. We can safely ignore this
-					//System.out.println("warn: variable found in optional triple pattern. " + triple.toString());
-				} else if (unionDepth > 0) {
-					//this means we don't have an answer for side of the union. We can safely ignore this
-					//System.out.println("warn: variable found in union triple pattern. " + triple.toString());
-				} else {
-					throw new IllegalArgumentException("we still have a variable in our triple. this should not be the case");
-				}
-			} else {
-				triples.add(triple);
-			}
-		} else {
-			throw new IllegalArgumentException("we tried to fetch values from triple pattern. However, triple pattern is null!");
-		}
+	public void addVarFromNode(Node node) {
+		if (node.isVariable()) variables.add(node.getName());
 	}
+	
 	
 	public boolean tripleContainsVar(Triple triple) {
 		return (triple.getSubject().isVariable() || triple.getPredicate().isVariable() || triple.getObject().isVariable());
@@ -164,4 +145,5 @@ public class ExtractTriplePatternsVisitor implements ElementVisitor {
 		// TODO Auto-generated method stub
 
 	}
+
 }

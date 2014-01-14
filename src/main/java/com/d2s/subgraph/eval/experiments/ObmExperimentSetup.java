@@ -28,8 +28,13 @@ public class ObmExperimentSetup extends ExperimentSetup {
 	private boolean UNIQUE_QUERIES = true;
 	
 	public ObmExperimentSetup(boolean useCacheFile) throws IOException, ParserConfigurationException, SAXException {
+		this(useCacheFile, false);
+	}
+	public ObmExperimentSetup(boolean useCacheFile, boolean skipLoadingFetcher) throws IOException, ParserConfigurationException, SAXException {
 		super(useCacheFile);
-		queriesFetcher = new ObmQueries(this, useCacheFile, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter(), new ConstructFilter());
+		if (!skipLoadingFetcher) {
+			queriesFetcher = new ObmQueries(this, useCacheFile, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter(), new ConstructFilter());
+		}
 	}
 	public String getGoldenStandardGraph() {
 		return GOLDEN_STANDARD_GRAPH;

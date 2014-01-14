@@ -10,10 +10,11 @@ import java.util.Set;
 
 import org.data2semantics.query.QueryCollection;
 
+import qtriples.ExtractQueryVariablesVisitor;
+import qtriples.ExtractTriplePatternsVisitor;
+import qtriples.RewriteTriplePatternsVisitor;
+
 import com.d2s.subgraph.eval.results.QueryResults;
-import com.d2s.subgraph.queries.querytriples.ExtractQueryVariablesVisitor;
-import com.d2s.subgraph.queries.querytriples.ExtractTriplePatternsVisitor;
-import com.d2s.subgraph.queries.querytriples.RewriteTriplePatternsVisitor;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QueryParseException;

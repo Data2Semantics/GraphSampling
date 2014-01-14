@@ -1,4 +1,4 @@
-package com.d2s.subgraph.eval.generation;
+package com.d2s.subgraph.eval.recall.generation;
 
 import java.io.BufferedReader;
 import java.io.File;
