@@ -7,9 +7,10 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.data2semantics.query.QueryCollection;
 import org.xml.sax.SAXException;
 
-import com.d2s.subgraph.queries.QaldDbpQueries;
-import com.d2s.subgraph.queries.QueriesFetcher;
+import com.d2s.subgraph.eval.experiments.ExperimentSetup.LogType;
 import com.d2s.subgraph.queries.Query;
+import com.d2s.subgraph.queries.fetch.QaldDbpQueries;
+import com.d2s.subgraph.queries.fetch.QueriesFetcher;
 
 
 public class DbpoExperimentSetup extends ExperimentSetup {
@@ -20,7 +21,6 @@ public class DbpoExperimentSetup extends ExperimentSetup {
 	public static String GOLDEN_STANDARD_GRAPH = "http://dbpo";
 	private static String GRAPH_PREFIX = "dbp_";
 	private static String EVAL_RESULTS_DIR = "dbpResults";
-	private static String QUERY_TRIPLES_DIR = "dbpQueryTriples";
 	private static String QUERY_RESULTS_DIR = "dbpQueryResults";
 	private static boolean PRIVATE_QUERIES = true;
 	
@@ -39,7 +39,6 @@ public class DbpoExperimentSetup extends ExperimentSetup {
 		} else {
 			throw new IllegalStateException("Illegal query selection mode passed to dbpo experiment setup");
 		}
-		queriesFetcher.setMaxNQueries(MAX_NUM_QUERIES);
 	}
 	
 	public String getGoldenStandardGraph() {
@@ -67,9 +66,6 @@ public class DbpoExperimentSetup extends ExperimentSetup {
 		return MAX_NUM_QUERIES;
 	}
 
-	public String getQueryTriplesDir() {
-		return QUERY_TRIPLES_DIR;
-	}
 	public String getQueryResultsDir() {
 		return QUERY_RESULTS_DIR;
 	}
@@ -79,4 +75,9 @@ public class DbpoExperimentSetup extends ExperimentSetup {
 	public boolean useUniqueQueries() {
 		return UNIQUE_QUERIES ;
 	}
+
+	public LogType getLogType() {
+		return LogType.OTHER;
+	}
+
 }

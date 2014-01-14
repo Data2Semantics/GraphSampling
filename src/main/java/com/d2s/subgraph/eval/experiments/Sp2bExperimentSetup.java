@@ -6,9 +6,10 @@ import org.data2semantics.query.QueryCollection;
 import org.data2semantics.query.filters.DescribeFilter;
 import org.data2semantics.query.filters.GraphClauseFilter;
 
-import com.d2s.subgraph.queries.QueriesFetcher;
+import com.d2s.subgraph.eval.experiments.ExperimentSetup.LogType;
 import com.d2s.subgraph.queries.Query;
-import com.d2s.subgraph.queries.Sp2bQueries;
+import com.d2s.subgraph.queries.fetch.QueriesFetcher;
+import com.d2s.subgraph.queries.fetch.Sp2bQueries;
 import com.d2s.subgraph.queries.filters.SimpleBgpFilter;
 
 
@@ -17,7 +18,6 @@ public class Sp2bExperimentSetup extends ExperimentSetup {
 	public static String GOLDEN_STANDARD_GRAPH = "http://sp2b";
 	private static String GRAPH_PREFIX = "sp2b_";
 	private static String EVAL_RESULTS_DIR = "sp2bResults";
-	private static String QUERY_TRIPLES_DIR = "sp2bQueryTriples";
 	private static String QUERY_RESULTS_DIR = "sp2bQueryResults";
 	private static boolean PRIVATE_QUERIES = false;
 	private static int MAX_NUM_QUERIES = 0;
@@ -27,7 +27,6 @@ public class Sp2bExperimentSetup extends ExperimentSetup {
 	public Sp2bExperimentSetup(boolean useCacheFile) throws IOException {
 		super(useCacheFile);
 		queriesFetcher = new Sp2bQueries(this, new DescribeFilter(), new SimpleBgpFilter(), new GraphClauseFilter());
-		queriesFetcher.setMaxNQueries(MAX_NUM_QUERIES);
 	}
 	
 	public String getGoldenStandardGraph() {
@@ -45,10 +44,6 @@ public class Sp2bExperimentSetup extends ExperimentSetup {
 		return EVAL_RESULTS_DIR;
 	}
 	
-	public String getQueryTriplesDir() {
-		return QUERY_TRIPLES_DIR;
-	}
-	
 	public int getMaxNumQueries() {
 		return MAX_NUM_QUERIES;
 	}
@@ -61,5 +56,8 @@ public class Sp2bExperimentSetup extends ExperimentSetup {
 	}
 	public boolean useUniqueQueries() {
 		return UNIQUE_QUERIES ;
+	}
+	public LogType getLogType() {
+		return LogType.OTHER;
 	}
 }

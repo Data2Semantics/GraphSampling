@@ -1,4 +1,4 @@
-package com.d2s.subgraph.queries;
+package com.d2s.subgraph.queries.fetch;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -13,7 +13,6 @@ import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 
 public class Sp2bQueries extends QueriesFetcher {
 	private static String QUERY_DIR = "src/main/resources/sp2bQueries";
-	public static String CSV_COPY = "src/main/resources/sp2b_queries.csv";
 	private static String QUERY_FILE_EXTENSION = "sparql";
 
 	public Sp2bQueries(ExperimentSetup experimentSetup, QueryFilter... filters) throws IOException {
@@ -21,10 +20,10 @@ public class Sp2bQueries extends QueriesFetcher {
 		System.out.println("parsing sp2b query logs");
 		this.filters = new ArrayList<QueryFilter>(Arrays.asList(filters));
 		parseQueryDir();
-		saveQueriesToCsv(CSV_COPY);
+		saveQueriesToCsv();
 		saveQueriesToCacheFile();
 	}
-
+	
 	private void parseQueryDir() throws IOException {
 		File queryDir = new File(QUERY_DIR);
 		if (!queryDir.exists()) {
@@ -39,14 +38,20 @@ public class Sp2bQueries extends QueriesFetcher {
 		});
 		
 		for (File queryFile: queryFiles) {
-			addQueryFileToList(queryFile);
-			if (queryCollection.getDistinctQueryCount() > maxNumQueries) {
+			parseCustomLogFile(queryFile);
+			if (queryCollection.getDistinctQueryCount() > experimentSetup.getMaxNumQueries()) {
 				break;
 			}
-			
 		}
 	}
-
+	
+	@Override
+	protected void parseCustomLogFile(File queryFile) throws IOException {
+		addQueryFileToList(queryFile);
+		
+		
+	}
+	
 	private void addQueryFileToList(File queryFile) throws IOException {
 		
 		String queryString = FileUtils.readFileToString(queryFile);
@@ -68,5 +73,8 @@ public class Sp2bQueries extends QueriesFetcher {
 			e.printStackTrace();
 		}
 	}
+
+
+
 
 }

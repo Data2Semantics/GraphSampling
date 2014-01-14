@@ -52,8 +52,8 @@ public class QueryUtils {
 	}
 
 
-	public static Query getAsConstructQuery(Query origQuery) {
-		Query constructQuery = (Query) origQuery.cloneQuery();
+	public static Query getAsConstructQuery(Query origQuery) throws IOException {
+		Query constructQuery = Query.create(origQuery.toString());
 		constructQuery.setQueryConstructType();
 
 		final BasicPattern constructBp = new BasicPattern();

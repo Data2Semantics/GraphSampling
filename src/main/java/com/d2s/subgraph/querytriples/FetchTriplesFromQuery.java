@@ -2,7 +2,6 @@ package com.d2s.subgraph.querytriples;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 
@@ -66,34 +65,40 @@ public class FetchTriplesFromQuery {
 		return new File(outputDir.getPath() + "/" + outputDir.listFiles().length);
 	}
 	
-	private String getNodeRepresentation(Node node) {
+	private String getNodeRepresentation(Node node) throws UnsupportedOperationException {
 		String nodeString;
-		try {
+//		try {
+			if (node.toString().startsWith("?")) {
+				throw new UnsupportedOperationException("Our node " + node.toString() + " is still a variable... We have a problem!");
+			}
 			nodeString = node.toString();
-		} catch (UnsupportedOperationException e) {
-			System.out.println(originalQuery.toString());
-			throw e;
-		}
+			if (node.isURI()) {
+				nodeString = "<" + nodeString + ">";
+			}
+//		} catch (UnsupportedOperationException e) {
+//			System.out.println(originalQuery.toString());
+//			throw e;
+//		}
 		return nodeString;
 	}
 	
-	private String getStringRepresentation(Triple triple) {
+	private String getStringRepresentation(Triple triple) throws UnsupportedOperationException{
 		String tripleString;
-		try {
+//		try {
 			tripleString = getNodeRepresentation(triple.getSubject()) + "\t" + getNodeRepresentation(triple.getPredicate()) + "\t" + getNodeRepresentation(triple.getObject());
-		} catch (UnsupportedOperationException e) {
-			System.out.println(originalQuery.toString());
-			throw e;
+//		} catch (UnsupportedOperationException e) {
+//			System.out.println(originalQuery.toString());
+//			throw e;
 			
-		}
-		return tripleString;
+//		}
+		return tripleString + "\n";
 	}
 	
 	private void fetchAndStoresTriplesFromResultSet(ResultSet resultSet) throws IOException {
 		while (resultSet.hasNext()) {
 			QuerySolution solution = resultSet.next();
 			File outputFile = getTripleFile();
-			for (Triple triple: originalQuery.fetchTriplesFromPatterns(solution)) {
+			for (Triple triple: rewrittenQuery.fetchTriplesFromPatterns(solution)) {
 				try {
 					FileUtils.write(outputFile, getStringRepresentation(triple), true);
 				} catch (UnsupportedOperationException e) {

@@ -1,4 +1,4 @@
-package com.d2s.subgraph.queries;
+package com.d2s.subgraph.queries.fetch;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,6 +22,7 @@ import org.xml.sax.SAXException;
 import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.experiments.DbpoExperimentSetup;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
+import com.d2s.subgraph.queries.Query;
 import com.d2s.subgraph.util.QueryUtils;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -35,7 +36,6 @@ public class QaldDbpQueries extends QueriesFetcher {
 	public static String QALD_2_QUERIES = "src/main/resources/qald2-dbpedia-train.xml";
 	public static String QALD_3_QUERIES = "src/main/resources/qald3-dbpedia-train.xml";
 	private static String IGNORE_QUERY_STRING = "OUT OF SCOPE";
-	public static String CSV_COPY = "src/main/resources/qald_queries.csv";
 	private boolean removeStringProjVar;
 	private boolean onlyDbo;
 	
@@ -44,10 +44,10 @@ public class QaldDbpQueries extends QueriesFetcher {
 		this.filters = new ArrayList<QueryFilter>(Arrays.asList(filters));
 		this.removeStringProjVar = removeStringProjVar;
 		this.onlyDbo = onlyDbo;
-		parseXml(new File(xmlFile));
+		parseCustomLogFile(new File(xmlFile));
 		eraseEmptyresultQueries();
 		saveQueriesToCacheFile();
-		saveQueriesToCsv(CSV_COPY);
+		saveQueriesToCsv();
 	}
 
 	public QaldDbpQueries(ExperimentSetup experimentSetup, String xmlFile, boolean removeStringProjVar) throws SAXException, IOException, ParserConfigurationException {
@@ -79,7 +79,8 @@ public class QaldDbpQueries extends QueriesFetcher {
 		System.out.println("ignored " + (emptyQueries + failedQueries) + " queries from xml. Empty queries: " + emptyQueries + ", failed queries: " + failedQueries);
 		queryCollection = validQueryCollection;
 	}
-	private void parseXml(File xmlFile) throws SAXException, IOException, ParserConfigurationException {
+	
+	protected void parseCustomLogFile(File xmlFile) throws IOException, ParserConfigurationException, SAXException {
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 		Document doc = dBuilder.parse(xmlFile);
@@ -103,6 +104,8 @@ public class QaldDbpQueries extends QueriesFetcher {
 		}
 		
 	}
+	
+	
 	
 	private void doMainLoop(Node nNode) {
 		if (nNode.getNodeType() == Node.ELEMENT_NODE) {
@@ -196,4 +199,6 @@ public class QaldDbpQueries extends QueriesFetcher {
 			e.printStackTrace();
 		}
 	}
+
+
 }

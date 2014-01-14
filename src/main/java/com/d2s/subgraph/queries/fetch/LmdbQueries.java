@@ -1,4 +1,4 @@
-package com.d2s.subgraph.queries;
+package com.d2s.subgraph.queries.fetch;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -13,7 +13,6 @@ import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 
 public class LmdbQueries extends QueriesFetcher {
 	public static String QUERY_FILE = "src/main/resources/lmdbQueries.txt";
-	public static String CSV_COPY = "src/main/resources/lmdb_queries.csv";
 
 	public LmdbQueries(ExperimentSetup experimentSetup, QueryFilter... filters) throws IOException {
 		this(experimentSetup, true, filters);
@@ -25,22 +24,22 @@ public class LmdbQueries extends QueriesFetcher {
 		if (queryCollection.getTotalQueryCount() == 0) {
 			System.out.println("parsing lmdb query logs");
 			this.filters = new ArrayList<QueryFilter>(Arrays.asList(filters));
-			parseLogFile(new File(QUERY_FILE));
+			parseCustomLogFile(new File(QUERY_FILE));
 			saveQueriesToCacheFile();
-			saveQueriesToCsv(CSV_COPY);
+			saveQueriesToCsv();
 		}
 	}
 
 	
 
-	private void parseLogFile(File textFile) throws IOException {
+	protected void parseCustomLogFile(File textFile) throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader(textFile));
 		String query;
 		while ((query = br.readLine()) != null) {
 			if (query.length() > 0) {
 				addQueryToList(query);
 			}
-			if (queryCollection.getDistinctQueryCount() > maxNumQueries) {
+			if (queryCollection.getDistinctQueryCount() > experimentSetup.getMaxNumQueries()) {
 				break;
 			}
 		}
