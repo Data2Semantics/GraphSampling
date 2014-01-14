@@ -13,6 +13,6 @@ hadoop fs -mkdir $1/tmp;
 hadoop fs -mkdir $1/queryStats;
 hadoop fs -mkdir $1/queryStatsInput;
 hadoop fs -mkdir $1/evaluation;
-hadoop fs -mkdir $1/evaluation/qtriples;
+hadoop fs -mkdir $1/evaluation/qTripleWeights;
 hadoop fs -mkdir $1/evaluation/weightDistribution;
 echo "done";
