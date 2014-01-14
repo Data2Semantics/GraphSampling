@@ -21,7 +21,7 @@ if [ -n "$2" ]; then
 fi
 
 
-hadoopLs "$dataset/analysis/";
+hadoopLs "$dataset/roundtrip/";
 for dir in "${hadoopLs[@]}"; do
 	if [[ ! "$dir" == $pattern ]]; then
 		continue

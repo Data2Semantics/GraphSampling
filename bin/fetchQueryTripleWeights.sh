@@ -19,9 +19,15 @@ pattern="*"
 if [ -n "$2" ]; then
 	pattern="$2"
 fi
-targetDir=${dataset}QTripleWeights
+qTripleDir="qTripleWeights";
+mkdir -p $qTripleDir;
+targetDir="$qTripleDir/$dataset"
 echo "Storing to $targetDir"
-mkdir -p $targetDir;
+rm -rf $targetDir;
+mkdir $targetDir;
+
+echo "getting number of triples used as input (for validation purposes)"
+numRequiredTriples=`hadoop fs -cat $dataset/evaluation/qTriples | wc -l`
 
 hadoopLs "$dataset/evaluation/qTripleWeights";
 for dir in "${hadoopLs[@]}"; do
@@ -30,4 +36,14 @@ for dir in "${hadoopLs[@]}"; do
 	fi
 	dirBasename=`basename $dir`
 	hadoop fs -cat $dir/* >> $targetDir/$dirBasename;
+	#fetchedTriples=`wc -l $targetDir/$dirBasename`;
+	fetchedTriples=`wc -l $targetDir/$dirBasename | cut -f1 -d' '`
+	#echo $fetchedTriples;
+	#echo $numRequiredTriples;
+	if [ "$fetchedTriples" -ne "$numRequiredTriples" ]; then
+		echo "IMPORTANT!!!!!!!!!!!!!!"
+		echo "number of fetched triples for $dirBasename does not match the triples we presented as input!!!"
+		echo "input: $numRequiredTriples";
+		echo "number of fetched triples: $fetchedTriples";
+	fi
 done;
