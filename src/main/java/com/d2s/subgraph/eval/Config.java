@@ -12,6 +12,7 @@ public class Config {
 	public static String PATH_QUERY_LOGS = "input/queryLogs/";
 	public static String PATH_QUERY_CSV_COPY = "cache/queryCsvCopies/";
 	public static String PATH_QUERY_CONSTRUCT_TRIPLES = "output/constructTriples/";
+	public static String PATH_FAILED_QUERIES = "output/failedQueries/";
 	
 	/**
 	 * file names

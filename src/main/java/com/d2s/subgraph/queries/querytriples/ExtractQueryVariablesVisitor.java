@@ -1,4 +1,4 @@
-package com.d2s.subgraph.querytriples;
+package com.d2s.subgraph.queries.querytriples;
 
 import java.util.HashSet;
 import java.util.Iterator;

@@ -19,15 +19,21 @@ pattern="*"
 if [ -n "$2" ]; then
 	pattern="$2"
 fi
-targetDir=${dataset}QTripleWeights
-echo "Storing to $targetDir"
-mkdir -p $targetDir;
 
-hadoopLs "$dataset/evaluation/qTripleWeights";
+
+hadoopLs "$dataset/roundtrip/";
 for dir in "${hadoopLs[@]}"; do
 	if [[ ! "$dir" == $pattern ]]; then
 		continue
 	fi
-	dirBasename=`basename $dir`
-	hadoop fs -cat $dir/* >> $targetDir/$dirBasename;
+	if [[ ! "$dir" == *_long ]]; then
+		if [[ ! "$dir" == *_dict ]]; then
+                	#hmm, we want to skip longs! 
+			#dirBasename=`basename $dir`
+			#IFS=_ read -a delimited <<< "$dirBasename"
+			#rewriteMethod=${delimited[0]}
+			#unset IFS
+			pig pigAnalysis/evaluation/fetchWeightDistribution.py $dir;
+		fi
+	fi
 done;

@@ -1,4 +1,4 @@
-package com.d2s.subgraph.querytriples;
+package com.d2s.subgraph.queries.querytriples;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -66,10 +66,10 @@ public class ExtractTriplePatternsVisitor implements ElementVisitor {
 			if (tripleContainsVar(triple)) {
 				if (optionalDepth > 0) {
 					//this means we don't have an answer for this optional. We can safely ignore this
-					System.out.println("warn: variable found in optional triple pattern. " + triple.toString());
+					//System.out.println("warn: variable found in optional triple pattern. " + triple.toString());
 				} else if (unionDepth > 0) {
 					//this means we don't have an answer for side of the union. We can safely ignore this
-					System.out.println("warn: variable found in union triple pattern. " + triple.toString());
+					//System.out.println("warn: variable found in union triple pattern. " + triple.toString());
 				} else {
 					throw new IllegalArgumentException("we still have a variable in our triple. this should not be the case");
 				}

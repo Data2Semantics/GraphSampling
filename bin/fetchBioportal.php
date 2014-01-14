@@ -1,6 +1,6 @@
 #!/usr/bin/php
 <?php
-	$apiKey = "";
+	$apiKey = "d1fb99e1-2b94-4bee-8278-ec72cbfe3f20";
 	$dirToStoreIn = "bioportal";
 	if (file_exists($dirToStoreIn)) {
 		shell_exec("rm -r ".$dirToStoreIn);

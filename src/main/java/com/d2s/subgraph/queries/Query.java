@@ -11,9 +11,9 @@ import java.util.Set;
 import org.data2semantics.query.QueryCollection;
 
 import com.d2s.subgraph.eval.results.QueryResults;
-import com.d2s.subgraph.querytriples.ExtractQueryVariablesVisitor;
-import com.d2s.subgraph.querytriples.ExtractTriplePatternsVisitor;
-import com.d2s.subgraph.querytriples.RewriteTriplePatternsVisitor;
+import com.d2s.subgraph.queries.querytriples.ExtractQueryVariablesVisitor;
+import com.d2s.subgraph.queries.querytriples.ExtractTriplePatternsVisitor;
+import com.d2s.subgraph.queries.querytriples.RewriteTriplePatternsVisitor;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QueryParseException;
@@ -186,7 +186,13 @@ public class Query extends org.data2semantics.query.Query {
 	
 	
 	public static void main(String[] args) throws IOException {
-		Query query = Query.create("SELECT ?x WHERE {?x ?jh ?j} GROUP BY ?x LIMIT 10");
+		Query query = Query.create("SELECT ?v0 FROM <http://lgd>\n" + 
+				"WHERE {\n" + 
+				"OPTIONAL {\n" + 
+				"<http://linkedgeodata.org/triplify/node240109189> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?v0 .\n" + 
+				"}\n" + 
+				"} OFFSET 0 LIMIT 1000\n" + 
+				"");
 		
 		/**
 		 * fetch triples based on query patterns
@@ -202,8 +208,8 @@ public class Query extends org.data2semantics.query.Query {
 		/**
 		 * rewrite queries for triple retrieval
 		 */
-		Query rewrittenQuery = query.getQueryForTripleRetrieval();
-		System.out.println(rewrittenQuery);
+//		Query rewrittenQuery = query.getQueryForTripleRetrieval();
+//		System.out.println(rewrittenQuery);
 	}
 
 

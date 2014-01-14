@@ -24,7 +24,7 @@ public class LgdQueries extends QueriesFetcher {
 	}
 
 	protected void parseCustomLogFile(File textFile) throws IOException {
-		// not needed (we use CLF, something we user for other parsers as well)
+		//unused
 	}
 
 	public static void main(String[] args) {

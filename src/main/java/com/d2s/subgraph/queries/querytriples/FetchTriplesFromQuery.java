@@ -1,4 +1,4 @@
-package com.d2s.subgraph.querytriples;
+package com.d2s.subgraph.queries.querytriples;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,6 +36,7 @@ public class FetchTriplesFromQuery {
 		setupDirStructure();
 	}
 	
+	
 	private void process() throws IOException {
 		//rewrite to * query
 		rewrittenQuery = originalQuery.getQueryForTripleRetrieval();
@@ -67,30 +68,19 @@ public class FetchTriplesFromQuery {
 	
 	private String getNodeRepresentation(Node node) throws UnsupportedOperationException {
 		String nodeString;
-//		try {
-			if (node.toString().startsWith("?")) {
-				throw new UnsupportedOperationException("Our node " + node.toString() + " is still a variable... We have a problem!");
-			}
-			nodeString = node.toString();
-			if (node.isURI()) {
-				nodeString = "<" + nodeString + ">";
-			}
-//		} catch (UnsupportedOperationException e) {
-//			System.out.println(originalQuery.toString());
-//			throw e;
-//		}
+		if (node.toString().startsWith("?")) {
+			throw new UnsupportedOperationException("Our node " + node.toString() + " is still a variable... We have a problem!");
+		}
+		nodeString = node.toString();
+		if (node.isURI()) {
+			nodeString = "<" + nodeString + ">";
+		}
 		return nodeString;
 	}
 	
 	private String getStringRepresentation(Triple triple) throws UnsupportedOperationException{
 		String tripleString;
-//		try {
-			tripleString = getNodeRepresentation(triple.getSubject()) + "\t" + getNodeRepresentation(triple.getPredicate()) + "\t" + getNodeRepresentation(triple.getObject());
-//		} catch (UnsupportedOperationException e) {
-//			System.out.println(originalQuery.toString());
-//			throw e;
-			
-//		}
+		tripleString = getNodeRepresentation(triple.getSubject()) + "\t" + getNodeRepresentation(triple.getPredicate()) + "\t" + getNodeRepresentation(triple.getObject());
 		return tripleString + "\n";
 	}
 	
@@ -122,7 +112,9 @@ public class FetchTriplesFromQuery {
 	public static void main(String[] args) throws Exception {
 		boolean useCachedQueries = true;
 		ExperimentSetup experimentsetup = new SwdfExperimentSetup(useCachedQueries);
-		FetchTriplesFromQuery.fetch(experimentsetup, experimentsetup.getQueryCollection().getQueries().iterator().next(), new File("test"));
+		
+//		Query query = Query.create("SELECT * WHERE {?x rdf:label ?name} LIMIT 1");
+//		FetchTriplesFromQuery.fetch(experimentsetup, query, new File("test"));
 		// new EvaluateGraphs(new
 		// DbpoExperimentSetup(DbpoExperimentSetup.QALD_REMOVE_OPTIONALS)),
 		// new EvaluateGraphs(new

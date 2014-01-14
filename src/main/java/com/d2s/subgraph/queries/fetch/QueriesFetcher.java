@@ -13,11 +13,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Scanner;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.TrueFileFilter;
+import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.jena.atlas.web.HttpException;
 import org.data2semantics.query.QueryCollection;
 import org.data2semantics.query.filters.QueryFilter;
@@ -39,22 +42,28 @@ import com.hp.hpl.jena.sparql.engine.http.QueryExceptionHTTP;
 
 
 public abstract class QueriesFetcher {
+	public enum UnaddedQueryType{FILTERED,EMPTY_RESULTSET, INVALID, DUPLICATE_VALID, DUPLICATE_INVALID};
 	protected ArrayList<QueryFilter> filters;
 	protected QueryCollection<Query> queryCollection;
+	protected HashSet<String> invalidQueryCollection;
 	protected int invalidQueries;
 	protected int filteredQueries;
 	protected int duplicateQueries;
 	protected int noResultsQueries;
+	protected boolean writeUnaddedQueries = true;
 	protected boolean useCacheFile = true;
 	protected ExperimentSetup experimentSetup;
 	public QueriesFetcher(ExperimentSetup experimentSetup, boolean useCacheFile, QueryFilter... filters) throws IOException {
 		this.filters = new ArrayList<QueryFilter>(Arrays.asList(filters));
 		queryCollection = new QueryCollection<Query>();
+		invalidQueryCollection = new HashSet<String>();
 		this.experimentSetup = experimentSetup;
 		this.useCacheFile = useCacheFile;
 	}
 	
+	
 	protected void fetch() throws QueryParseException, IOException, ParserConfigurationException, SAXException {
+		if (writeUnaddedQueries) initializeUnaddedQueriesDir();
 		tryFetchingQueriesFromCache();
 		
 		if (queryCollection.getTotalQueryCount() == 0) {
@@ -63,6 +72,54 @@ public abstract class QueriesFetcher {
 			saveQueriesToCsv();
 		}
 	}
+	
+	protected void writeUnaddedQueriesToFile(UnaddedQueryType type, String queryString) throws IOException {
+		File file = new File(Config.PATH_FAILED_QUERIES + experimentSetup.getId() + "_" + type);
+		FileUtils.write(file, queryString + "\n----------\n", true);
+		
+	}
+	protected void initializeUnaddedQueriesDir() throws IOException {
+		File path = new File(Config.PATH_FAILED_QUERIES);
+		if (!path.exists()) path.mkdir();
+		for (File file: FileUtils.listFiles(path, new WildcardFileFilter(experimentSetup.getId() + "*"), TrueFileFilter.TRUE)) {
+			System.out.println("removing " + file.getPath());
+			file.delete();
+		}
+	}
+	
+	protected void setUnaddedQuery(UnaddedQueryType type, Query query) throws IOException {
+		setUnaddedQuery(type, query.toString());
+	}
+	
+	protected void setUnaddedQuery(UnaddedQueryType type, String queryString) throws IOException {
+		switch (type) {
+			case EMPTY_RESULTSET:
+				if (writeUnaddedQueries) writeUnaddedQueriesToFile(type, queryString);
+				noResultsQueries++;
+				System.out.print("e");
+				break;
+			case FILTERED:
+				if (writeUnaddedQueries) writeUnaddedQueriesToFile(type, queryString);
+				filteredQueries++;
+				System.out.print("f");
+				break;
+			case INVALID:
+				if (writeUnaddedQueries) writeUnaddedQueriesToFile(type, queryString);
+				invalidQueries++;
+				System.out.print("i");
+				break;
+			case DUPLICATE_INVALID:
+				if (writeUnaddedQueries) writeUnaddedQueriesToFile(type, queryString);
+				System.out.print("-");
+				break;
+			case DUPLICATE_VALID:
+				if (writeUnaddedQueries) writeUnaddedQueriesToFile(type, queryString);
+				System.out.print("d");
+				break;
+		}
+		
+	}
+	
 	/**
 	 * 
 	 * @param query
@@ -109,15 +166,17 @@ public abstract class QueriesFetcher {
 				throw new IllegalStateException("no results for query");
 			}
 		} catch (QueryExceptionHTTP e) {
-			if (e.getMessage().contains("SPARQL compiler:")) {
+			if (e.getMessage().contains("SPARQL compiler:") || e.getMessage().contains("are reserved for SQL names") || e.getMessage().contains("Virtuoso 22003")) {
 				//this is a virtuoso sparql syntax error. some things might validate in jena, but not in virtuoso,
-				//e.g. virtuoso specific function such as <bif:contains>
+				//e.g. virtuoso specific function such as <bif:contains>, or a 'too few arguments' error for such functions
 				//just list this as invalid query, and move on
 				invalidQueries++;
 				
 				//throw exception as well, otherwise this query gets stored anyway
 				throw new IllegalStateException("virtuoso sparql compilation error");
 			} else {
+				System.out.println("blaat?");
+				System.out.println("message:@#@#" + e.getMessage() + "@#@#");
 				e.printStackTrace();
 				System.exit(1);
 			}
@@ -133,6 +192,7 @@ public abstract class QueriesFetcher {
 	}
 	
 
+
 	
 	/**
 	 * @todo: hasresults check should only check one named graph, not all
@@ -140,43 +200,50 @@ public abstract class QueriesFetcher {
 	 * @throws IOException
 	 */
 	protected void addQueryToList(String queryString) throws IOException {
+//		if (invalidQueryCollection.contains(queryString)) {
+//			//we already encountered this query. just ignore
+//			setUnaddedQuery(UnaddedQueryType.DUPLICATE_INVALID, queryString);
+//		} else {
 		try {
-			
 			Query query = Query.create(queryString, queryCollection);
-			if (checkFilters(query)) {
-				if (queryCollection.containsQuery(query)) {
-					//already added. no need to do 'hasresults' again
-					queryCollection.addQuery(query);
-				} else {
-					System.out.print("*");
-					Date timeStart = new Date();
-					try {
-						query = execQueryToTest(query.getQueryWithFromClause(experimentSetup.getGoldenStandardGraph()));
-						System.out.print("+");
-//						System.out.println(queryString);
+			if (!invalidQueryCollection.contains(query.toString())) {
+				if (checkFilters(query)) {
+					if (queryCollection.containsQuery(query)) {
+						//already added. no need to do 'hasresults' again
 						queryCollection.addQuery(query);
-					} catch (IllegalStateException e) {
-						//no results for this query!
-						noResultsQueries++;
+						setUnaddedQuery(UnaddedQueryType.DUPLICATE_VALID, query);
+					} else {
+						Date timeStart = new Date();
+						try {
+							query = execQueryToTest(query.getQueryWithFromClause(experimentSetup.getGoldenStandardGraph()));
+							System.out.print("+");
+	//						System.out.println(queryString);
+							queryCollection.addQuery(query);
+						} catch (IllegalStateException e) {
+							//no results for this query!
+							setUnaddedQuery(UnaddedQueryType.EMPTY_RESULTSET, query);
+						}
+						Date timeEnd = new Date();
+						if ((timeEnd.getTime() - timeStart.getTime()) > 5000) {
+							//longer than 5 seconds
+							System.out.print("taking longer than 5 seconds:");
+						}
 					}
-					Date timeEnd = new Date();
-					if ((timeEnd.getTime() - timeStart.getTime()) > 5000) {
-						//longer than 5 seconds
-						System.out.println("taking longer than 5 seconds:");
-					}
+				} else {
+					setUnaddedQuery(UnaddedQueryType.FILTERED, query);
 				}
 			} else {
-				filteredQueries++;
+				setUnaddedQuery(UnaddedQueryType.DUPLICATE_INVALID, queryString);
 			}
-			
 		} catch (QueryParseException e) {
 			// could not parse query, probably a faulty one. ignore!
-			invalidQueries++;
+			setUnaddedQuery(UnaddedQueryType.INVALID, queryString);
 		}  catch (HttpException e) {
 			// hmm, might be something like a time-out. ignore for now, but do show this for debugging purposes
 			System.out.println(e.getMessage());
-			invalidQueries++;
+			setUnaddedQuery(UnaddedQueryType.INVALID, queryString);
 		}
+//		}
 	}
 	protected void saveQueriesToCacheFile() throws IOException {
 		File cacheDir = new File(Config.PATH_QUERY_CACHE);
@@ -272,14 +339,16 @@ public abstract class QueriesFetcher {
 		ArrayList<String> extensions = new ArrayList<String>(Arrays.asList(etensionsArray));
 		if (extensions.size() == 0) {
 			//try to guess, based on query log type
-			if (experimentSetup.getLogType() == ExperimentSetup.LogType.CLF) {
+//			if (experimentSetup.getLogType() == ExperimentSetup.LogType.CLF) {
 				extensions.add("log");
-			}
+//			}
 		}
 		int iterator = 1;
 		Collection<File> logFiles = getQueryLogFiles(extensions.toArray(new String[extensions.size()]));
 		for (File logFile: logFiles) {
-			System.out.println("parsing file " + iterator + " of " + logFiles.size());
+			System.out.println();
+			System.out.println("did " + queryCollection.getDistinctQueryCount() + " queries");
+			System.out.println("parsing file " + iterator + " of " + logFiles.size() + ": " + logFile.getName());
 			iterator++;
 			try {
 				parseLogFile(logFile, experimentSetup.getLogType());
@@ -315,7 +384,7 @@ public abstract class QueriesFetcher {
 				String encodedUrlQuery = firstString.split(" ")[0];
 				// remove other args
 				String encodedSparqlQuery = encodedUrlQuery.split("&")[0];
-
+				
 				addQueryToList(URLDecoder.decode(encodedSparqlQuery, "UTF-8"));
 				if (experimentSetup.getMaxNumQueries() != 0 && queryCollection.getDistinctQueryCount() > experimentSetup.getMaxNumQueries()) {
 					break;
