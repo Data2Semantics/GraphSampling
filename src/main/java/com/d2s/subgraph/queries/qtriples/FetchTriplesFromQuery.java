@@ -1,4 +1,4 @@
-package qtriples;
+package com.d2s.subgraph.queries.qtriples;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +23,7 @@ public class FetchTriplesFromQuery {
 	private Query originalQuery;
 	private Query rewrittenQuery;
 	private File experimentDir;
-	private File outputDir;
+	private File queryOutputDir;
 	
 	//swdf
 	//	query-0
@@ -55,15 +55,18 @@ public class FetchTriplesFromQuery {
 	}
 	
 	private void setupDirStructure() throws IOException {
-		outputDir = Utils.mkdir(experimentDir.getPath() + "/query-" + experimentDir.listFiles().length);
+		queryOutputDir = Utils.mkdir(experimentDir.getPath() + "/query-" + experimentDir.listFiles().length);
 		
 		//write query to this path
-		FileUtils.write(new File(outputDir.getPath() + "/query.txt"), originalQuery.toString());
+		FileUtils.write(new File(queryOutputDir.getPath() + "/query.txt"), originalQuery.toString());
 	}
 	
 	
-	private File getTripleFile() {
-		return new File(outputDir.getPath() + "/" + outputDir.listFiles().length);
+	private File getQuerySolutionDir() {
+		File file = new File(queryOutputDir.getPath() + "/qs" + queryOutputDir.listFiles().length);
+		if (file.exists()) throw new IllegalStateException("Query solution dir " + file.getPath() + " already exists. Stopping getting triples from queries");
+		file.mkdir();
+		return file;
 	}
 	
 	private String getNodeRepresentation(Node node) throws UnsupportedOperationException {
@@ -85,20 +88,22 @@ public class FetchTriplesFromQuery {
 	}
 	
 	private void fetchAndStoresTriplesFromResultSet(ResultSet resultSet) throws IOException {
-		while (resultSet.hasNext()) {
-			QuerySolution solution = resultSet.next();
-			File outputFile = getTripleFile();
-			for (Triple triple: rewrittenQuery.fetchTriplesFromPatterns(solution)) {
-				try {
-					FileUtils.write(outputFile, getStringRepresentation(triple), true);
-				} catch (UnsupportedOperationException e) {
-					System.out.println(originalQuery.toString());
-					throw e;
-					
+		try {
+			while (resultSet.hasNext()) {
+				QuerySolution solution = resultSet.next();
+				File outputDir = getQuerySolutionDir();
+				File requiredTriplesFile = new File(outputDir.getPath() + "/" + Config.FILE_QTRIPLES_REQUIRED);
+				for (Triple triple: rewrittenQuery.fetchTriplesFromPatterns(solution)) {
+					FileUtils.write(requiredTriplesFile, getStringRepresentation(triple), true);
 				}
 				
 			}
-			
+		} catch (UnsupportedOperationException e) {
+			System.out.println(originalQuery.toString());
+			throw e;
+		} catch (IllegalArgumentException e) {
+			System.out.println(originalQuery.toString());
+			throw e;
 		}
 		
 	}
@@ -111,10 +116,10 @@ public class FetchTriplesFromQuery {
 
 	public static void main(String[] args) throws Exception {
 		boolean useCachedQueries = true;
-		ExperimentSetup experimentsetup = new SwdfExperimentSetup(useCachedQueries);
+		ExperimentSetup experimentsetup = new SwdfExperimentSetup(useCachedQueries, true);
 		
-//		Query query = Query.create("SELECT * WHERE {?x rdf:label ?name} LIMIT 1");
-//		FetchTriplesFromQuery.fetch(experimentsetup, query, new File("test"));
+		Query query = Query.create("SELECT * WHERE {[] a ?name} LIMIT 1");
+		FetchTriplesFromQuery.fetch(experimentsetup, query, new File("test"));
 		// new EvaluateGraphs(new
 		// DbpoExperimentSetup(DbpoExperimentSetup.QALD_REMOVE_OPTIONALS)),
 		// new EvaluateGraphs(new

@@ -1,12 +1,13 @@
-package qtriples;
+package com.d2s.subgraph.queries.qtriples.visitors;
 
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.ListIterator;
+import java.util.Set;
 
-import com.d2s.subgraph.queries.Query;
+import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.sparql.core.TriplePath;
-import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.syntax.Element;
 import com.hp.hpl.jena.sparql.syntax.ElementAssign;
 import com.hp.hpl.jena.sparql.syntax.ElementBind;
@@ -27,68 +28,44 @@ import com.hp.hpl.jena.sparql.syntax.ElementTriplesBlock;
 import com.hp.hpl.jena.sparql.syntax.ElementUnion;
 import com.hp.hpl.jena.sparql.syntax.ElementVisitor;
 
-public class RewriteTriplePatternsVisitor implements ElementVisitor {
-	private enum TripleLoc {SUB, PRED, OBJ};
-	private RDFNode node;
-	private Query query;
-	// private String varName;
-	private Var varName;
-
-	public RewriteTriplePatternsVisitor(String varName, RDFNode node, Query query) {
-		this.node = node;
-		this.query = query;
-		this.varName = Var.alloc(varName);
+public class ExtractQueryVariablesVisitor implements ElementVisitor {
+	Set<String> variables = new HashSet<String>();
+	private int unionDepth = 0;
+	private int optionalDepth = 0;
+	
+	public Set<String> getVariables() {
+		return this.variables;
 	}
 
 	public void visit(ElementTriplesBlock el) {
-		// TODO Auto-generated method stub
-
+		Iterator<Triple> it = el.getPattern().iterator();
+		while (it.hasNext()) {
+			Triple triple = it.next();
+			addVarFromNode(triple.getSubject());
+			addVarFromNode(triple.getPredicate());
+			addVarFromNode(triple.getObject());
+		}
 	}
 
 	public void visit(ElementPathBlock el) {
-		// ListIterator<TriplePath> it = el.getPattern().iterator();
-		// while ( it.hasNext() ) {
-		// final TriplePath tp = it.next();
-		// final Var d = Var.alloc( "d" );
-		// if ( tp.getSubject().equals( d )) {
-		// it.add( new TriplePath( new Triple( d, d, d )));
-		// }
-		// }
-
 		ListIterator<TriplePath> it = el.getPattern().iterator();
-		
 		while (it.hasNext()) {
-			final TriplePath origTriple = it.next();
-			if (origTriple.getSubject().equals(varName)) {
-				setNodeInTriplePattern(TripleLoc.SUB, origTriple, it);
-			}
-			if (origTriple.isTriple() && origTriple.getPredicate().equals(varName)) {
-				setNodeInTriplePattern(TripleLoc.PRED, origTriple, it);
-			}
-			if (origTriple.getObject().equals(varName)) {
-				setNodeInTriplePattern(TripleLoc.OBJ, origTriple, it);
-			}
-			
+			final TriplePath triple = it.next();
+			addVarFromNode(triple.getSubject());
+			addVarFromNode(triple.getPredicate());
+			addVarFromNode(triple.getObject());
 		}
 	}
-	private void setNodeInTriplePattern(TripleLoc location, TriplePath origTriple, ListIterator<TriplePath> it) {
-		TriplePath newPath;
-		if (origTriple.isTriple() || location == TripleLoc.PRED) {
-			newPath = new TriplePath(new Triple(
-					(location == TripleLoc.SUB? node.asNode(): origTriple.getSubject()), 
-					(location == TripleLoc.PRED? node.asNode(): origTriple.getPredicate()), 
-					(location == TripleLoc.OBJ? node.asNode(): origTriple.getObject()) 
-					));
-		} else {
-			//contains a path
-			newPath = new TriplePath(
-					(location == TripleLoc.SUB? node.asNode(): origTriple.getSubject()), 
-					origTriple.getPath(), 
-					(location == TripleLoc.OBJ? node.asNode(): origTriple.getObject()) 
-					);
-		}
-		it.set(newPath);
+	
+	public void addVarFromNode(Node node) {
+		if (node.isVariable()) variables.add(node.getName());
 	}
+	
+	
+	public boolean tripleContainsVar(Triple triple) {
+		return (triple.getSubject().isVariable() || triple.getPredicate().isVariable() || triple.getObject().isVariable());
+	}
+	
 
 	public void visit(ElementFilter el) {
 		// TODO Auto-generated method stub
@@ -106,13 +83,17 @@ public class RewriteTriplePatternsVisitor implements ElementVisitor {
 	}
 
 	public void visit(ElementUnion el) {
+		unionDepth++;
 		for (Element e : el.getElements()) {
 			e.visit(this);
 		}
+		unionDepth--;
 	}
 
 	public void visit(ElementOptional el) {
+		optionalDepth++;
 		el.getOptionalElement().visit(this);
+		optionalDepth--;
 	}
 
 	public void visit(ElementGroup el) {
@@ -164,4 +145,5 @@ public class RewriteTriplePatternsVisitor implements ElementVisitor {
 		// TODO Auto-generated method stub
 
 	}
+
 }

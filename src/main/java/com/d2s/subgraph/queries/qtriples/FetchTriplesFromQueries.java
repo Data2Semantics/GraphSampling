@@ -1,4 +1,4 @@
-package qtriples;
+package com.d2s.subgraph.queries.qtriples;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,18 +18,25 @@ import com.d2s.subgraph.queries.Query;
 
 public class FetchTriplesFromQueries {
 	
-	public static File setupDirStructure(ExperimentSetup experimentSetup) {
+	public static File setupDirStructure(ExperimentSetup experimentSetup) throws IOException {
 		File outputDir = new File(Config.PATH_QUERY_TRIPLES);
 		if (!outputDir.exists()) outputDir.mkdir();
 		File experimentSetupDir = new File(outputDir.getPath() + "/" + experimentSetup.getId());
-		if (!experimentSetupDir.exists()) experimentSetupDir.mkdir();
+		if (experimentSetupDir.exists()) {
+			System.out.println("removed previous qtriples results");
+			FileUtils.deleteDirectory(experimentSetupDir);
+		}
+		experimentSetupDir.mkdir();
 		return experimentSetupDir;
 	}
 	
 	public static void fetch(ExperimentSetup experimentSetup) throws IOException {
 		File experimentDir = setupDirStructure(experimentSetup);
 		QueryCollection<Query> queries = experimentSetup.getQueryCollection();
+		int count = 1;
 		for (Query query: queries.getQueries()) {
+			System.out.println(count + "/" + queries.getDistinctQueryCount());
+			count++;
 			FetchTriplesFromQuery.fetch(experimentSetup, query, experimentDir);
 		}
 		createUniqueFile(experimentDir);

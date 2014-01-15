@@ -295,15 +295,13 @@ public abstract class QueriesFetcher {
 	}
 	protected boolean useCacheFile(String path) {
 		boolean useCacheFile = false;
-		if (this.useCacheFile) { 
+		if (this.useCacheFile) {
 			File file = new File(path);
 			if (file.exists()) {
-				System.out.println("file exists");
 				try {
 					BufferedReader br = new BufferedReader(new FileReader(file));
 					String line;
 					while ((line = br.readLine()) != null) {
-						System.out.println("has file length");
 						if (line.length() != 0) {
 							useCacheFile = true;
 							break;
@@ -315,9 +313,6 @@ public abstract class QueriesFetcher {
 					System.out.println("exception");
 					//do nothing. just dont use cache file
 				}
-			}
-			if (useCacheFile) {
-				System.out.println("using queries from our cache file!!!");
 			}
 		}
 		

@@ -4,17 +4,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import org.data2semantics.query.QueryCollection;
 
-import qtriples.ExtractQueryVariablesVisitor;
-import qtriples.ExtractTriplePatternsVisitor;
-import qtriples.RewriteTriplePatternsVisitor;
-
 import com.d2s.subgraph.eval.results.QueryResults;
+import com.d2s.subgraph.queries.qtriples.visitors.ExtractQueryVariablesVisitor;
+import com.d2s.subgraph.queries.qtriples.visitors.ExtractTriplePatternsVisitor;
+import com.d2s.subgraph.queries.qtriples.visitors.ReplaceBlankNodesVisitor;
+import com.d2s.subgraph.queries.qtriples.visitors.RewriteTriplePatternsVisitor;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QueryParseException;
@@ -23,7 +21,6 @@ import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.query.Syntax;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.sparql.core.Prologue;
-import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.syntax.Element;
 
 public class Query extends org.data2semantics.query.Query {
@@ -114,8 +111,17 @@ public class Query extends org.data2semantics.query.Query {
 		Query query = Query.create(this.toString());
 		query.setQueryResultStar(true);
 		query.setDistinct(true);
+		query.replaceBlankNodesByVars();
 		query = query.getQueryWithoutOrderBy();
+		
 		return query;
+	}
+	
+	public void replaceBlankNodesByVars() {
+		System.out.println("bla");
+		Element queryElement = getQueryPattern();
+		if (queryElement == null) return;
+		queryElement.visit(new ReplaceBlankNodesVisitor());
 	}
 	
 	public Query getQueryWithoutOrderBy() {
@@ -155,7 +161,7 @@ public class Query extends org.data2semantics.query.Query {
 		Element queryElement;
 		
 		for (String varName: getVarnamesFromPatterns()) {
-			System.out.println("processing var " + varName);
+//			System.out.println("processing var " + varName);
 			RDFNode node = solution.get(varName);
 			if (node != null) {
 				queryElement = getQueryPattern();
@@ -169,14 +175,15 @@ public class Query extends org.data2semantics.query.Query {
 		
 		//we've rewritten the triple patterns to contain values. Now, we need to convert them to regular triples (i.e. another object in jena representation!)
 		queryElement = getQueryPattern();
+		
 		ExtractTriplePatternsVisitor extractTriplesVisitor = new ExtractTriplePatternsVisitor();
 		queryElement.visit(extractTriplesVisitor);
 		
 		
 		
-		for (Triple triple: extractTriplesVisitor.getTriples()) {
-			System.out.println(triple.toString());
-		}
+//		for (Triple triple: extractTriplesVisitor.getTriples()) {
+//			System.out.println(triple.toString());
+//		}
 		
 		
 		
@@ -187,24 +194,18 @@ public class Query extends org.data2semantics.query.Query {
 	
 	
 	public static void main(String[] args) throws IOException {
-		Query query = Query.create("SELECT ?v0 FROM <http://lgd>\n" + 
+		Query query = Query.create("SELECT * FROM <http://lgd>\n" + 
 				"WHERE {\n" + 
-				"OPTIONAL {\n" + 
-				"<http://linkedgeodata.org/triplify/node240109189> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?v0 .\n" + 
-				"}\n" + 
-				"} OFFSET 0 LIMIT 1000\n" + 
-				"");
+				"[] a ?bla ;"
+				+ "a ?bf ." +
+				
+				"}");
 		
 		/**
 		 * fetch triples based on query patterns
 		 */
-//		QueryExecution queryExecution = QueryExecutionFactory.sparqlService("http://dbpedia.org/sparql", "SELECT * WHERE {?x ?jh ?j} LIMIT 1");
-//		System.out.println("exec query");
-//		ResultSet result = queryExecution.execSelect();
-//		for (Triple triple: query.fetchTriplesFromPatterns(result.next())) {
-//			System.out.println(triple.toString());
-//		}
-		
+		query.replaceBlankNodesByVars();
+		System.out.println(query.toString());
 		
 		/**
 		 * rewrite queries for triple retrieval

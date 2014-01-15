@@ -28,7 +28,7 @@ public class Config {
 	public static String FILE_CSV_REWR_VS_ALGS = "rewrVsAlgs.csv";
 	public static String FILE_CSV_AVG_RECALL_PER_QUERY = "avgRecallPerQuery.csv";
 	public static String FILE_CSV_BEST_RECALL_PER_ALG = "bestRecallPerAlgorithm.csv";
-	
+	public static String FILE_QTRIPLES_REQUIRED = "required";
 	
 	/**
 	 * Sample info

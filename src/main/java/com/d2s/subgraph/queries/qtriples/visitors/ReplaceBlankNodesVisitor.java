@@ -1,10 +1,9 @@
-package qtriples;
+package com.d2s.subgraph.queries.qtriples.visitors;
 
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.ListIterator;
-import java.util.Set;
 
+import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.Node_Variable;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.sparql.core.TriplePath;
 import com.hp.hpl.jena.sparql.syntax.Element;
@@ -27,64 +26,63 @@ import com.hp.hpl.jena.sparql.syntax.ElementTriplesBlock;
 import com.hp.hpl.jena.sparql.syntax.ElementUnion;
 import com.hp.hpl.jena.sparql.syntax.ElementVisitor;
 
-public class ExtractTriplePatternsVisitor implements ElementVisitor {
-	Set<Triple> triples = new HashSet<Triple>();
-	private int optionalDepth;
-	private int unionDepth;
-	
-	public Set<Triple> getTriples() {
-		return this.triples;
-	}
-
+public class ReplaceBlankNodesVisitor implements ElementVisitor {
+	private enum TripleLoc {SUB, PRED, OBJ};
 	public void visit(ElementTriplesBlock el) {
-		Iterator<Triple> it = el.getPattern().iterator();
-		while (it.hasNext()) {
-			fetchFromTriple(it.next());
-		}
+		// TODO Auto-generated method stub
+
 	}
 
 	public void visit(ElementPathBlock el) {
+		// ListIterator<TriplePath> it = el.getPattern().iterator();
+		// while ( it.hasNext() ) {
+		// final TriplePath tp = it.next();
+		// final Var d = Var.alloc( "d" );
+		// if ( tp.getSubject().equals( d )) {
+		// it.add( new TriplePath( new Triple( d, d, d )));
+		// }
+		// }
 
 		ListIterator<TriplePath> it = el.getPattern().iterator();
 		
 		while (it.hasNext()) {
-			final TriplePath origTriple = it.next();
-			try {
-				fetchFromTriple(origTriple.asTriple());
-			} catch (IllegalArgumentException e) {
-				System.out.println(e.getMessage());
-			}
-//			if (!added) {
-//				System.out.println(origTriple.toString() + " is not a triple!");
-//			}
-			
+			TriplePath origTriple = it.next();
+			origTriple = replaceBNodeIfNeeded(TripleLoc.SUB, origTriple, it);
+			origTriple = replaceBNodeIfNeeded(TripleLoc.PRED, origTriple, it);
+			origTriple = replaceBNodeIfNeeded(TripleLoc.OBJ, origTriple, it);
 		}
 	}
-	
-	public void fetchFromTriple(Triple triple) {
-		if (triple != null) {
-			if (tripleContainsVar(triple)) {
-				if (optionalDepth > 0) {
-					//this means we don't have an answer for this optional. We can safely ignore this
-					//System.out.println("warn: variable found in optional triple pattern. " + triple.toString());
-				} else if (unionDepth > 0) {
-					//this means we don't have an answer for side of the union. We can safely ignore this
-					//System.out.println("warn: variable found in union triple pattern. " + triple.toString());
-				} else {
-					throw new IllegalArgumentException("we still have a variable in our triple. this should not be the case");
-				}
-			} else {
-				triples.add(triple);
-			}
+	private TriplePath replaceBNodeIfNeeded(TripleLoc location, TriplePath origTriple, ListIterator<TriplePath> it) {
+		TriplePath newPath;
+		if (origTriple.isTriple() || location == TripleLoc.PRED) {
+			newPath = new TriplePath(new Triple(
+					(location == TripleLoc.SUB? getNodeAsBnode(origTriple.getSubject()): origTriple.getSubject()), 
+					(location == TripleLoc.PRED? getNodeAsBnode(origTriple.getPredicate()): origTriple.getPredicate()), 
+					(location == TripleLoc.OBJ? getNodeAsBnode(origTriple.getObject()): origTriple.getObject()) 
+					));
 		} else {
-			throw new IllegalArgumentException("we tried to fetch values from triple pattern. However, triple pattern is null!");
+			//contains a path
+			newPath = new TriplePath(
+					(location == TripleLoc.SUB? getNodeAsBnode(origTriple.getSubject()): origTriple.getSubject()), 
+					origTriple.getPath(), 
+					(location == TripleLoc.OBJ? getNodeAsBnode(origTriple.getObject()): origTriple.getObject()) 
+					);
 		}
+		System.out.println("df" + newPath.toString());
+		it.set(newPath);
+		return newPath;
 	}
 	
-	public boolean tripleContainsVar(Triple triple) {
-		return (triple.getSubject().isVariable() || triple.getPredicate().isVariable() || triple.getObject().isVariable());
-	}
 	
+	private Node getNodeAsBnode(Node node) {
+		//argh, 'isBlankNode' does not work!!!! it is rewritten to query with two questionmarks.......
+		if (node.isVariable() && node.toString().substring(0, 2).equals("??")) {
+			return new Node_Variable(node.toString().substring(2));
+		}
+		return node;
+	}
+
+
 
 	public void visit(ElementFilter el) {
 		// TODO Auto-generated method stub
@@ -102,17 +100,13 @@ public class ExtractTriplePatternsVisitor implements ElementVisitor {
 	}
 
 	public void visit(ElementUnion el) {
-		unionDepth++;
 		for (Element e : el.getElements()) {
 			e.visit(this);
 		}
-		unionDepth--;
 	}
 
 	public void visit(ElementOptional el) {
-		optionalDepth++;
 		el.getOptionalElement().visit(this);
-		optionalDepth--;
 	}
 
 	public void visit(ElementGroup el) {
