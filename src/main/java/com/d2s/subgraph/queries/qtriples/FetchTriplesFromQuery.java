@@ -2,6 +2,7 @@ package com.d2s.subgraph.queries.qtriples;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 
@@ -24,7 +25,7 @@ public class FetchTriplesFromQuery {
 	private Query rewrittenQuery;
 	private File experimentDir;
 	private File queryOutputDir;
-	
+	private int querySolutionsCount = 0;
 	//swdf
 	//	query-0
 	//		solution-0
@@ -38,6 +39,7 @@ public class FetchTriplesFromQuery {
 	
 	
 	private void process() throws IOException {
+		System.out.println("rewrite");
 		//rewrite to * query
 		rewrittenQuery = originalQuery.getQueryForTripleRetrieval();
 		
@@ -46,12 +48,12 @@ public class FetchTriplesFromQuery {
 		
 		//execute on endpoint
 		QueryExecution queryExecution = QueryExecutionFactory.sparqlService(Config.EXPERIMENT_ENDPOINT, rewrittenQuery);
+		System.out.println("exec");
 		ResultSet result = queryExecution.execSelect();
-		
-		//combine results and query patterns to retrieve triples (a set of triples per row (i.e. query solution);
+		System.out.println("store");
 		fetchAndStoresTriplesFromResultSet(result);
-		//write these to file (no csv). use structure:
-		//experimentDir -> query -> each query solution in a file, where each row is the set of triples for that query solution
+		//combine results and query patterns to retrieve triples (a set of triples per row (i.e. query solution);
+		//experimentDir -> query -> query solution -> triple files
 	}
 	
 	private void setupDirStructure() throws IOException {
@@ -63,9 +65,12 @@ public class FetchTriplesFromQuery {
 	
 	
 	private File getQuerySolutionDir() {
-		File file = new File(queryOutputDir.getPath() + "/qs" + queryOutputDir.listFiles().length);
+		//only use listfiles() once! This is becomes very expensive when there are a lot of files in this dir.. Just use our own iterator
+		if (querySolutionsCount == 0) querySolutionsCount = queryOutputDir.listFiles().length;
+		File file = new File(queryOutputDir.getPath() + "/qs" + querySolutionsCount);
 		if (file.exists()) throw new IllegalStateException("Query solution dir " + file.getPath() + " already exists. Stopping getting triples from queries");
 		file.mkdir();
+		querySolutionsCount++;
 		return file;
 	}
 	
@@ -93,10 +98,10 @@ public class FetchTriplesFromQuery {
 				QuerySolution solution = resultSet.next();
 				File outputDir = getQuerySolutionDir();
 				File requiredTriplesFile = new File(outputDir.getPath() + "/" + Config.FILE_QTRIPLES_REQUIRED);
-				for (Triple triple: rewrittenQuery.fetchTriplesFromPatterns(solution)) {
+				Set<Triple> fetchedTriples = rewrittenQuery.fetchTriplesFromPatterns(solution);
+				for (Triple triple: fetchedTriples) {
 					FileUtils.write(requiredTriplesFile, getStringRepresentation(triple), true);
 				}
-				
 			}
 		} catch (UnsupportedOperationException e) {
 			System.out.println(originalQuery.toString());
@@ -118,7 +123,24 @@ public class FetchTriplesFromQuery {
 		boolean useCachedQueries = true;
 		ExperimentSetup experimentsetup = new SwdfExperimentSetup(useCachedQueries, true);
 		
-		Query query = Query.create("SELECT * WHERE {[] a ?name} LIMIT 1");
+		Query query = Query.create("PREFIX  dc:   <http://purl.org/dc/elements/1.1/>\n" + 
+				"PREFIX  rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" + 
+				"PREFIX  geo:  <http://www.w3.org/2003/01/geo/wgs84_pos#>\n" + 
+				"PREFIX  foaf: <http://xmlns.com/foaf/0.1/>\n" + 
+				"PREFIX  owl:  <http://www.w3.org/2002/07/owl#>\n" + 
+				"PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" + 
+				"PREFIX  swrc: <http://swrc.ontoware.org/ontology#>\n" + 
+				"PREFIX  swrc-ext: <http://www.cs.vu.nl/~mcaklein/onto/swrc_ext/2005/05#>\n" + 
+				"PREFIX  ical: <http://www.w3.org/2002/12/cal/ical#>\n" + 
+				"PREFIX  swc:  <http://data.semanticweb.org/ns/swc/ontology#>\n" + 
+				"\n" + 
+				"SELECT DISTINCT  ?paperURI ?personURI\n" + 
+				"FROM <http://df>\n" + 
+				"WHERE\n" + 
+				"  { ?personURI rdf:type foaf:Person .\n" + 
+				"    ?personURI foaf:made ?paperURI .\n" + 
+				"    ?paperURI swc:isPartOf <http://data.semanticweb.org/conference/www/2010/proceedings>\n" + 
+				"  }");
 		FetchTriplesFromQuery.fetch(experimentsetup, query, new File("test"));
 		// new EvaluateGraphs(new
 		// DbpoExperimentSetup(DbpoExperimentSetup.QALD_REMOVE_OPTIONALS)),

@@ -118,7 +118,6 @@ public class Query extends org.data2semantics.query.Query {
 	}
 	
 	public void replaceBlankNodesByVars() {
-		System.out.println("bla");
 		Element queryElement = getQueryPattern();
 		if (queryElement == null) return;
 		queryElement.visit(new ReplaceBlankNodesVisitor());
@@ -158,6 +157,7 @@ public class Query extends org.data2semantics.query.Query {
 	}
 	
 	public Set<Triple> fetchTriplesFromPatterns(QuerySolution solution) {
+		
 		Element queryElement;
 		
 		for (String varName: getVarnamesFromPatterns()) {

@@ -34,15 +34,6 @@ public class ReplaceBlankNodesVisitor implements ElementVisitor {
 	}
 
 	public void visit(ElementPathBlock el) {
-		// ListIterator<TriplePath> it = el.getPattern().iterator();
-		// while ( it.hasNext() ) {
-		// final TriplePath tp = it.next();
-		// final Var d = Var.alloc( "d" );
-		// if ( tp.getSubject().equals( d )) {
-		// it.add( new TriplePath( new Triple( d, d, d )));
-		// }
-		// }
-
 		ListIterator<TriplePath> it = el.getPattern().iterator();
 		
 		while (it.hasNext()) {
@@ -68,7 +59,6 @@ public class ReplaceBlankNodesVisitor implements ElementVisitor {
 					(location == TripleLoc.OBJ? getNodeAsBnode(origTriple.getObject()): origTriple.getObject()) 
 					);
 		}
-		System.out.println("df" + newPath.toString());
 		it.set(newPath);
 		return newPath;
 	}
