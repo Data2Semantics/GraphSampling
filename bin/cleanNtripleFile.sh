@@ -10,7 +10,9 @@ if [ -n "$2" ]; then
 	finalOutput="$2"
 fi
 
-tr -d '\\'  < ${input} > ${output};
+#replace: line breaks, and unicode stuff
+sed 's/\(\\u[[:alnum:]]\{4\}\|\\n\)//g' $input > $output
+
 mv $output $finalOutput;
 
 
