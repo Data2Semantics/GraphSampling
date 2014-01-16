@@ -10,8 +10,8 @@ if [ -n "$2" ]; then
 	finalOutput="$2"
 fi
 
-#replace: line breaks, and unicode stuff
-sed 's/\(\\u[[:alnum:]]\{4\}\|\\n\)//g' $input > $output
+#replace: double backslashes (makes latter things easier), line breaks, and unicode stuff
+sed 's/\([\\]\{2\}\|\\u[[:alnum:]]\{4\}\|\\n\)//g' $input > $output
 
 mv $output $finalOutput;
 
