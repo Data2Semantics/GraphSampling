@@ -96,6 +96,8 @@ public class FetchTriplesFromQuery {
 		try {
 			while (resultSet.hasNext()) {
 				QuerySolution solution = resultSet.next();
+				System.out.println(solution.toString());
+				System.exit(1);
 				File outputDir = getQuerySolutionDir();
 				File requiredTriplesFile = new File(outputDir.getPath() + "/" + Config.FILE_QTRIPLES_REQUIRED);
 				Set<Triple> fetchedTriples = rewrittenQuery.fetchTriplesFromPatterns(solution);
@@ -123,24 +125,30 @@ public class FetchTriplesFromQuery {
 		boolean useCachedQueries = true;
 		ExperimentSetup experimentsetup = new SwdfExperimentSetup(useCachedQueries, true);
 		
-		Query query = Query.create("PREFIX  dc:   <http://purl.org/dc/elements/1.1/>\n" + 
-				"PREFIX  rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" + 
+		Query query = Query.create("PREFIX  rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" + 
 				"PREFIX  geo:  <http://www.w3.org/2003/01/geo/wgs84_pos#>\n" + 
 				"PREFIX  foaf: <http://xmlns.com/foaf/0.1/>\n" + 
 				"PREFIX  owl:  <http://www.w3.org/2002/07/owl#>\n" + 
-				"PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" + 
-				"PREFIX  swrc: <http://swrc.ontoware.org/ontology#>\n" + 
-				"PREFIX  swrc-ext: <http://www.cs.vu.nl/~mcaklein/onto/swrc_ext/2005/05#>\n" + 
-				"PREFIX  ical: <http://www.w3.org/2002/12/cal/ical#>\n" + 
-				"PREFIX  swc:  <http://data.semanticweb.org/ns/swc/ontology#>\n" + 
 				"\n" + 
-				"SELECT DISTINCT  ?paperURI ?personURI\n" + 
+				"SELECT DISTINCT  ?name ?homepage ?page ?sameAs ?seeAlso ?latitude ?longitude\n" + 
 				"FROM <http://df>\n" + 
 				"WHERE\n" + 
-				"  { ?personURI rdf:type foaf:Person .\n" + 
-				"    ?personURI foaf:made ?paperURI .\n" + 
-				"    ?paperURI swc:isPartOf <http://data.semanticweb.org/conference/www/2010/proceedings>\n" + 
-				"  }");
+				"  { <http://data.semanticweb.org/organization/otto-vonotto-von-guericke-universitaet-magdeburg-fakultaet-fuer-informatik-ag-managementinformationssysteme> foaf:name ?name\n" + 
+				"    OPTIONAL\n" + 
+				"      { <http://data.semanticweb.org/organization/otto-vonotto-von-guericke-universitaet-magdeburg-fakultaet-fuer-informatik-ag-managementinformationssysteme> foaf:page ?page }\n" + 
+				"    OPTIONAL\n" + 
+				"      { <http://data.semanticweb.org/organization/otto-vonotto-von-guericke-universitaet-magdeburg-fakultaet-fuer-informatik-ag-managementinformationssysteme> owl:sameAs ?sameAs }\n" + 
+				"    OPTIONAL\n" + 
+				"      { <http://data.semanticweb.org/organization/otto-vonotto-von-guericke-universitaet-magdeburg-fakultaet-fuer-informatik-ag-managementinformationssysteme> rdfs:seeAlso ?seeAlso }\n" + 
+				"    OPTIONAL\n" + 
+				"      { <http://data.semanticweb.org/organization/otto-vonotto-von-guericke-universitaet-magdeburg-fakultaet-fuer-informatik-ag-managementinformationssysteme> foaf:homepage ?homepage }\n" + 
+				"    OPTIONAL\n" + 
+				"      { <http://data.semanticweb.org/organization/otto-vonotto-von-guericke-universitaet-magdeburg-fakultaet-fuer-informatik-ag-managementinformationssysteme> foaf:based_near ?location .\n" + 
+				"        ?location geo:lat ?latitude .\n" + 
+				"        ?location geo:long ?longitude\n" + 
+				"      }\n" + 
+				"  }\n" + 
+				"");
 		FetchTriplesFromQuery.fetch(experimentsetup, query, new File("test"));
 		// new EvaluateGraphs(new
 		// DbpoExperimentSetup(DbpoExperimentSetup.QALD_REMOVE_OPTIONALS)),

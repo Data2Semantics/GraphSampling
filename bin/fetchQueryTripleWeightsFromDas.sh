@@ -7,11 +7,10 @@ fi
 dataset=$1
 
 echo "fetching hdfs data for das4 master node"
-ssh fs0.das4.cs.vu.nl:fetchQueryTripleWeights.sh $dataset;
+ssh fs0.das4.cs.vu.nl fetchQueryTripleWeights.sh $dataset;
 
-
-localTargetDir="~/code/subgraphAnalysis/input/"
+localTargetDir="~/code/subgraphSelection/input/"
 echo "rsyncing locally"
-rsync -avz fs0.das4.cs.vu.nl:qTripleWeights $localTargetDir;
+eval rsync -avz fs0.das4.cs.vu.nl:qTripleWeights $localTargetDir;
 #rsync -avz fs0.das4.cs.vu.nl:weightDistribution $localTargetDir;
 
