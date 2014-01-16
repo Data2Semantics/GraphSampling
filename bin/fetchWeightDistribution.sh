@@ -19,15 +19,19 @@ pattern="*"
 if [ -n "$2" ]; then
 	pattern="$2"
 fi
-targetDir=${dataset}WeightDistribution
+weightDistDir="weightDistribution";
+mkdir -p $weightDistDir;
+targetDir="$weightDistDir/$dataset"
 echo "Storing to $targetDir"
-mkdir -p $targetDir;
+rm -rf $targetDir;
+mkdir $targetDir;
+
 
 hadoopLs "$dataset/evaluation/weightDistribution";
 for dir in "${hadoopLs[@]}"; do
 	if [[ ! "$dir" == $pattern ]]; then
 		continue
 	fi
-		dirBasename=`basename $dir`
-		hadoop fs -cat $dir/* >> ${targetDir}/$dirBasename;
+	dirBasename=`basename $dir`
+	hadoop fs -cat $dir/* >> ${targetDir}/$dirBasename;
 done;
