@@ -20,6 +20,9 @@ do
 	
 	echo "now rsyncing"
 	rsync -avz ${concatFile} fs0.das4.cs.vu.nl:qTriples/$dirBasename
+	
+	echo "adding file to hdfs"
+	ssh fs0.das4.cs.vu.nl uploadQueryTriplesToHdfs.sh $dirBasename
 done
 
 

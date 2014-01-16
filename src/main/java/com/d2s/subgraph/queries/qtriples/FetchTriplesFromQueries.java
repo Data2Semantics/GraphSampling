@@ -84,7 +84,7 @@ public class FetchTriplesFromQueries {
 		boolean useCachedQueries = true;
 		
 		FetchTriplesFromQueries fetch = new FetchTriplesFromQueries(new SwdfExperimentSetup(useCachedQueries));
-		fetch.maxQueries = 20;
+//		fetch.maxQueries = 20;
 		fetch.resetExperimentDir();
 		fetch.processQueries();
 //		fetch.createUniqueTripleFile();

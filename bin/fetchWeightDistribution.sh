@@ -35,3 +35,5 @@ for dir in "${hadoopLs[@]}"; do
 	dirBasename=`basename $dir`
 	hadoop fs -cat $dir/* >> ${targetDir}/$dirBasename;
 done;
+
+

@@ -39,7 +39,7 @@ public class FetchTriplesFromQuery {
 	
 	
 	private void process() throws IOException {
-		System.out.println("rewrite");
+//		System.out.println("rewrite");
 		//rewrite to * query
 		rewrittenQuery = originalQuery.getQueryForTripleRetrieval();
 		
@@ -48,9 +48,9 @@ public class FetchTriplesFromQuery {
 		
 		//execute on endpoint
 		QueryExecution queryExecution = QueryExecutionFactory.sparqlService(Config.EXPERIMENT_ENDPOINT, rewrittenQuery);
-		System.out.println("exec");
+//		System.out.println("exec");
 		ResultSet result = queryExecution.execSelect();
-		System.out.println("store");
+//		System.out.println("store");
 		fetchAndStoresTriplesFromResultSet(result);
 		//combine results and query patterns to retrieve triples (a set of triples per row (i.e. query solution);
 		//experimentDir -> query -> query solution -> triple files
@@ -65,7 +65,7 @@ public class FetchTriplesFromQuery {
 	
 	
 	private File getQuerySolutionDir() {
-		//only use listfiles() once! This is becomes very expensive when there are a lot of files in this dir.. Just use our own iterator
+		//only use listfiles() once! This becomes very expensive when there are a lot of files in this dir.. Just use our own iterator
 		if (querySolutionsCount == 0) querySolutionsCount = queryOutputDir.listFiles().length;
 		File file = new File(queryOutputDir.getPath() + "/qs" + querySolutionsCount);
 		if (file.exists()) throw new IllegalStateException("Query solution dir " + file.getPath() + " already exists. Stopping getting triples from queries");
