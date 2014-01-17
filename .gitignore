@@ -1,11 +1,9 @@
 .output
 .cache
 .classpath
-.settings
 *.class
 target/classes/*
 *.csv
-.project
 .pydevproject
 src/main/java/com/d2s/test/*
 filename.txt

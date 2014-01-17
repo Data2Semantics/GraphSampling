@@ -33,7 +33,7 @@ public class OutputCsv extends OutputWrapper {
 //		System.out.println("writing csv files for "  + onlyGraphsContaining);
 		HashMap<Integer, ArrayList<String>> table = new HashMap<Integer, ArrayList<String>>();
 		
-		for (Query query: queryCollection.getQueries()) {
+		for (Query query: getQueryCollection().getQueries()) {
 			int queryId = query.getQueryId();
 			
 			ArrayList<String> row = new ArrayList<String>();
@@ -193,26 +193,28 @@ public class OutputCsv extends OutputWrapper {
 		return row;
 	}
 	private double getSampleAverage(String mode) {
-		boolean found = false;
-		double sampleAverage = 0.0;
-		for (SampleResults results: this.allGraphResults) {
-			if (results.getGraphName().equals("http://" + experimentSetup.getGraphPrefix() + "sample_" + mode + ".nt")) {
-				found = true;
-				sampleAverage = results.getAverageRecall();
-			}
-		}
-		if (!found) {
-			System.out.println("could not find average recall for sample graphs... Tried looking for " + experimentSetup.getGraphPrefix() + "sample_" + mode + ".nt");
-			System.exit(1);
-		}
-		return sampleAverage;
+		System.out.println("todo: implement random sample (avg)");
+		return 0.0;
+//		boolean found = false;
+//		double sampleAverage = 0.0;
+//		for (SampleResults results: this.allGraphResults) {
+//			if (results.getGraphName().equals("http://" + experimentSetup.getGraphPrefix() + "sample_" + mode + ".nt")) {
+//				found = true;
+//				sampleAverage = results.getAverageRecall();
+//			}
+//		}
+//		if (!found) {
+//			System.out.println("could not find average recall for sample graphs... Tried looking for " + experimentSetup.getGraphPrefix() + "sample_" + mode + ".nt");
+//			System.exit(1);
+//		}
+//		return sampleAverage;
 		
 	}
 	public void outputAverageRecallPerQuery() throws IOException {
 		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + Config.FILE_CSV_AVG_RECALL_PER_QUERY);
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
 		writer.writeNext(new String[]{"queryId", "avgRecall"});
-		for (Query query: queryCollection.getQueries()) {
+		for (Query query: getQueryCollection().getQueries()) {
 			int queryId = query.getQueryId();
 			
 			double totalRecall = 0.0;// totalrecall!
@@ -237,10 +239,11 @@ public class OutputCsv extends OutputWrapper {
 		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + Config.FILE_CSV_BEST_RECALL_PER_ALG);
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
 		writer.writeNext(new String[]{"queryId", "algorithm", "bestRecall", "avgQueryRecall"});
-		int[] algorithms = new int[]{Utils.ALG_BETWEENNESS, Utils.ALG_EIGENVECTOR, Utils.ALG_INDEGREE, Utils.ALG_OUTDEGREE, Utils.ALG_PAGERANK};
+//		int[] algorithms = new int[]{Utils.ALG_BETWEENNESS, Utils.ALG_EIGENVECTOR, Utils.ALG_INDEGREE, Utils.ALG_OUTDEGREE, Utils.ALG_PAGERANK};
+		int[] algorithms = new int[]{Utils.ALG_INDEGREE, Utils.ALG_OUTDEGREE, Utils.ALG_PAGERANK};
 		int[] rewrMethods = new int[]{Utils.REWRITE_NODE1, Utils.REWRITE_NODE2, Utils.REWRITE_NODE3, Utils.REWRITE_NODE4, Utils.REWRITE_PATH};
 		
-		for (Query query: queryCollection.getQueries()) {
+		for (Query query: getQueryCollection().getQueries()) {
 			ArrayList<ArrayList<String>> rows = new ArrayList<ArrayList<String>>();
 			int queryId = query.getQueryId();
 			
@@ -261,15 +264,26 @@ public class OutputCsv extends OutputWrapper {
 						}
 					}
 				}
-				if (numGraphResultsFound != rewrMethods.length) {
-					System.out.println("unable to find all rewrite methods when calculating best recall per algorithm");
-					System.exit(1);
-				} else {
+				/**
+				 * 
+				 * 
+				 * 
+				 * can I delete below? can't see why we need this
+				 * 
+				 * 
+				 * 
+				 * 
+				 */
+//				if (numGraphResultsFound != rewrMethods.length) {
+//					
+//					System.out.println("unable to find all rewrite methods when calculating best recall per algorithm");
+//					System.exit(1);
+//				} else {
 					row.add(Integer.toString(queryId));
 					row.add(StringUtils.getAlgorithmAsString(algorithm));
 					row.add(Double.toString(bestRecall));
 					rows.add(row);
-				}
+//				}
 			}
 			double avgQueryRecall = totalRecall / (double)graphCount;
 			for (ArrayList<String> row: rows) {

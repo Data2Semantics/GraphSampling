@@ -11,15 +11,17 @@ import com.d2s.subgraph.queries.Query;
 
 public abstract class OutputWrapper {
 	protected ArrayList<SampleResults> allGraphResults = new ArrayList<SampleResults>();
-	protected QueryCollection<Query> queryCollection;
 	protected ExperimentSetup experimentSetup;
 	protected File resultsDir;
 	public OutputWrapper(ExperimentSetup experimentSetup, ArrayList<SampleResults> allGraphResults, QueryCollection<Query> queryCollection, File resultsDir) {
 		this.experimentSetup = experimentSetup;
 		this.allGraphResults = allGraphResults;
-		this.queryCollection = queryCollection;
 		this.resultsDir = resultsDir;
 		
+	}
+	
+	public QueryCollection<Query> getQueryCollection() {
+		return allGraphResults.get(0).queryCollection;
 	}
 	
 }

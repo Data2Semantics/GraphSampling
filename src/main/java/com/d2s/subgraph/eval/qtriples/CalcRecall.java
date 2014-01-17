@@ -21,10 +21,12 @@ import com.d2s.subgraph.queries.Query;
 
 public class CalcRecall {
 	private int maxSamples = Integer.MAX_VALUE;
+	private int maxQueries = Integer.MAX_VALUE;
 	private ExperimentSetup experimentSetup;
 	CalcCutoffWeight cutoffWeights;
 	private File[] queryDirs;
 	private WriteAnalysis analysisOutput;
+	
 	public CalcRecall(ExperimentSetup experimentSetup, double maxSampleSize) throws IOException {
 		this.experimentSetup = experimentSetup;
 		this.analysisOutput = new WriteAnalysis(experimentSetup);
@@ -89,9 +91,10 @@ public class CalcRecall {
 		SampleResultsRegular results = new SampleResultsRegular();
 		results.setGraphName(sample);
 //		Set<Double> queryRecalls = new HashSet<Double>();
-//		double count = 1;
+		int count = 0;
 //		double totalQuerySize = queryDirs.length;
 		for (File queryDir: queryDirs) {
+			if (count > maxQueries) break;
 //			String percentage = Double.toString(Math.round((count / totalQuerySize) * 100.0)) + "%";
 //			System.out.print("\r" + percentage);
 //			count++;
@@ -118,6 +121,7 @@ public class CalcRecall {
 	public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException, InterruptedException {
 		CalcRecall calc = new CalcRecall(new SwdfExperimentSetup(true), 0.5);
 		calc.maxSamples = 1;
+		calc.maxQueries = 10;
 		calc.calcRecallForSamples();
 	}
 }

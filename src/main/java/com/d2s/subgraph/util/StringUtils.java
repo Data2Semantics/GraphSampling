@@ -30,10 +30,10 @@ import com.hp.hpl.jena.sparql.syntax.ElementWalker;
 import com.hp.hpl.jena.sparql.syntax.Template;
 
 public class StringUtils {
-	public static int REWRITE_NODE1 = 0;
-	public static int REWRITE_NODE2 = 1;
-	public static int REWRITE_NODE3 = 2;
-	public static int REWRITE_NODE4 = 3;
+	public static int REWRITE_RESOURCE_SIMPLE = 0;
+	public static int REWRITE_RESOURCE_WITHOUT_LIT = 1;
+	public static int REWRITE_RESOURCE_UNIQUE = 2;
+	public static int REWRITE_RESOURCE_CONTEXT = 3;
 	public static int REWRITE_PATH = 4;
 
 	public static int ALG_EIGENVECTOR = 0;
@@ -93,14 +93,14 @@ public class StringUtils {
 
 	public static int getRewriteMethod(String graphName) {
 		int rewriteMethod = -1;
-		if (graphName.contains("litAsLit")) {
-			rewriteMethod = REWRITE_NODE3;
-		} else if (graphName.contains("noLit")) {
-			rewriteMethod = REWRITE_NODE2;
-		} else if (graphName.contains("litAsNode")) {
-			rewriteMethod = REWRITE_NODE1;
-		} else if (graphName.contains("litWithPred")) {
-			rewriteMethod = REWRITE_NODE4;
+		if (graphName.contains("resourceUnique")) {
+			rewriteMethod = REWRITE_RESOURCE_UNIQUE;
+		} else if (graphName.contains("resourceWithoutLit")) {
+			rewriteMethod = REWRITE_RESOURCE_WITHOUT_LIT;
+		} else if (graphName.contains("resourceSimple")) {
+			rewriteMethod = REWRITE_RESOURCE_SIMPLE;
+		} else if (graphName.contains("resourceContext")) {
+			rewriteMethod = REWRITE_RESOURCE_CONTEXT;
 		} else if (graphName.contains("so-so")) {
 			rewriteMethod = REWRITE_PATH;
 		}
@@ -130,13 +130,13 @@ public class StringUtils {
 	
 	public static String getRewriteMethodAsString(int rewriteMethod) {
 		String rewriteMethodString = "";
-		if (rewriteMethod == REWRITE_NODE1) {
+		if (rewriteMethod == REWRITE_RESOURCE_SIMPLE) {
 			rewriteMethodString = "Simple";
-		} else if (rewriteMethod == REWRITE_NODE2) {
+		} else if (rewriteMethod == REWRITE_RESOURCE_WITHOUT_LIT) {
 			rewriteMethodString = "WithoutLiterals";
-		} else if (rewriteMethod == REWRITE_NODE3) {
+		} else if (rewriteMethod == REWRITE_RESOURCE_UNIQUE) {
 			rewriteMethodString = "UniqueLiterals";
-		} else if (rewriteMethod == REWRITE_NODE4) {
+		} else if (rewriteMethod == REWRITE_RESOURCE_CONTEXT) {
 			rewriteMethodString = "ContextLiterals";
 		} else if (rewriteMethod == REWRITE_PATH) {
 			rewriteMethodString = "Path";

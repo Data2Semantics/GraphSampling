@@ -124,18 +124,20 @@ public class WriteAnalysis {
 			headers.add(graphResults.getProperName());
 		}
 		writer.writeNext(headers.toArray(new String[headers.size()]));
-		for (Query query: queryCollection.getQueries()) {
+		
+		for (Query query: allGraphResults.get(0).queryCollection.getQueries()) {
 			ArrayList<String> row = new ArrayList<String>();
 			int queryId = query.getQueryId();
 			row.add(Integer.toString(queryId));
 			for (SampleResults graphResults: allGraphResults) {
-				QueryCollection<Query> collection = graphResults.getQueryCollection();
-				System.out.println(query.toString());
-				Query otherQ = collection.getQuery(query.toString());
-				QueryResults qresults = otherQ.getResults();
-				double recall = qresults.getRecall();
-//				row.add(Double.toString(graphResults.getQueryCollection().getQuery(query.toString()).getResults().getRecall()));
-				row.add(Double.toString(recall));
+//				QueryCollection<Query> collection = graphResults.getQueryCollection();
+//				System.out.println(query.toString());
+//				Query otherQ = collection.getQuery(query.toString());
+//				QueryResults qresults = otherQ.getResults();
+//				double recall = qresults.getRecall();
+				
+				row.add(Double.toString(graphResults.getQueryCollection().getQuery(query.toString()).getResults().getRecall()));
+//				row.add(Double.toString(recall));
 			}
 			writer.writeNext(row.toArray(new String[row.size()]));
 		}
