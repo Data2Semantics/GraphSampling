@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
-import com.d2s.subgraph.eval.results.GraphResultsRegular;
+import com.d2s.subgraph.eval.results.SampleResultsRegular;
 
 import au.com.bytecode.opencsv.CSVWriter;
 

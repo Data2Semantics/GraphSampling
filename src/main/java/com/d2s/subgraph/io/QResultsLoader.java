@@ -15,16 +15,16 @@ import au.com.bytecode.opencsv.CSVReader;
 import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.analysis.WriteAnalysis;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
-import com.d2s.subgraph.eval.results.GraphResults;
-import com.d2s.subgraph.eval.results.GraphResultsRegular;
-import com.d2s.subgraph.eval.results.GraphResultsSample;
+import com.d2s.subgraph.eval.results.SampleResults;
+import com.d2s.subgraph.eval.results.SampleResultsRegular;
+import com.d2s.subgraph.eval.results.SampleResultsRandom;
 import com.d2s.subgraph.eval.results.QueryResultsRegular;
 import com.d2s.subgraph.queries.Query;
 
 public class QResultsLoader {
 	private ExperimentSetup experimentSetup;
 	private WriteAnalysis analyseResults;
-	ArrayList<GraphResultsRegular> allGraphResults;
+	ArrayList<SampleResultsRegular> allGraphResults;
 	public QResultsLoader(ExperimentSetup experimentSetup) {
 		this.experimentSetup = experimentSetup;
 
@@ -62,7 +62,7 @@ public class QResultsLoader {
 				queryCollection.addQuery(query);
 				
 		    }
-			GraphResultsRegular regularGraphResults = new GraphResultsRegular();
+			SampleResultsRegular regularGraphResults = new SampleResultsRegular();
 			regularGraphResults.setQueryCollection(queryCollection);
 			
 			allGraphResults.add(regularGraphResults);
@@ -105,12 +105,12 @@ public class QResultsLoader {
 
 
 	private void addToBatchResults() throws IOException {
-		HashMap<String, ArrayList<GraphResults>> groupedRandomSampleGraphs = groupRandomSampleGraphs();
+		HashMap<String, ArrayList<SampleResults>> groupedRandomSampleGraphs = groupRandomSampleGraphs();
 		
 		//the method called above already added all regular graph to batch results.
 		//now just add our random sample results
-		for (Entry<String, ArrayList<GraphResults>> entry: groupedRandomSampleGraphs.entrySet()) {
-			GraphResultsSample sampleGraphResultsCombined = new GraphResultsSample();
+		for (Entry<String, ArrayList<SampleResults>> entry: groupedRandomSampleGraphs.entrySet()) {
+			SampleResultsRandom sampleGraphResultsCombined = new SampleResultsRandom();
 			sampleGraphResultsCombined.add(entry.getValue());
 			analyseResults.add(sampleGraphResultsCombined);
 		}
@@ -120,16 +120,16 @@ public class QResultsLoader {
 	 * loop through all graphs. if it is a regular graph, add to batch result.
 	 * if it is a random sample graph, group them (by size), so we can combine them afterwards
 	 */
-	private HashMap<String, ArrayList<GraphResults>> groupRandomSampleGraphs() {
-		HashMap<String, ArrayList<GraphResults>> groupedSampleGraphs = new HashMap<String, ArrayList<GraphResults>>();
+	private HashMap<String, ArrayList<SampleResults>> groupRandomSampleGraphs() {
+		HashMap<String, ArrayList<SampleResults>> groupedSampleGraphs = new HashMap<String, ArrayList<SampleResults>>();
 		
 
-		for(GraphResultsRegular graphResult: allGraphResults) {
+		for(SampleResultsRegular graphResult: allGraphResults) {
 			String randomSampleType = getRandomSampleType(graphResult.getGraphName());
 			if (randomSampleType != null) {
 				
 				if (!groupedSampleGraphs.containsKey(randomSampleType)) {
-					groupedSampleGraphs.put(randomSampleType, new ArrayList<GraphResults>());
+					groupedSampleGraphs.put(randomSampleType, new ArrayList<SampleResults>());
 				}
 				groupedSampleGraphs.get(randomSampleType).add(graphResult);
 			} else {

@@ -12,7 +12,7 @@ import org.data2semantics.query.QueryCollection;
 import org.rosuda.JRI.Rengine;
 
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
-import com.d2s.subgraph.eval.results.GraphResults;
+import com.d2s.subgraph.eval.results.SampleResults;
 import com.d2s.subgraph.queries.Query;
 
 public class OutputR extends OutputWrapper {
@@ -21,7 +21,7 @@ public class OutputR extends OutputWrapper {
 	private static String SCRIPT_DRAW_PLOTS = "src/main/resources/rScripts/drawPlots.R";
 	File tempDir;
 	
-	public OutputR(ExperimentSetup experimentSetup, ArrayList<GraphResults> allGraphResults, QueryCollection<Query> queryCollection, File resultsDir) {
+	public OutputR(ExperimentSetup experimentSetup, ArrayList<SampleResults> allGraphResults, QueryCollection<Query> queryCollection, File resultsDir) {
 		super(experimentSetup, allGraphResults, queryCollection, resultsDir);
 		tempDir = new File(TEMP_DIR);
 		if (!tempDir.exists()) {

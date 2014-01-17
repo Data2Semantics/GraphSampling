@@ -10,8 +10,8 @@ import com.d2s.subgraph.queries.Query;
 import com.d2s.subgraph.util.StringUtils;
 import com.d2s.subgraph.util.Utils;
 
-public class GraphResultsRegular extends GraphResults {
-	public GraphResultsRegular() throws IOException {
+public class SampleResultsRegular extends SampleResults {
+	public SampleResultsRegular() throws IOException {
 		super();
 	}
 	public void add(Query query) {
@@ -84,13 +84,13 @@ public class GraphResultsRegular extends GraphResults {
 		}
 		return algorithm;
 	}
-	public int getPercentage() {
-		String graphName = getGraphName();
-		ArrayList<String> parts = new ArrayList<String>(Arrays.asList( graphName.split("-")));
-		String trailingBit = parts.get(parts.size()-1);
-		trailingBit = trailingBit.replace(".nt", "");
-		return Integer.parseInt(trailingBit);
-	}
+//	public int getPercentage() {
+//		String graphName = getGraphName();
+//		ArrayList<String> parts = new ArrayList<String>(Arrays.asList( graphName.split("-")));
+//		String trailingBit = parts.get(parts.size()-1);
+//		trailingBit = trailingBit.replace(".nt", "");
+//		return Integer.parseInt(trailingBit);
+//	}
 	public void setQueryCollection(QueryCollection<Query> queryCollection) {
 		this.queryCollection = queryCollection;
 	}

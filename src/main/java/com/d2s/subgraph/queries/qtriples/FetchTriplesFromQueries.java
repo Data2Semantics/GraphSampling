@@ -41,26 +41,6 @@ public class FetchTriplesFromQueries {
 		experimentDir.mkdir();
 	}
 	
-//	public void createUniqueTripleFile() throws IOException {
-////		System.out.println("creating unique triple file");
-//		//We've fetch everything. Now make a list of all unique triples, so we can fetch their weight in our weighted triple set
-//		Collection<File> tripleFiles = FileUtils.listFilesAndDirs(experimentDir, new IOFileFilter(){
-//			public boolean myAccept(String filename) {
-//				return (!filename.contains(".") && !filename.contains("-"));
-//			}
-//			public boolean accept(File filename) {
-//				return myAccept(filename.getName());
-//			}
-//			public boolean accept(File dir, String filename) {
-//				return myAccept(filename);
-//			}}, TrueFileFilter.INSTANCE);
-//		Set<String> triples = new HashSet<String>();
-//		for (File file: tripleFiles) {
-//			if (!file.isDirectory()) triples.addAll(FileUtils.readLines(file));
-//		}
-//		FileUtils.writeLines(new File(experimentDir.getPath() + "/allTriples.txt"), triples);
-//	}
-//	
 	private void processQueries() throws IOException {
 		QueryCollection<Query> queries = experimentSetup.getQueryCollection();
 		int count = 1;

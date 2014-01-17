@@ -12,22 +12,21 @@ import org.data2semantics.query.QueryCollection;
 
 import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
-import com.d2s.subgraph.eval.results.GraphResults;
 import com.d2s.subgraph.eval.results.QueryResults;
+import com.d2s.subgraph.eval.results.SampleResults;
 import com.d2s.subgraph.queries.Query;
-import com.d2s.subgraph.util.QueryUtils;
 import com.d2s.subgraph.util.StringUtils;
 
 public class OutputHtml extends OutputWrapper{
-	public OutputHtml(ExperimentSetup experimentSetup, ArrayList<GraphResults> allGraphResults, QueryCollection<Query> queryCollection, File resultsDir) {
+	public OutputHtml(ExperimentSetup experimentSetup, ArrayList<SampleResults> allGraphResults, QueryCollection<Query> queryCollection, File resultsDir) {
 		super(experimentSetup, allGraphResults, queryCollection, resultsDir);
 	}
 	/**
 	 * html table with graph evalutations as columns, and queries per row
 	 * @throws IOException
 	 */
-	public void asHtmlTable(ArrayList<String> onlyGraphsContaining) throws IOException {
-		System.out.println("writing html files for "  + onlyGraphsContaining);
+	public void asHtmlTable() throws IOException {
+//		System.out.println("writing html files for "  + onlyGraphsContaining);
 		String encodedEndpoint = URLEncoder.encode(Config.EXPERIMENT_ENDPOINT, "UTF-8"); 
 		String html = "<html><head>\n" +
 				"<link rel='stylesheet' href='http://www.few.vu.nl/~lrietveld/static/style.css' type='text/css' />\n" +
@@ -48,14 +47,14 @@ public class OutputHtml extends OutputWrapper{
 			ArrayList<String> row = new ArrayList<String>();
 			double totalRecall = 0.0;// totalrecall!
 			int numGraphs = 0;
-			for (GraphResults results: allGraphResults) {
+			for (SampleResults results: allGraphResults) {
 				if (results.getQueryCollection().getQuery(query.toString()) != null) {
 //					if (onlyGraphsContaining.length() == 0 || results.getGraphName().contains(onlyGraphsContaining)) {
-					if (StringUtils.partialStringMatch(results.getGraphName(), onlyGraphsContaining)) {
+//					if (StringUtils.partialStringMatch(results.getGraphName(), onlyGraphsContaining)) {
 						QueryResults queryResults = results.getQueryCollection().getQuery(query.toString()).getResults();
 						totalRecall += queryResults.getRecall();
 						numGraphs++;
-					}
+//					}
 				}
 			}
 			
@@ -86,8 +85,8 @@ public class OutputHtml extends OutputWrapper{
 		html += "<thead>\n<tr>";
 		html += "<th>queryId</th><th>avg</th><th>#tp's<br>(non opt)<br><th>#ccv<br></th><th>#cvv<br></th><th>#vcc<br></th>";
 		
-		for (GraphResults graphResults: allGraphResults) {
-			if (StringUtils.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
+		for (SampleResults graphResults: allGraphResults) {
+//			if (StringUtils.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
 				html += "\n<th>" + graphResults.getGraphName().substring("http://".length()).replace('_', '-') + "<br>(avg: " + StringUtils.getDoubleAsFormattedString(graphResults.getAverageRecall()) + ")</th>";
 //				for (Query query: queryCollection.getQueries()) {
 				for (Query query: graphResults.getQueryCollection().getQueries()) {
@@ -108,7 +107,7 @@ public class OutputHtml extends OutputWrapper{
 						row.add("<td>N/A</td>");
 					}
 				}
-			}
+//			}
 		}
 		
 		html += "</tr></thead><tbody>\n";
@@ -120,6 +119,6 @@ public class OutputHtml extends OutputWrapper{
 			html += "</tr>";
 		}
 		html += "\n</tbody> </table></body></html>";
-		FileUtils.writeStringToFile(new File(experimentSetup.getEvalResultsDir() + "/" + onlyGraphsContaining.get(0) + "_" + Config.FILE_HTML_SUMMARY), html);
+		FileUtils.writeStringToFile(new File(Config.PATH_EVALUATION_OUTPUT + experimentSetup.getId() + "/" + Config.FILE_HTML_SUMMARY), html);
 	}
 }

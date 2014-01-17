@@ -22,7 +22,6 @@ public abstract class ExperimentSetup {
 
 	public abstract QueryCollection<Query> getQueryCollection();
 
-	public abstract String getEvalResultsDir();
 
 	public abstract int getMaxNumQueries();
 

@@ -9,21 +9,27 @@ import com.d2s.subgraph.queries.Query;
 
 
 
-public abstract class GraphResults {
+public abstract class SampleResults {
 	
 	public QueryCollection<Query> queryCollection;
 	public String graphName;
+	private double percentage;
 	public int totalTruePositives = 0;
 	public int totalGoldenStandardSize = 0;
 	
 	public abstract void add(Query query);
 	public abstract String getRewriteMethod();
 	public abstract String getAlgorithm();
-	public abstract int getPercentage();
+	public String getPercentage() {
+		return Double.toString(Math.round((percentage * (double)100))) + "%";
+	}
+	public void setPercentage(Double percentage) {
+		this.percentage = percentage;
+	}
 	public abstract String getShortGraphName();
 	public abstract String getProperName();
 	
-	public GraphResults() throws IOException {
+	public SampleResults() throws IOException {
 		queryCollection = new QueryCollection<Query>();
 	}
 	
@@ -39,7 +45,9 @@ public abstract class GraphResults {
 	public double getAverageRecall() {
 		double totalRecall = 0.0;
 		for (Query query: queryCollection.getQueries()) {
-			totalRecall += query.getResults().getRecall();
+			if (query.getResults() != null) {
+				totalRecall += query.getResults().getRecall();
+			}
 		}
 		return totalRecall / (double)queryCollection.getDistinctQueryCount();
 	}

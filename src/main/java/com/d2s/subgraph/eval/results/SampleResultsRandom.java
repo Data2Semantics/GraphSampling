@@ -6,12 +6,12 @@ import java.util.Arrays;
 
 import com.d2s.subgraph.queries.Query;
 
-public class GraphResultsSample extends GraphResults{
-	public GraphResultsSample() throws IOException {
+public class SampleResultsRandom extends SampleResults{
+	public SampleResultsRandom() throws IOException {
 		super();
 	}
 
-	private ArrayList<GraphResults> allGraphResults = new ArrayList<GraphResults>();
+	private ArrayList<SampleResults> allGraphResults = new ArrayList<SampleResults>();
 	
 	public void add(Query result) {
 		//do nothing. (this object is more of a wrapper for other graph results objects)
@@ -22,7 +22,7 @@ public class GraphResultsSample extends GraphResults{
 	 * aggregate these individual sample results to this one sample resultset
 	 * @param individualSampleResults
 	 */
-	public void add(ArrayList<GraphResults> allGraphResults) {
+	public void add(ArrayList<SampleResults> allGraphResults) {
 		this.allGraphResults = allGraphResults;
 		aggregateToSingleObject();
 	}
@@ -37,7 +37,7 @@ public class GraphResultsSample extends GraphResults{
 		for (Query query: queries) {
 			QueryResultsSample queryResultsSample = new QueryResultsSample();
 			ArrayList<Query> allQueryResults = new ArrayList<Query>();
-			for (GraphResults graphResults: allGraphResults) {
+			for (SampleResults graphResults: allGraphResults) {
 				allQueryResults.add(graphResults.getQueryCollection().getQuery(query.toString()));
 			}
 			queryResultsSample.add(allQueryResults);
@@ -80,14 +80,14 @@ public class GraphResultsSample extends GraphResults{
 		return "sample";
 	}
 	
-	public int getPercentage() {
-		return 50;
+	public String getPercentage() {
+		return "50%";
 	}
 
 	public static void main(String[] args)  {
 		try {
 //			EvaluateGraphs evaluate = new EvaluateGraphs(new DbpExperimentSetup());
-			GraphResultsSample results = new GraphResultsSample();
+			SampleResultsRandom results = new SampleResultsRandom();
 			results.aggregateToSingleObject();
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -15,6 +15,7 @@ public class Config {
 	public static String PATH_FAILED_QUERIES = "output/failedQueries/";
 	public static String PATH_WEIGHTED_QUERY_TRIPLES = "input/qTripleWeights/";
 	public static String PATH_WEIGHT_DISTRIBUTION = "input/weightDistribution/";
+	public static String PATH_EVALUATION_OUTPUT = "output/evaluation/";
 	
 	
 	/**
@@ -29,6 +30,8 @@ public class Config {
 	public static String FILE_CSV_AVG_RECALL_PER_QUERY = "avgRecallPerQuery.csv";
 	public static String FILE_CSV_BEST_RECALL_PER_ALG = "bestRecallPerAlgorithm.csv";
 	public static String FILE_QTRIPLES_REQUIRED = "required";
+	public static String FILE_QTRIPLES_OPTIONAL = "optional";
+	public static String FILE_QTRIPLES_UNION = "unions";
 	
 	/**
 	 * Sample info

@@ -13,7 +13,6 @@ import com.d2s.subgraph.queries.qtriples.visitors.ExtractQueryVariablesVisitor;
 import com.d2s.subgraph.queries.qtriples.visitors.ExtractTriplePatternsVisitor;
 import com.d2s.subgraph.queries.qtriples.visitors.ReplaceBlankNodesVisitor;
 import com.d2s.subgraph.queries.qtriples.visitors.RewriteTriplePatternsVisitor;
-import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QueryParseException;
 import com.hp.hpl.jena.query.QuerySolution;
@@ -156,12 +155,11 @@ public class Query extends org.data2semantics.query.Query {
 		return visitor.getVariables();
 	}
 	
-	public Set<Triple> fetchTriplesFromPatterns(QuerySolution solution) {
+	public ExtractTriplePatternsVisitor fetchTriplesFromPatterns(QuerySolution solution, ExtractTriplePatternsVisitor visitor) {
 		
 		Element queryElement;
 		
 		for (String varName: getVarnamesFromPatterns()) {
-//			System.out.println("processing var " + varName);
 			RDFNode node = solution.get(varName);
 			if (node != null) {
 				queryElement = getQueryPattern();
@@ -176,19 +174,15 @@ public class Query extends org.data2semantics.query.Query {
 		//we've rewritten the triple patterns to contain values. Now, we need to convert them to regular triples (i.e. another object in jena representation!)
 		queryElement = getQueryPattern();
 		
-		ExtractTriplePatternsVisitor extractTriplesVisitor = new ExtractTriplePatternsVisitor();
-		queryElement.visit(extractTriplesVisitor);
 		
-		
+		queryElement.visit(visitor);
 		
 //		for (Triple triple: extractTriplesVisitor.getTriples()) {
 //			System.out.println(triple.toString());
 //		}
 		
 		
-		
-		
-		return extractTriplesVisitor.getTriples();
+		return visitor;
 		
 	}
 	

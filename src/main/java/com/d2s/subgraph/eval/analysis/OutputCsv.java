@@ -12,14 +12,14 @@ import au.com.bytecode.opencsv.CSVWriter;
 
 import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
-import com.d2s.subgraph.eval.results.GraphResults;
+import com.d2s.subgraph.eval.results.SampleResults;
 import com.d2s.subgraph.eval.results.QueryResults;
 import com.d2s.subgraph.queries.Query;
 import com.d2s.subgraph.util.StringUtils;
 import com.d2s.subgraph.util.Utils;
 
 public class OutputCsv extends OutputWrapper {
-	public OutputCsv(ExperimentSetup experimentSetup, ArrayList<GraphResults> allGraphResults, QueryCollection<Query> queryCollection, File resultsDir) {
+	public OutputCsv(ExperimentSetup experimentSetup, ArrayList<SampleResults> allGraphResults, QueryCollection<Query> queryCollection, File resultsDir) {
 		super(experimentSetup, allGraphResults, queryCollection, resultsDir);
 	}
 	
@@ -29,8 +29,8 @@ public class OutputCsv extends OutputWrapper {
 	 * table with graph evaluations as columns, and queries per row (with query id as row header)
 	 * @throws IOException 
 	 */
-	public void asCsvTable(ArrayList<String> onlyGraphsContaining) throws IOException {
-		System.out.println("writing csv files for "  + onlyGraphsContaining);
+	public void asCsvTable() throws IOException {
+//		System.out.println("writing csv files for "  + onlyGraphsContaining);
 		HashMap<Integer, ArrayList<String>> table = new HashMap<Integer, ArrayList<String>>();
 		
 		for (Query query: queryCollection.getQueries()) {
@@ -41,8 +41,8 @@ public class OutputCsv extends OutputWrapper {
 			table.put(queryId, row);
 		}
 		
-		for (GraphResults graphResults: allGraphResults) {
-			if (StringUtils.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
+		for (SampleResults graphResults: allGraphResults) {
+//			if (StringUtils.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
 				for (Query query: graphResults.getQueryCollection().getQueries()) {
 					ArrayList<String> row = table.get(query.getQueryId());
 					if (query.getResults() != null) {
@@ -52,17 +52,17 @@ public class OutputCsv extends OutputWrapper {
 						row.add("N/A");
 					}
 				}
-			}
+//			}
 		}
 		
-		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + onlyGraphsContaining.get(0) + "_" + Config.FILE_CSV_FULL_LIST);
+		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + Config.FILE_CSV_FULL_LIST);
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
 		ArrayList<String> header = new ArrayList<String>();
 		header.add("queryId");
-		for (GraphResults graphResults: allGraphResults) {
-			if (StringUtils.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
+		for (SampleResults graphResults: allGraphResults) {
+//			if (StringUtils.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
 				header.add(graphResults.getShortGraphName());
-			}
+//			}
 			
 		}
 		writer.writeNext(header.toArray(new String[header.size()]));
@@ -76,14 +76,14 @@ public class OutputCsv extends OutputWrapper {
 	 * table with graph evaluations as columns, and queries per row (with query id as row header)
 	 * @throws IOException 
 	 */
-	public void asCsvFlatList(ArrayList<String> onlyGraphsContaining) throws IOException {
-		System.out.println("writing csv flatlist for "  + onlyGraphsContaining);
-		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + onlyGraphsContaining.get(0) + "_"+ Config.FILE_CSV_FLAT_FULL_LIST);
+	public void asCsvFlatList() throws IOException {
+		System.out.println("writing csv flatlist");
+		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + Config.FILE_CSV_FLAT_FULL_LIST);
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
 		writer.writeNext(new String[]{"queryId", "graph", "recall", "rewrMethod", "algorithm"});
 		
-		for (GraphResults graphResults: allGraphResults) {
-			if (StringUtils.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
+		for (SampleResults graphResults: allGraphResults) {
+//			if (StringUtils.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
 //				for (Query query: queryCollection.getQueries()) {
 //					if (graphResults.contains(query.getQueryId())) {
 //						writer.writeNext(new String[]{
@@ -100,24 +100,24 @@ public class OutputCsv extends OutputWrapper {
 							graphResults.getProperName(), 
 							Double.toString(query.getResults().getRecall()), 
 							graphResults.getRewriteMethod(), 
-							graphResults.getAlgorithm() + " " + Integer.toString(graphResults.getPercentage()) + "%"});
+							graphResults.getAlgorithm() + " " + graphResults.getPercentage()});
 				}
-			}
+//			}
 		}
 		writer.close();
 	}
 	
-	public void rewriteVsAlgs(ArrayList<String> onlyGraphsContaining) throws IOException {
-		System.out.println("writing csv rewrite vs. algs "  + onlyGraphsContaining);
+	public void rewriteVsAlgs() throws IOException {
+		System.out.println("writing csv rewrite vs. algs");
 		HashMap<Integer, Double> node1 = new HashMap<Integer, Double>();
 		HashMap<Integer, Double> node2 = new HashMap<Integer, Double>();
 		HashMap<Integer, Double> node3 = new HashMap<Integer, Double>();
 		HashMap<Integer, Double> node4 = new HashMap<Integer, Double>();
 		HashMap<Integer, Double> path = new HashMap<Integer, Double>();
 		
-		for (GraphResults graphResults: allGraphResults) {
+		for (SampleResults graphResults: allGraphResults) {
 			String graphName = graphResults.getGraphName();
-			if (StringUtils.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining) && !graphName.contains("sample") && !graphName.contains("Baseline")) {
+//			if (StringUtils.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining) && !graphName.contains("sample") && !graphName.contains("Baseline")) {
 				HashMap<Integer, Double> hashmapPick = null;
 				int rewriteMethod = StringUtils.getRewriteMethod(graphName);
 				int analysisAlgorithm = StringUtils.getAnalysisAlgorithm(graphName);
@@ -134,9 +134,9 @@ public class OutputCsv extends OutputWrapper {
 					System.exit(1);
 				}
 				hashmapPick.put(analysisAlgorithm, graphResults.getAverageRecall());
-			}
+//			}
 		}
-		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + onlyGraphsContaining.get(0) + "_"+ Config.FILE_CSV_REWR_VS_ALGS);
+		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + Config.FILE_CSV_REWR_VS_ALGS);
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
 		double sampleAverage = getSampleAverage("0.5");
 		writer.writeNext(new String[]{Double.toString(sampleAverage), "eigenvector", "pagerank", "betweenness", "indegree", "outdegree"});
@@ -195,7 +195,7 @@ public class OutputCsv extends OutputWrapper {
 	private double getSampleAverage(String mode) {
 		boolean found = false;
 		double sampleAverage = 0.0;
-		for (GraphResults results: this.allGraphResults) {
+		for (SampleResults results: this.allGraphResults) {
 			if (results.getGraphName().equals("http://" + experimentSetup.getGraphPrefix() + "sample_" + mode + ".nt")) {
 				found = true;
 				sampleAverage = results.getAverageRecall();
@@ -208,7 +208,7 @@ public class OutputCsv extends OutputWrapper {
 		return sampleAverage;
 		
 	}
-	public void outputAverageRecallPerQuery(ArrayList<String> onlyGraphsContaining) throws IOException {
+	public void outputAverageRecallPerQuery() throws IOException {
 		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + Config.FILE_CSV_AVG_RECALL_PER_QUERY);
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
 		writer.writeNext(new String[]{"queryId", "avgRecall"});
@@ -217,13 +217,13 @@ public class OutputCsv extends OutputWrapper {
 			
 			double totalRecall = 0.0;// totalrecall!
 			int numGraphs = 0;
-			for (GraphResults results: allGraphResults) {
+			for (SampleResults results: allGraphResults) {
 				if (results.getQueryCollection().getQuery(query.toString()) != null) {
-					if (StringUtils.partialStringMatch(results.getGraphName(), onlyGraphsContaining)) {
+//					if (StringUtils.partialStringMatch(results.getGraphName(), onlyGraphsContaining)) {
 						QueryResults queryResults = results.getQueryCollection().getQuery(query.toString()).getResults();
 						totalRecall += queryResults.getRecall();
 						numGraphs++;
-					}
+//					}
 				}
 			}
 			
@@ -233,7 +233,7 @@ public class OutputCsv extends OutputWrapper {
 		writer.close();
 		
 	}
-	public void outputBestRecallPerAlgorithm(ArrayList<String> onlyGraphsContaining) throws IOException {
+	public void outputBestRecallPerAlgorithm() throws IOException {
 		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + Config.FILE_CSV_BEST_RECALL_PER_ALG);
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
 		writer.writeNext(new String[]{"queryId", "algorithm", "bestRecall", "avgQueryRecall"});
@@ -250,7 +250,7 @@ public class OutputCsv extends OutputWrapper {
 				ArrayList<String> row = new ArrayList<String>();
 				double bestRecall = 0.0;
 				int numGraphResultsFound = 0;
-				for (GraphResults results: allGraphResults) {
+				for (SampleResults results: allGraphResults) {
 					if (StringUtils.getAnalysisAlgorithm(results.getGraphName()) == algorithm) {
 						numGraphResultsFound++;
 						totalRecall += results.getQueryCollection().getQuery(query.toString()).getResults().getRecall();

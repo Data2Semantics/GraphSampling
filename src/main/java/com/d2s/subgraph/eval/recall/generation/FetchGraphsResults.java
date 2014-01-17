@@ -30,7 +30,7 @@ public class FetchGraphsResults {
 	private ArrayList<String> graphs = new ArrayList<String>();;
 	public FetchGraphsResults(ExperimentSetup experimentSetup) throws IOException {
 		this.experimentSetup = experimentSetup;
-		this.resultsDir = new File(experimentSetup.getEvalResultsDir());
+		this.resultsDir = new File(Config.PATH_EVALUATION_OUTPUT + experimentSetup.getId());
 		if (!(resultsDir.exists() && resultsDir.isDirectory())) {
 			resultsDir.mkdir();
 		}

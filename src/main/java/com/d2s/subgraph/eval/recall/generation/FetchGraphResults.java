@@ -12,9 +12,9 @@ import org.openrdf.repository.RepositoryException;
 import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 import com.d2s.subgraph.eval.experiments.Sp2bExperimentSetup;
-import com.d2s.subgraph.eval.results.GraphResults;
-import com.d2s.subgraph.eval.results.GraphResultsRegular;
 import com.d2s.subgraph.eval.results.QueryResultsRegular;
+import com.d2s.subgraph.eval.results.SampleResults;
+import com.d2s.subgraph.eval.results.SampleResultsRegular;
 import com.d2s.subgraph.io.QResultsSaver;
 import com.d2s.subgraph.queries.Query;
 import com.d2s.subgraph.util.QueryUtils;
@@ -31,13 +31,13 @@ public class FetchGraphResults {
 	private ExperimentSetup experimentSetup;
 	public int validCount = 0;
 	public int invalidCount = 0;
-	private GraphResults graphResults;
+	private SampleResults graphResults;
 
 	public FetchGraphResults(ExperimentSetup experimentSetup, String subGraph) throws IOException {
 		this.goldenStandardGraph = experimentSetup.getGoldenStandardGraph();
 		this.experimentSetup = experimentSetup;
 		this.subGraph = subGraph;
-		graphResults = new GraphResultsRegular();
+		graphResults = new SampleResultsRegular();
 		graphResults.setGraphName(subGraph);
 	}
 
@@ -235,13 +235,12 @@ public class FetchGraphResults {
 		return ResultSetFactory.copyResults(queryExecution.execSelect());
 	}
 
-	public GraphResults getResults() {
+	public SampleResults getResults() {
 		return graphResults;
 	}
 
 	public static void main(String[] args) {
 
-		String goldenStandardGraph = "http://sp2b";
 		String subgraph = "http://df-s-o-litAsLit-unweighted-directed-pagerank-min-max-50-50.nt";
 		try {
 			// EvaluateGraph evaluate = new EvaluateGraph(new QaldDbpQueries(QaldDbpQueries.QALD_2_QUERIES, new OnlyDboQueries()),

@@ -2,6 +2,9 @@ package com.d2s.subgraph.queries.qtriples;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
@@ -10,6 +13,7 @@ import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 import com.d2s.subgraph.eval.experiments.SwdfExperimentSetup;
 import com.d2s.subgraph.queries.Query;
+import com.d2s.subgraph.queries.qtriples.visitors.ExtractTriplePatternsVisitor;
 import com.d2s.subgraph.util.Utils;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
@@ -17,6 +21,8 @@ import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.sparql.syntax.ElementTriplesBlock;
+import com.hp.hpl.jena.sparql.syntax.TripleCollectorMark;
 
 public class FetchTriplesFromQuery {
 	
@@ -93,18 +99,28 @@ public class FetchTriplesFromQuery {
 	}
 	
 	private void fetchAndStoresTriplesFromResultSet(ResultSet resultSet) throws IOException {
+//		System.out.println("fetching and storing");
 		try {
+			//to avoid constantly doing ask calls, we should save the triple blocks we -know- are there, here
+			Set<TripleCollectorMark> knownToExist = new HashSet<TripleCollectorMark>(); 
+			Set<TripleCollectorMark> knownNotToExist = new HashSet<TripleCollectorMark>(); 
+			boolean hasResults = false;
 			while (resultSet.hasNext()) {
+				hasResults = true;
 				QuerySolution solution = resultSet.next();
-				System.out.println(solution.toString());
-				System.exit(1);
 				File outputDir = getQuerySolutionDir();
-				File requiredTriplesFile = new File(outputDir.getPath() + "/" + Config.FILE_QTRIPLES_REQUIRED);
-				Set<Triple> fetchedTriples = rewrittenQuery.fetchTriplesFromPatterns(solution);
-				for (Triple triple: fetchedTriples) {
-					FileUtils.write(requiredTriplesFile, getStringRepresentation(triple), true);
-				}
+				ExtractTriplePatternsVisitor visitor = new ExtractTriplePatternsVisitor(experimentSetup.getGoldenStandardGraph(), knownToExist, knownNotToExist);
+				rewrittenQuery.fetchTriplesFromPatterns(solution, visitor);
+				writeRequiredTriples(new File(outputDir.getPath() + "/" + Config.FILE_QTRIPLES_REQUIRED), visitor.getRequiredTriples());
+				writeOptionalTriples(new File(outputDir.getPath() + "/" + Config.FILE_QTRIPLES_OPTIONAL), visitor.getOptionalTriples());
+				writeUnionTriples(new File(outputDir.getPath() + "/" + Config.FILE_QTRIPLES_UNION), visitor.getUnionTriples());
+//				QTriples fetchedTriples = rewrittenQuery.fetchTriplesFromPatterns(solution);
+//				fetchedTriples.checkPossibleTriples(experimentSetup.getGoldenStandardGraph(), knownTriples, knownNotToExistTriples);
+//				knownTriples.addAll(fetchedTriples.getRequiredTriples());
+				
+				
 			}
+			if (!hasResults) System.out.println("STRANGE! query " + queryOutputDir.getPath() + " does not have any results!");
 		} catch (UnsupportedOperationException e) {
 			System.out.println(originalQuery.toString());
 			throw e;
@@ -116,6 +132,33 @@ public class FetchTriplesFromQuery {
 	}
 
 	
+	private void writeUnionTriples(File file, LinkedHashMap<String, Set<Triple>> unionTriples) throws UnsupportedOperationException, IOException {
+		for (Entry<String, Set<Triple>> triples: unionTriples.entrySet()) {
+			for (Triple triple: triples.getValue()) {
+				FileUtils.write(new File(file.getPath() + "/" + triples.getKey()), getStringRepresentation(triple), true);
+			}
+		}
+	}
+
+
+	private void writeOptionalTriples(File file, LinkedHashMap<Integer, Set<Triple>> optionalTriples) throws UnsupportedOperationException, IOException {
+		for (Entry<Integer, Set<Triple>> triples: optionalTriples.entrySet()) {
+			for (Triple triple: triples.getValue()) {
+				FileUtils.write(new File(file.getPath() + "/" + triples.getKey()), getStringRepresentation(triple), true);
+			}
+		}
+
+	}
+
+
+	private void writeRequiredTriples(File file, Set<Triple> set) throws UnsupportedOperationException, IOException {
+		for (Triple triple: set) {
+			FileUtils.write(file, getStringRepresentation(triple), true);
+		}
+		
+	}
+
+
 	public static void fetch(ExperimentSetup experimentSetup, Query query, File experimentDir) throws IOException {
 		FetchTriplesFromQuery fetch = new FetchTriplesFromQuery(experimentSetup, query, experimentDir);
 		fetch.process();
@@ -125,30 +168,11 @@ public class FetchTriplesFromQuery {
 		boolean useCachedQueries = true;
 		ExperimentSetup experimentsetup = new SwdfExperimentSetup(useCachedQueries, true);
 		
-		Query query = Query.create("PREFIX  rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" + 
-				"PREFIX  geo:  <http://www.w3.org/2003/01/geo/wgs84_pos#>\n" + 
-				"PREFIX  foaf: <http://xmlns.com/foaf/0.1/>\n" + 
-				"PREFIX  owl:  <http://www.w3.org/2002/07/owl#>\n" + 
-				"\n" + 
-				"SELECT DISTINCT  ?name ?homepage ?page ?sameAs ?seeAlso ?latitude ?longitude\n" + 
-				"FROM <http://df>\n" + 
+		Query query = Query.create("SELECT  ?result\n" + 
+				"FROM <http://swdf>\n" + 
 				"WHERE\n" + 
-				"  { <http://data.semanticweb.org/organization/otto-vonotto-von-guericke-universitaet-magdeburg-fakultaet-fuer-informatik-ag-managementinformationssysteme> foaf:name ?name\n" + 
-				"    OPTIONAL\n" + 
-				"      { <http://data.semanticweb.org/organization/otto-vonotto-von-guericke-universitaet-magdeburg-fakultaet-fuer-informatik-ag-managementinformationssysteme> foaf:page ?page }\n" + 
-				"    OPTIONAL\n" + 
-				"      { <http://data.semanticweb.org/organization/otto-vonotto-von-guericke-universitaet-magdeburg-fakultaet-fuer-informatik-ag-managementinformationssysteme> owl:sameAs ?sameAs }\n" + 
-				"    OPTIONAL\n" + 
-				"      { <http://data.semanticweb.org/organization/otto-vonotto-von-guericke-universitaet-magdeburg-fakultaet-fuer-informatik-ag-managementinformationssysteme> rdfs:seeAlso ?seeAlso }\n" + 
-				"    OPTIONAL\n" + 
-				"      { <http://data.semanticweb.org/organization/otto-vonotto-von-guericke-universitaet-magdeburg-fakultaet-fuer-informatik-ag-managementinformationssysteme> foaf:homepage ?homepage }\n" + 
-				"    OPTIONAL\n" + 
-				"      { <http://data.semanticweb.org/organization/otto-vonotto-von-guericke-universitaet-magdeburg-fakultaet-fuer-informatik-ag-managementinformationssysteme> foaf:based_near ?location .\n" + 
-				"        ?location geo:lat ?latitude .\n" + 
-				"        ?location geo:long ?longitude\n" + 
-				"      }\n" + 
-				"  }\n" + 
-				"");
+				"  { ?result <http://www.w3.org/2000/01/rdf-schema#label> \"Christophe Guéret\" }");
+//		System.out.println(query.toString());
 		FetchTriplesFromQuery.fetch(experimentsetup, query, new File("test"));
 		// new EvaluateGraphs(new
 		// DbpoExperimentSetup(DbpoExperimentSetup.QALD_REMOVE_OPTIONALS)),
