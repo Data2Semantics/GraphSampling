@@ -12,11 +12,12 @@ import au.com.bytecode.opencsv.CSVWriter;
 
 import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
-import com.d2s.subgraph.eval.results.SampleResults;
 import com.d2s.subgraph.eval.results.QueryResults;
+import com.d2s.subgraph.eval.results.SampleResults;
 import com.d2s.subgraph.queries.Query;
 import com.d2s.subgraph.util.StringUtils;
-import com.d2s.subgraph.util.Utils;
+import com.d2s.subgraph.util.StringUtils.Algorithms;
+import com.d2s.subgraph.util.StringUtils.RewriteMethods;
 
 public class OutputCsv extends OutputWrapper {
 	public OutputCsv(ExperimentSetup experimentSetup, ArrayList<SampleResults> allGraphResults, QueryCollection<Query> queryCollection, File resultsDir) {
@@ -109,27 +110,27 @@ public class OutputCsv extends OutputWrapper {
 	
 	public void rewriteVsAlgs() throws IOException {
 		System.out.println("writing csv rewrite vs. algs");
-		HashMap<Integer, Double> node1 = new HashMap<Integer, Double>();
-		HashMap<Integer, Double> node2 = new HashMap<Integer, Double>();
-		HashMap<Integer, Double> node3 = new HashMap<Integer, Double>();
-		HashMap<Integer, Double> node4 = new HashMap<Integer, Double>();
-		HashMap<Integer, Double> path = new HashMap<Integer, Double>();
+		HashMap<Algorithms, Double> node1 = new HashMap<Algorithms, Double>();
+		HashMap<Algorithms, Double> node2 = new HashMap<Algorithms, Double>();
+		HashMap<Algorithms, Double> node3 = new HashMap<Algorithms, Double>();
+		HashMap<Algorithms, Double> node4 = new HashMap<Algorithms, Double>();
+		HashMap<Algorithms, Double> path = new HashMap<Algorithms, Double>();
 		
 		for (SampleResults graphResults: allGraphResults) {
 			String graphName = graphResults.getGraphName();
 //			if (StringUtils.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining) && !graphName.contains("sample") && !graphName.contains("Baseline")) {
-				HashMap<Integer, Double> hashmapPick = null;
-				int rewriteMethod = StringUtils.getRewriteMethod(graphName);
-				int analysisAlgorithm = StringUtils.getAnalysisAlgorithm(graphName);
+				HashMap<Algorithms, Double> hashmapPick = null;
+				RewriteMethods rewriteMethod = StringUtils.getRewriteMethod(graphName);
+				Algorithms analysisAlgorithm = StringUtils.getAnalysisAlgorithm(graphName);
 				
 				
 				
-				if (rewriteMethod == Utils.REWRITE_NODE1) hashmapPick = node1;
-				if (rewriteMethod == Utils.REWRITE_NODE2) hashmapPick = node2;
-				if (rewriteMethod == Utils.REWRITE_NODE3) hashmapPick = node3;
-				if (rewriteMethod == Utils.REWRITE_NODE4) hashmapPick = node4;
-				if (rewriteMethod == Utils.REWRITE_PATH) hashmapPick = path;
-				if (hashmapPick == null || analysisAlgorithm == -1) {
+				if (rewriteMethod == RewriteMethods.RESOURCE_SIMPLE) hashmapPick = node1;
+				if (rewriteMethod == RewriteMethods.RESOURCE_WITHOUT_LIT) hashmapPick = node2;
+				if (rewriteMethod == RewriteMethods.RESOURCE_UNIQUE) hashmapPick = node3;
+				if (rewriteMethod == RewriteMethods.RESOURCE_CONTEXT) hashmapPick = node4;
+				if (rewriteMethod == RewriteMethods.PATH) hashmapPick = path;
+				if (hashmapPick == null) {
 					System.out.println("Not able to detect rewrite method or analysis of graph " + graphName);
 					System.exit(1);
 				}
@@ -163,30 +164,30 @@ public class OutputCsv extends OutputWrapper {
 		
 		writer.close();
 	}
-	private ArrayList<String> getHashMapAsArrayRow(HashMap<Integer, Double> hm) {
+	private ArrayList<String> getHashMapAsArrayRow(HashMap<Algorithms, Double> hm) {
 		ArrayList<String> row = new ArrayList<String>();
-		if (hm.containsKey(Utils.ALG_EIGENVECTOR)) {
-			row.add(Double.toString(hm.get(Utils.ALG_EIGENVECTOR)));
+		if (hm.containsKey(Algorithms.EIGENVECTOR)) {
+			row.add(Double.toString(hm.get(Algorithms.EIGENVECTOR)));
 		} else {
 			row.add("");
 		}
-		if (hm.containsKey(Utils.ALG_PAGERANK)) {
-			row.add(Double.toString(hm.get(Utils.ALG_PAGERANK)));
+		if (hm.containsKey(Algorithms.PAGERANK)) {
+			row.add(Double.toString(hm.get(Algorithms.PAGERANK)));
 		} else {
 			row.add("");
 		}
-		if (hm.containsKey(Utils.ALG_BETWEENNESS)) {
-			row.add(Double.toString(hm.get(Utils.ALG_BETWEENNESS)));
+		if (hm.containsKey(Algorithms.BETWEENNESS)) {
+			row.add(Double.toString(hm.get(Algorithms.BETWEENNESS)));
 		} else {
 			row.add("");
 		}
-		if (hm.containsKey(Utils.ALG_INDEGREE)) {
-			row.add(Double.toString(hm.get(Utils.ALG_INDEGREE)));
+		if (hm.containsKey(Algorithms.INDEGREE)) {
+			row.add(Double.toString(hm.get(Algorithms.INDEGREE)));
 		} else {
 			row.add("");
 		}
-		if (hm.containsKey(Utils.ALG_OUTDEGREE)) {
-			row.add(Double.toString(hm.get(Utils.ALG_OUTDEGREE)));
+		if (hm.containsKey(Algorithms.OUTDEGREE)) {
+			row.add(Double.toString(hm.get(Algorithms.OUTDEGREE)));
 		} else {
 			row.add("");
 		}
@@ -240,8 +241,8 @@ public class OutputCsv extends OutputWrapper {
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
 		writer.writeNext(new String[]{"queryId", "algorithm", "bestRecall", "avgQueryRecall"});
 //		int[] algorithms = new int[]{Utils.ALG_BETWEENNESS, Utils.ALG_EIGENVECTOR, Utils.ALG_INDEGREE, Utils.ALG_OUTDEGREE, Utils.ALG_PAGERANK};
-		int[] algorithms = new int[]{Utils.ALG_INDEGREE, Utils.ALG_OUTDEGREE, Utils.ALG_PAGERANK};
-		int[] rewrMethods = new int[]{Utils.REWRITE_NODE1, Utils.REWRITE_NODE2, Utils.REWRITE_NODE3, Utils.REWRITE_NODE4, Utils.REWRITE_PATH};
+		Algorithms[] algorithms = new Algorithms[]{Algorithms.INDEGREE, Algorithms.OUTDEGREE, Algorithms.PAGERANK};
+		RewriteMethods[] rewrMethods = new RewriteMethods[]{RewriteMethods.RESOURCE_CONTEXT, RewriteMethods.RESOURCE_SIMPLE, RewriteMethods.RESOURCE_UNIQUE, RewriteMethods.RESOURCE_WITHOUT_LIT, RewriteMethods.PATH};
 		
 		for (Query query: getQueryCollection().getQueries()) {
 			ArrayList<ArrayList<String>> rows = new ArrayList<ArrayList<String>>();
@@ -249,7 +250,7 @@ public class OutputCsv extends OutputWrapper {
 			
 			double totalRecall = 0.0;
 			int graphCount = 0;
-			for (int algorithm: algorithms) {
+			for (Algorithms algorithm: algorithms) {
 				ArrayList<String> row = new ArrayList<String>();
 				double bestRecall = 0.0;
 				int numGraphResultsFound = 0;

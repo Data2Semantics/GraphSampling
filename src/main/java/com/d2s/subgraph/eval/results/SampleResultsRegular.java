@@ -8,7 +8,6 @@ import org.data2semantics.query.QueryCollection;
 
 import com.d2s.subgraph.queries.Query;
 import com.d2s.subgraph.util.StringUtils;
-import com.d2s.subgraph.util.Utils;
 
 public class SampleResultsRegular extends SampleResults {
 	public SampleResultsRegular() throws IOException {
@@ -30,32 +29,10 @@ public class SampleResultsRegular extends SampleResults {
 	}
 	
 	public String getProperName() {
-		int rewriteMethod = StringUtils.getRewriteMethod(getGraphName());
-		int analysisAlg = StringUtils.getAnalysisAlgorithm(getGraphName());
 		String properName = "";
-		if (rewriteMethod == Utils.REWRITE_NODE1) {
-			properName += "Node1";
-		} else if (rewriteMethod == Utils.REWRITE_NODE2) {
-			properName += "Node2";
-		} else if (rewriteMethod == Utils.REWRITE_NODE3) {
-			properName += "Node3";
-		} else if (rewriteMethod == Utils.REWRITE_NODE4) {
-			properName += "Node4";
-		} else if (rewriteMethod == Utils.REWRITE_PATH) {
-			properName += "Path";
-		}
-		if (analysisAlg == Utils.ALG_BETWEENNESS) {
-			properName += " betweenness";
-		} else if (analysisAlg == Utils.ALG_EIGENVECTOR) {
-			properName += " eigenvector";
-		} else if (analysisAlg == Utils.ALG_INDEGREE) {
-			properName += " indegree";
-		} else if (analysisAlg == Utils.ALG_OUTDEGREE) {
-			properName += " outdegree";
-		} else if (analysisAlg == Utils.ALG_PAGERANK) {
-			properName += " pagerank";
-		}
-		properName += " " + getPercentage() + "%";
+		properName += StringUtils.getRewriteMethodAsString(getGraphName());
+		properName += " " + StringUtils.getAlgorithmAsString(getGraphName());
+		properName += " " + getPercentage();
 		return properName;
 	}
 	public String getShortGraphName() {

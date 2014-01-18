@@ -26,19 +26,6 @@ import com.hp.hpl.jena.sparql.syntax.ElementWalker;
 import com.hp.hpl.jena.sparql.syntax.Template;
 
 public class QueryUtils {
-	public static int REWRITE_NODE1 = 0;
-	public static int REWRITE_NODE2 = 1;
-	public static int REWRITE_NODE3 = 2;
-	public static int REWRITE_NODE4 = 3;
-	public static int REWRITE_PATH = 4;
-
-	public static int ALG_EIGENVECTOR = 0;
-	public static int ALG_PAGERANK = 1;
-	public static int ALG_BETWEENNESS = 2;
-	public static int ALG_INDEGREE = 3;
-	public static int ALG_OUTDEGREE = 4;
-	
-
 
 
 	public static int getResultSize(ResultSetRewindable resultSet) {
