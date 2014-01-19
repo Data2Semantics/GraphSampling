@@ -389,6 +389,8 @@ public abstract class QueriesFetcher {
 		br.close();
 		
 	}
+	
+	
 	public static void main(String[] args) throws IOException {
 		String query = "SELECT DISTINCT ?p ?o\n" + 
 				"FROM <http://swdf>\n" + 
