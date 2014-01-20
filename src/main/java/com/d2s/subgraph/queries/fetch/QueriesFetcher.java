@@ -218,6 +218,7 @@ public abstract class QueriesFetcher {
 							query = execQueryToTest(query.getQueryWithFromClause(experimentSetup.getGoldenStandardGraph()));
 							System.out.print("+");
 	//						System.out.println(queryString);
+							query.setQueryId(queryCollection.getDistinctQueryCount());
 							queryCollection.addQuery(query);
 						} catch (IllegalStateException e) {
 							//no results for this query!
@@ -268,8 +269,10 @@ public abstract class QueriesFetcher {
 		while(sc.hasNext()) {
 			String line = sc.next();
 			String queryString = line.trim();
+			
 			if (queryString.length() > 0) {
 				Query query = Query.create(URLDecoder.decode(queryString, "UTF-8"), queryCollection);
+				query.setQueryId(queryCollection.getDistinctQueryCount());
 				queryCollection.addQuery(query);
 			}
 		}

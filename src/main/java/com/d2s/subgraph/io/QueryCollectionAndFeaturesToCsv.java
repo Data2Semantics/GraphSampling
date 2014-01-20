@@ -76,7 +76,6 @@ public class QueryCollectionAndFeaturesToCsv {
 			Query query = queries.get(i);
 			
 			ArrayList<String> row = new ArrayList<String>();
-			// writer.writeNext(new String[]{
 			row.add(Integer.toString(i));
 			row.add(Integer.toString(query.triplePatternCount));
 			row.add(Integer.toString(query.triplePatternCountCcv));
@@ -94,9 +93,7 @@ public class QueryCollectionAndFeaturesToCsv {
 			row.add(Integer.toString(query.numOptionalBlocks.getVal()));
 			row.add(Integer.toString(query.numOptionalTriples.getVal()));
 			
-			
 			writer.writeNext(row.toArray(new String[row.size()]));
-			// });
 		}
 
 		writer.close();

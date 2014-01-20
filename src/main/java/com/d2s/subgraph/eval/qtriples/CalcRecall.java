@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.TreeMap;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -74,49 +75,34 @@ public class CalcRecall {
 		File queryTripleDir = new File(Config.PATH_QUERY_TRIPLES + experimentSetup.getId());
 		File[] qsDirs = queryTripleDir.listFiles();
 		
-		ArrayList<File> filteredQsDirs = new ArrayList<File>();
+		TreeMap<Integer, File> filteredQsDirs = new TreeMap<Integer, File>();
 		for (File file: qsDirs) {
 			if (file.getName().startsWith("query-")) {
-				filteredQsDirs.add(file);
+				filteredQsDirs.put(Integer.parseInt(file.getName().substring("query-".length())), file);
 			}
 		}
-		queryDirs = filteredQsDirs.toArray(new File[filteredQsDirs.size()]);
+		filteredQsDirs.values().toArray(new File[filteredQsDirs.size()]);
+		queryDirs = filteredQsDirs.values().toArray(new File[filteredQsDirs.size()]);
 		if (queryDirs.length == 0) throw new IllegalStateException("could not find queries to calc recall for. Searching in dir " + queryTripleDir.getPath());
 	}
 	
 	private SampleResults calcForQueries(String sample, HashMap<String, Double> sampleWeights) throws IOException {
-//		File queryTripleDir = new File(Config.PATH_QUERY_TRIPLES + experimentSetup.getId());
-//		Collection<File> queryDirs = FileUtils.listFiles(queryTripleDir, DirectoryFileFilter.INSTANCE, null);
-//		Collection<File> queryDirs = FileUtils.listFiles(queryTripleDir, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
 		SampleResultsRegular results = new SampleResultsRegular();
 		results.setGraphName(sample);
-//		Set<Double> queryRecalls = new HashSet<Double>();
 		int count = 0;
-//		double totalQuerySize = queryDirs.length;
 		for (File queryDir: queryDirs) {
+			System.out.println(queryDir.getName());
 			if (count > maxQueries) break;
-//			String percentage = Double.toString(Math.round((count / totalQuerySize) * 100.0)) + "%";
-//			System.out.print("\r" + percentage);
-//			count++;
 			Query query = CalcRecallForQuery.calc(experimentSetup, sample, sampleWeights, queryDir, cutoffWeights.getCutoffWeights().get(sample));
+			query.setQueryId(count);
 			results.add(query);
+			count++;
 		}
 		System.out.println("avg recall: " + results.getAverageRecall());
 		results.setPercentage(cutoffWeights.getCutoffSize(sample));
-//		recall
 		return results;
 	}
 	
-//	private void calcForQuery(File queryDir) throws IOException {
-//		File queryFile = new File(queryDir.getPath() + "/query.txt");
-//		if (!queryFile.exists()) throw new IOException("tried to locate " + queryFile.getPath() + ", but it isnt there. Unable to calc recall");
-//		
-//		Query query = Query.create(FileUtils.readFileToString(queryFile));
-//		
-//		
-//		
-//		
-//	}
 
 	public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException, InterruptedException {
 		CalcRecall calc = new CalcRecall(new SwdfExperimentSetup(true), 0.5);

@@ -23,7 +23,7 @@ import com.hp.hpl.jena.sparql.core.Prologue;
 import com.hp.hpl.jena.sparql.syntax.Element;
 
 public class Query extends org.data2semantics.query.Query {
-	private int queryId;
+	private Integer queryId;
 	private boolean onlyDbo;
 	private ResultSetRewindable goldenStandardResults = null;
 	private ArrayList<HashMap<String, String>> answers = new ArrayList<HashMap<String, String>>();
@@ -35,7 +35,7 @@ public class Query extends org.data2semantics.query.Query {
 		super(prologue);
 	}
 	
-	public int getQueryId() {
+	public Integer getQueryId() {
 		return queryId;
 	}
 	

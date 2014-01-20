@@ -45,6 +45,10 @@ public class CalcRecallForQuery {
 		fetchQuerySolutionDirs();
 	}
 	
+//	public void setQueryId(int queryId) {
+//		query.setQueryId(queryId);
+//	}
+	
 	private void fetchQuerySolutionDirs() {
 		File[] qsDirs = queryDir.listFiles();
 		
