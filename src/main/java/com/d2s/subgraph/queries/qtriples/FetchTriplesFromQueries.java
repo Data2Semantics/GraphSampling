@@ -2,13 +2,8 @@ package com.d2s.subgraph.queries.qtriples;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.IOFileFilter;
-import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.data2semantics.query.QueryCollection;
 
 import com.d2s.subgraph.eval.Config;

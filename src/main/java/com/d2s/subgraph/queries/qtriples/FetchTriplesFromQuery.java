@@ -2,8 +2,11 @@ package com.d2s.subgraph.queries.qtriples;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -21,6 +24,8 @@ import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.syntax.ElementTriplesBlock;
 import com.hp.hpl.jena.sparql.syntax.TripleCollectorMark;
 
@@ -32,9 +37,13 @@ public class FetchTriplesFromQuery {
 	private File experimentDir;
 	private File queryOutputDir;
 	private int querySolutionsCount = 0;
+	private Map<File, Integer> fileCounts = new HashMap<File, Integer>();
+	private List<Var> projectionVariables;
+	private Map<Map<String, RDFNode>, File> storedQuerySolutions = new HashMap<Map<String, RDFNode>, File>();
 	//swdf
 	//	query-0
 	//		solution-0
+	//			collapsed-0
 
 	public FetchTriplesFromQuery(ExperimentSetup experimentSetup, Query query, File experimentDir) throws IOException {
 		this.originalQuery = query;
@@ -45,6 +54,7 @@ public class FetchTriplesFromQuery {
 	
 	
 	private void process() throws IOException {
+		projectionVariables = originalQuery.getProjectVars();
 //		System.out.println("rewrite");
 		//rewrite to * query
 		rewrittenQuery = originalQuery.getQueryForTripleRetrieval();
@@ -70,13 +80,38 @@ public class FetchTriplesFromQuery {
 	}
 	
 	
-	private File getQuerySolutionDir() {
+	private File getRootQuerySolutionDir() {
 		//only use listfiles() once! This becomes very expensive when there are a lot of files in this dir.. Just use our own iterator
 		if (querySolutionsCount == 0) querySolutionsCount = queryOutputDir.listFiles().length;
+		
 		File file = new File(queryOutputDir.getPath() + "/qs" + querySolutionsCount);
+		
+		
 		if (file.exists()) throw new IllegalStateException("Query solution dir " + file.getPath() + " already exists. Stopping getting triples from queries");
 		file.mkdir();
 		querySolutionsCount++;
+		
+		
+		
+		return file;
+	}
+	
+	/**
+	 * Each query solution might have several 'collapsed' query solution. There may be several query solutions to our distinct * query, which are each able to answer
+	 * a single query solution from the original query (e.g. when that query uses distinct icw projection vars). In that case we only need 1 of the query solutions from our distinct * query!
+	 * Therefore, we need to differentiate between some query solutions. We do that by storing them in separate 'collapsed' dirs
+	 * @return
+	 */
+	private File getCollapsedQuerySolutionDir(File rootQsDir) {
+		//we use our own filecount object, to avoid using the listFiles() java function (which can get quite expensive)
+		Integer fileCount = fileCounts.get(rootQsDir);
+		if (fileCount == null) fileCounts.put(rootQsDir, 0);//havent used this dir yet to store stuff in, so it has zero files
+		
+		File file = new File(rootQsDir.getPath() + "/collapsed" + fileCount);
+		if (file.exists()) throw new IllegalStateException("Query solution dir " + file.getPath() + " already exists. Stopping getting triples from queries");
+		file.mkdir();
+		
+		fileCounts.put(rootQsDir, fileCounts.get(rootQsDir) + 1);
 		return file;
 	}
 	
@@ -108,7 +143,23 @@ public class FetchTriplesFromQuery {
 			while (resultSet.hasNext()) {
 				hasResults = true;
 				QuerySolution solution = resultSet.next();
-				File outputDir = getQuerySolutionDir();
+				
+				Map<String, RDFNode> projectionVarBindings = getProjectVarBindings(solution);
+				File outputDir = null;
+				if (originalQuery.isDistinct() && !originalQuery.isQueryResultStar()) {
+//					System.out.println(projectionVarBindings.toString());
+					if (storedQuerySolutions.keySet().contains(projectionVarBindings)) {
+						outputDir = storedQuerySolutions.get(projectionVarBindings);
+						outputDir = getCollapsedQuerySolutionDir(outputDir);
+					}
+				}
+				if (outputDir == null) {
+					outputDir = getRootQuerySolutionDir();
+					storedQuerySolutions.put(projectionVarBindings, outputDir);
+					outputDir = getCollapsedQuerySolutionDir(outputDir);
+				}
+				
+				
 				ExtractTriplePatternsVisitor visitor = new ExtractTriplePatternsVisitor(experimentSetup.getGoldenStandardGraph(), knownToExist, knownNotToExist);
 				rewrittenQuery.fetchTriplesFromPatterns(solution, visitor);
 				writeRequiredTriples(new File(outputDir.getPath() + "/" + Config.FILE_QTRIPLES_REQUIRED), visitor.getRequiredTriples());
@@ -132,6 +183,17 @@ public class FetchTriplesFromQuery {
 	}
 
 	
+	private Map<String, RDFNode> getProjectVarBindings(QuerySolution solution) {
+		HashMap<String, RDFNode> projVarBindings = new HashMap<String, RDFNode>();
+		
+		for (Var projVar: projectionVariables) {
+			projVarBindings.put(projVar.toString(), solution.get(projVar.toString()));
+		}
+		
+		return projVarBindings;
+	}
+
+
 	private void writeUnionTriples(File file, LinkedHashMap<String, Set<Triple>> unionTriples) throws UnsupportedOperationException, IOException {
 		for (Entry<String, Set<Triple>> triples: unionTriples.entrySet()) {
 			for (Triple triple: triples.getValue()) {
@@ -167,13 +229,22 @@ public class FetchTriplesFromQuery {
 	public static void main(String[] args) throws Exception {
 		boolean useCachedQueries = true;
 		ExperimentSetup experimentsetup = new SwdfExperimentSetup(useCachedQueries, true);
-		
-		Query query = Query.create("SELECT  ?result\n" + 
-				"FROM <http://swdf>\n" + 
-				"WHERE\n" + 
-				"  { ?result <http://www.w3.org/2000/01/rdf-schema#label> \"Christophe Guéret\" }");
+		Query query = Query.create("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" + 
+				"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" + 
+				"PREFIX foaf: <http://xmlns.com/foaf/0.1/>\n" + 
+				"\n" + 
+				"SELECT DISTINCT ?paper FROM <http://swdf>\n" + 
+				"WHERE {\n" + 
+				"	?paper a <http://swrc.ontoware.org/ontology#InProceedings>;\n" + 
+				"      <http://swrc.ontoware.org/ontology#year> \"2009\";\n" + 
+				"      foaf:maker ?maker\n" + 
+				"} LIMIT 1000\n" + 
+				"");
 //		System.out.println(query.toString());
-		FetchTriplesFromQuery.fetch(experimentsetup, query, new File("test"));
+		
+		File outputDir = new File("test");
+		if (outputDir.exists()) FileUtils.deleteDirectory(outputDir);
+		FetchTriplesFromQuery.fetch(experimentsetup, query, outputDir);
 		// new EvaluateGraphs(new
 		// DbpoExperimentSetup(DbpoExperimentSetup.QALD_REMOVE_OPTIONALS)),
 		// new EvaluateGraphs(new

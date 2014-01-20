@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeMap;
 
@@ -91,12 +90,18 @@ public class CalcRecall {
 		results.setGraphName(sample);
 		int count = 0;
 		for (File queryDir: queryDirs) {
-			System.out.println(queryDir.getName());
+//			System.out.println(queryDir.getName());dd
 			if (count > maxQueries) break;
-			Query query = CalcRecallForQuery.calc(experimentSetup, sample, sampleWeights, queryDir, cutoffWeights.getCutoffWeights().get(sample));
-			query.setQueryId(count);
-			results.add(query);
-			count++;
+			try {
+				Query query = CalcRecallForQuery.calc(experimentSetup, sample, sampleWeights, queryDir, cutoffWeights.getCutoffWeights().get(sample));
+				query.setQueryId(count);
+				results.add(query);
+				count++;
+			} catch (IllegalStateException e) {
+//				System.out.println(e.getMessage());
+				throw e;
+			}
+			
 		}
 		System.out.println("avg recall: " + results.getAverageRecall());
 		results.setPercentage(cutoffWeights.getCutoffSize(sample));
@@ -106,8 +111,8 @@ public class CalcRecall {
 
 	public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException, InterruptedException {
 		CalcRecall calc = new CalcRecall(new SwdfExperimentSetup(true), 0.5);
-		calc.maxSamples = 1;
-		calc.maxQueries = 10;
+//		calc.maxSamples = 1;
+//		calc.maxQueries = 5;
 		calc.calcRecallForSamples();
 	}
 }

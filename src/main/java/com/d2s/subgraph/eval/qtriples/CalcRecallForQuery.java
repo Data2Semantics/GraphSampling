@@ -93,11 +93,30 @@ public class CalcRecallForQuery {
 			System.out.println("no query triples found for query " + queryDir.getPath());
 		}
 	}	
+	
+	/**
+	 * Each query solution might have several 'collapsed' query solutions. There may be several query solutions to our distinct * query, which are each able to answer
+	 * a single query solution from the original query (e.g. when that query uses distinct icw projection vars). In that case we only need 1 of the query solutions from our distinct * query!
+	 * Therefore, we need to differentiate between some query solutions. We do that by storing them in separate 'collapsed' dirs
+	 * So, whenever one of these 'collapsed' dirs match, we mark this query solution as 'ok'!
+	 * @return
+	 */
 	private boolean isQuerySolutionInSample(File qsDir) throws NumberFormatException, IOException {
-		boolean querySolutionOk = checkRequiredFile(qsDir);
-		if (querySolutionOk) {
-			//todo: check optionals
-			querySolutionOk = checkUnionFiles(qsDir);
+		boolean querySolutionOk = false;
+//		System.out.println(qsDir.getPath());
+		for (File collapsedDir: qsDir.listFiles()) {
+			if (!collapsedDir.getName().startsWith("collapsed")) throw new IllegalStateException("expected a set of collapsed dirs in this path. but found: " + collapsedDir.getPath());
+//			System.out.print("+");
+			if (querySolutionOk) {
+				System.out.println("match!");
+				break;//we found 1 match, stop!
+			}
+			querySolutionOk = checkRequiredFile(collapsedDir);
+			if (querySolutionOk) {
+				//todo: check optionals
+				querySolutionOk = checkUnionFiles(collapsedDir);
+			}
+			
 		}
 		return querySolutionOk;
 	}

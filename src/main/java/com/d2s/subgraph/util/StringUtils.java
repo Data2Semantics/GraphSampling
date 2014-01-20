@@ -65,7 +65,7 @@ public class StringUtils {
 			rewriteMethod = RewriteMethods.RESOURCE_SIMPLE;
 		} else if (graphName.contains("resourceContext")) {
 			rewriteMethod = RewriteMethods.RESOURCE_CONTEXT;
-		} else if (graphName.contains("so-so")) {
+		} else if (graphName.contains("path")) {
 			rewriteMethod = RewriteMethods.PATH;
 		} else {
 			throw new IllegalStateException("unable to detect rewrite method based on " + graphName);

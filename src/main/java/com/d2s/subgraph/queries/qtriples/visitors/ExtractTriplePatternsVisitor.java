@@ -37,7 +37,6 @@ public class ExtractTriplePatternsVisitor implements ElementVisitor {
 	private LinkedHashMap<Integer, Set<Triple>> optionalTriples = new LinkedHashMap<Integer, Set<Triple>>();
 	private LinkedHashMap<String, Set<Triple>> unionTriples = new LinkedHashMap<String, Set<Triple>>();
 	
-	
 	private Set<TripleCollectorMark> knownToExist = new HashSet<TripleCollectorMark>(); 
 	private Set<TripleCollectorMark> knownNotToExist = new HashSet<TripleCollectorMark>(); 
 	private String namedGraph;
