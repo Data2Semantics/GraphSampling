@@ -13,5 +13,5 @@ runAnalysis.sh $dataset;
 runGiraphAnalysisToString.sh $dataset;
 roundtrip.sh $dataset;
 generateWeightDistribution.sh $dataset;
-generateFreqBaseline.sh $dataset;
+generateBaselines.sh $dataset;
 validateHash.sh $dataset;

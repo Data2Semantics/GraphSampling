@@ -85,7 +85,7 @@ public class CalcRecallForQuery {
 			incorrectCount = Math.min(maxNumberOfIncorrect, incorrectCount);
 		}
 		if (correctCount > 0 || incorrectCount > 0) {
-			recall = correctCount / (correctCount + incorrectCount);
+			recall = (double)correctCount / (double)(correctCount + incorrectCount);
 			QueryResultsRegular results = new QueryResultsRegular();
 			results.setRecall(recall);
 			query.setResults(results);

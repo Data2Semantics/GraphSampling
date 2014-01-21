@@ -7,7 +7,6 @@ if [ -z "$1" ];then
 fi
 dataset=$1
 
-echo "generating frequency baseline"
-pig pigAnalysis/stats/freqBaseline.py $dataset
 
-
+generateRandomSampleBaselines.sh $dataset;
+generateFreqBaseline.sh $dataset;
