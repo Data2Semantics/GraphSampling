@@ -87,7 +87,7 @@ public class OutputHtml extends OutputWrapper{
 		
 		for (SampleResults graphResults: allGraphResults) {
 //			if (StringUtils.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
-				html += "\n<th>" + graphResults.getGraphName().substring("http://".length()).replace('_', '-') + "<br>(avg: " + StringUtils.getDoubleAsFormattedString(graphResults.getAverageRecall()) + ")</th>";
+				html += "\n<th>" + graphResults.getProperName() + "<br>(avg: " + StringUtils.getDoubleAsFormattedString(graphResults.getAverageRecall()) + ")</th>";
 //				for (Query query: queryCollection.getQueries()) {
 				for (Query query: graphResults.getQueryCollection().getQueries()) {
 					ArrayList<String> row = table.get(query.getQueryId());

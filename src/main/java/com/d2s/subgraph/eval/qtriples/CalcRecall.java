@@ -40,6 +40,8 @@ public class CalcRecall {
 	private void calcRecallForSamples() throws IOException, InterruptedException {
 		int count = 0;
 		for (String sample: cutoffWeights.getCutoffWeights().keySet()) {
+//			if (!sample.equals("resourceUnique_outdegree")) continue;
+//			System.out.println(sample);
 			if (count >= maxSamples) break;
 			count++;
 			HashMap<String, Double> sampleWeights = fetchSampleWeights(sample);
@@ -98,8 +100,8 @@ public class CalcRecall {
 				results.add(query);
 				count++;
 			} catch (IllegalStateException e) {
-//				System.out.println(e.getMessage());
-				throw e;
+				System.out.println(e.getMessage());
+//				throw e;
 			}
 			
 		}
@@ -110,6 +112,7 @@ public class CalcRecall {
 	
 
 	public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException, InterruptedException {
+//		new SwdfExperimentSetup(false);
 		CalcRecall calc = new CalcRecall(new SwdfExperimentSetup(true), 0.5);
 //		calc.maxSamples = 1;
 //		calc.maxQueries = 5;

@@ -108,7 +108,7 @@ public class CalcRecallForQuery {
 			if (!collapsedDir.getName().startsWith("collapsed")) throw new IllegalStateException("expected a set of collapsed dirs in this path. but found: " + collapsedDir.getPath());
 //			System.out.print("+");
 			if (querySolutionOk) {
-				System.out.println("match!");
+//				System.out.println("match!");
 				break;//we found 1 match, stop!
 			}
 			querySolutionOk = checkRequiredFile(collapsedDir);
