@@ -5,7 +5,7 @@ isqlFile="${HOME}/.isqlCmdFile.sql"
 
 
 echo "Adding checkpoint"
-echo "checkpoint;" > $isqlFile;
+echo "checkpoint;&" > $isqlFile;
 echo "EXIT;" >> $isqlFile;
 echo "" >> $isqlFile;
 cat $isqlFile | isql;
