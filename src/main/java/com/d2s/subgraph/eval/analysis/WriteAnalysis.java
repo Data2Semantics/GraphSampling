@@ -13,7 +13,6 @@ import au.com.bytecode.opencsv.CSVWriter;
 
 import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
-import com.d2s.subgraph.eval.results.QueryResults;
 import com.d2s.subgraph.eval.results.SampleResults;
 import com.d2s.subgraph.eval.results.SampleResultsComparator;
 import com.d2s.subgraph.io.QResultsLoader;
@@ -90,6 +89,14 @@ public class WriteAnalysis {
 //		if (graphResults.getGraphName().contains("max-50")) modesImported.put("max-50", true);
 //		if (graphResults.getGraphName().contains("0.5")) modesImported.put("0.5", true);
 		this.allGraphResults.add(graphResults);
+	}
+	
+	public void add(ArrayList<SampleResults> graphResults) {
+//		if (graphResults.getGraphName().contains("max-20")) modesImported.put("max-20", true);
+//		if (graphResults.getGraphName().contains("0.2")) modesImported.put("0.2", true);
+//		if (graphResults.getGraphName().contains("max-50")) modesImported.put("max-50", true);
+//		if (graphResults.getGraphName().contains("0.5")) modesImported.put("0.5", true);
+		this.allGraphResults.addAll(graphResults);
 	}
 	
 	

@@ -18,7 +18,7 @@ for dir in "$@"; do
 	cat $isqlFile | isql;
 	
 	echo "Running loader"
-	echo "rdf_loader_run();" > $isqlFile;
+	echo "rdf_loader_run();&" > $isqlFile;
 	echo "EXIT;" >> $isqlFile;
 	echo "" >> $isqlFile;
 	cat $isqlFile | isql;

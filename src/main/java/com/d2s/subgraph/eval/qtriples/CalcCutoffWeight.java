@@ -15,7 +15,6 @@ import org.xml.sax.SAXException;
 
 import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
-import com.d2s.subgraph.eval.experiments.SwdfExperimentSetup;
 
 public class CalcCutoffWeight {
 	private double maxSampleSize;
@@ -36,7 +35,6 @@ public class CalcCutoffWeight {
 	public void calcForFiles() throws IOException {
 		for (File distFile: FileUtils.listFiles(weightDistDir, null, false)) {
 			calcCutoff(distFile);
-//			System.out.println(distFile.getName() + ":" + cutoffWeights.get(distFile.getName()));
 		}
 	}
 	
@@ -91,11 +89,6 @@ public class CalcCutoffWeight {
 		throw new IOException("unable to find cutoff weight based on weight distribution!");
 	}
 	
-//	public static HashMap<String, Double> get(ExperimentSetup experimentSetup, double maxSize) throws IOException {
-//		CalcCutoffWeight calc = new CalcCutoffWeight(experimentSetup, maxSize);
-//		calc.calcForFiles();
-//		return calc.cutoffWeights;
-//	}
 	
 	public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException {
 //		get(new SwdfExperimentSetup(true, true), 0.5);
