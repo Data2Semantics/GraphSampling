@@ -9,7 +9,7 @@ dataset=$1
 targetHdfsDir="$dataset/evaluation/qTriples"
 hadoop fs -rm $targetHdfsDir
 
-srcLocalFile="qTriples/$dataset"
+srcLocalFile="/var/scratch/lrd900/qTriples/$dataset"
 
 hadoop fs -put $srcLocalFile $targetHdfsDir
 

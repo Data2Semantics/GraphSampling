@@ -19,7 +19,7 @@ pattern="*"
 if [ -n "$2" ]; then
 	pattern="$2"
 fi
-qTripleDir="qTripleWeights";
+qTripleDir="/var/scratch/lrd900/qTripleWeights";
 mkdir -p $qTripleDir;
 targetDir="$qTripleDir/$dataset"
 echo "Storing to $targetDir"

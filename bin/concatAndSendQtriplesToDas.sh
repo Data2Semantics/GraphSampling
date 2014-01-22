@@ -17,7 +17,7 @@ sort $concatFile | uniq >>  ${uniqFile};
 mv ${uniqFile} ${concatFile};
 
 echo "now rsyncing"
-rsync -avz ${concatFile} fs0.das4.cs.vu.nl:qTriples/$dirBasename
+rsync -avz ${concatFile} fs0.das4.cs.vu.nl:/var/scratch/lrd900/qTriples/$dirBasename
 
 echo "adding file to hdfs"
 ssh fs0.das4.cs.vu.nl uploadQueryTriplesToHdfs.sh $dirBasename

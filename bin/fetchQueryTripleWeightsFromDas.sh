@@ -11,6 +11,6 @@ ssh fs0.das4.cs.vu.nl fetchQueryTripleWeights.sh $dataset;
 
 localTargetDir="~/code/subgraphSelection/input/"
 echo "rsyncing locally"
-eval rsync -avz fs0.das4.cs.vu.nl:qTripleWeights $localTargetDir;
+eval rsync -avz fs0.das4.cs.vu.nl:/var/scratch/lrd900/qTripleWeights $localTargetDir;
 #rsync -avz fs0.das4.cs.vu.nl:weightDistribution $localTargetDir;
 

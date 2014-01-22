@@ -19,7 +19,7 @@ pattern="*"
 if [ -n "$2" ]; then
 	pattern="$2"
 fi
-weightDistDir="weightDistribution";
+weightDistDir="/var/scratch/lrd900/weightDistribution";
 mkdir -p $weightDistDir;
 targetDir="$weightDistDir/$dataset"
 echo "Storing to $targetDir"
