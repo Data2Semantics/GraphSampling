@@ -22,9 +22,9 @@ fi
 
 
 hadoopLs "$dataset/roundtrip/";
-roundtripSamples=$hadoopLs
+roundtripSamples="${hadoopLs[@]}"
 hadoopLs "$dataset/baselines/";
-baselineSamples=$hadoopLs
+baselineSamples="${hadoopLs[@]}"
 allSamples=("${roundtripSamples[@]}" "${baselineSamples[@]}")
 for dir in "${allSamples[@]}"; do
 	if [[ ! "$dir" == $pattern ]]; then
