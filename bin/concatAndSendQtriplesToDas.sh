@@ -11,7 +11,7 @@ dirBasename=`basename $dir`
 echo "processing $dirBasename";
 concatFile=${dir}/../${dirBasename}AllQtriples;
 rm -f $concatFile;
-find $dir -type f | grep qs | xargs cat >> ${concatFile};
+find $dir -type f | grep qs | xargs cat > ${concatFile};
 uniqFile=${concatFile}_uniq; 
 sort $concatFile | uniq >>  ${uniqFile};
 mv ${uniqFile} ${concatFile};

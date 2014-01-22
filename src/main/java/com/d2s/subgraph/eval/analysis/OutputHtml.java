@@ -119,6 +119,6 @@ public class OutputHtml extends OutputWrapper{
 			html += "</tr>";
 		}
 		html += "\n</tbody> </table></body></html>";
-		FileUtils.writeStringToFile(new File(Config.PATH_EVALUATION_OUTPUT + experimentSetup.getId() + "/" + Config.FILE_HTML_SUMMARY), html);
+		FileUtils.writeStringToFile(new File(resultsDir, Config.FILE_HTML_SUMMARY), html);
 	}
 }

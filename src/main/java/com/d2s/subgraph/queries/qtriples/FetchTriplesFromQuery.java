@@ -169,6 +169,7 @@ public class FetchTriplesFromQuery {
 				
 				Query queryToFetchPatternsFrom = rewrittenQuery.clone(); //clone, otherwise we replace vars with values, and our next iterations fucks up
 				queryToFetchPatternsFrom.fetchTriplesFromPatterns(solution, visitor);
+//				System.out.println(visitor.getRequiredTriples());
 				writeRequiredTriples(new File(outputDir.getPath() + "/" + Config.FILE_QTRIPLES_REQUIRED), visitor.getRequiredTriples());
 				writeOptionalTriples(new File(outputDir.getPath() + "/" + Config.FILE_QTRIPLES_OPTIONAL), visitor.getOptionalTriples());
 				writeUnionTriples(new File(outputDir.getPath() + "/" + Config.FILE_QTRIPLES_UNION), visitor.getUnionTriples());
@@ -238,34 +239,24 @@ public class FetchTriplesFromQuery {
 		boolean useCachedQueries = true;
 		ExperimentSetup experimentsetup = new SwdfExperimentSetup(useCachedQueries, true);
 		Query query = Query.create(""
-				+ "PREFIX  dc:   <http://purl.org/dc/elements/1.1/>\n" + 
-				"PREFIX  :     <http://dbpedia.org/resource/>\n" + 
-				"PREFIX  dbpedia2: <http://dbpedia.org/property/>\n" + 
-				"PREFIX  geo:  <http://www.w3.org/2003/01/geo/wgs84_pos#>\n" + 
-				"PREFIX  foaf: <http://xmlns.com/foaf/0.1/>\n" + 
-				"PREFIX  swrc-ext: <http://www.cs.vu.nl/~mcaklein/onto/swrc_ext/2005/05#>\n" + 
-				"PREFIX  rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" + 
-				"PREFIX  owl:  <http://www.w3.org/2002/07/owl#>\n" + 
-				"PREFIX  xsd:  <http://www.w3.org/2001/XMLSchema#>\n" + 
-				"PREFIX  dbpedia: <http://dbpedia.org/>\n" + 
-				"PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" + 
+				+ "BASE    <http://192.168.27.144/eswc_planner/run/index.php>\n" + 
+				"PREFIX  dct:  <http://purl.org/dc/terms/>\n" + 
 				"PREFIX  swrc: <http://swrc.ontoware.org/ontology#>\n" + 
-				"PREFIX  dbpprop: <http://dbpedia.org/property/>\n" + 
-				"PREFIX  ical: <http://www.w3.org/2002/12/cal/ical#>\n" + 
-				"PREFIX  skos: <http://www.w3.org/2004/02/skos/core#>\n" + 
-				"PREFIX  swc:  <http://data.semanticweb.org/ns/swc/ontology#>"
-				+ "SELECT DISTINCT  ?s ?t ?y ?to ?h\n" + 
+				"PREFIX  swc:  <http://data.semanticweb.org/ns/swc/ontology#>\n" + 
+				"\n" + 
+				"SELECT DISTINCT  ?paper ?title ?abstract\n" + 
 				"FROM <http://swdf>\n" + 
 				"WHERE\n" + 
-				"  { ?s dc:title ?t .\n" + 
-				"    ?s swrc:year ?y\n" + 
-				"    OPTIONAL\n" + 
-				"      { ?s foaf:homepage ?h }\n" + 
-				"    OPTIONAL\n" + 
-				"      { ?s foaf:topic ?to }\n" + 
+				"  { ?conf swc:hasAcronym \"WWW2009\" .\n" + 
+				"    ?conf swc:hasRelatedDocument ?proceedings .\n" + 
+				"    ?proceedings swc:hasPart ?paper .\n" + 
+				"    ?paper dct:title ?title .\n" + 
+				"    ?paper swrc:abstract ?abstract\n" + 
 				"  }\n" + 
-				"ORDER BY DESC(?y)\n" + 
-				"LIMIT   200");
+				"ORDER BY ?title\n" + 
+				"OFFSET  0\n" + 
+				"LIMIT   10" + 
+				"");
 //		System.out.println(query.toString());
 		
 		File outputDir = new File("test");

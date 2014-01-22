@@ -26,7 +26,7 @@ public class CalcRecallForQuery {
 	private String sample;
 	private HashMap<String, Double> sampleWeights;
 	private File queryDir;
-	private boolean verbose = true;
+	private boolean verbose = false;
 	private File[] querySolutionDirs;
 	private int queryLimit = 0;
 	public CalcRecallForQuery(ExperimentSetup experimentSetup, String sample, HashMap<String, Double> sampleWeights, File queryDir, Double cutoffWeight) throws IOException {

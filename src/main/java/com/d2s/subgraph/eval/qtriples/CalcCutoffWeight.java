@@ -25,6 +25,7 @@ public class CalcCutoffWeight {
 	private HashMap<String, Double> cutoffSizes = new HashMap<String, Double>();
 	private File weightDistDir;
 	private boolean verbose = false;
+//	private int totalSize;
 	public CalcCutoffWeight(ExperimentSetup experimentSetup, double maxSampleSize, File cwd) throws IOException {
 		this.experimentSetup = experimentSetup;
 		this.maxSampleSize = maxSampleSize;
@@ -40,6 +41,9 @@ public class CalcCutoffWeight {
 			calcCutoff(distFile);
 		}
 	}
+//	public int getDatasetSize() {
+//		return this.totalSize;
+//	}
 	
 	public HashMap<String, Double> getCutoffWeights() {
 		return cutoffWeights;
@@ -50,7 +54,6 @@ public class CalcCutoffWeight {
 	}
 	
 	private void calcCutoff(File file) throws IOException {
-		
 		TreeMap<Double, Integer> dist = new TreeMap<Double, Integer>();
 		int totalSize = 0;
 		
@@ -72,8 +75,16 @@ public class CalcCutoffWeight {
 				dist.put(weight, count);
 			}
 		}
-//		System.out.println(dist);System.exit(1);
 		br.close();
+		
+//		if (this.totalSize == 0){
+//			this.totalSize = totalSize;
+//		} else {
+//			if (totalSize != this.totalSize) {
+//				throw new IllegalStateException("the total dataset size fetched from the weight distribution differs between different samples! There must be something wrong. Previous one: " + this.totalSize + ", current one: " + totalSize);
+//			}
+//		}
+		
 		if (verbose) System.out.println("totalsize triples based on query dist: " + totalSize);
 		int cutoffSize = (int) Math.round(totalSize * maxSampleSize);
 		if (verbose) System.out.println("max size triples for cutoff " + cutoffSize);
