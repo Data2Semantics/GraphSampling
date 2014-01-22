@@ -18,7 +18,9 @@ import com.hp.hpl.jena.query.QueryParseException;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.query.Syntax;
+import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.sparql.core.Prologue;
 import com.hp.hpl.jena.sparql.syntax.Element;
 
@@ -102,6 +104,17 @@ public class Query extends org.data2semantics.query.Query {
 		return queryWithFromClause;
 	}
 	
+	public Query clone() {
+		try {
+			return Query.create(this.toString());
+		} catch (IOException e) {
+			System.out.println("he???? failed cloning? should NEVER occur!");
+			e.printStackTrace();
+			System.exit(1);
+		};
+		return null;
+	}
+	
 	/**
 	 * remove projection variables
 	 * add distinct
@@ -156,12 +169,29 @@ public class Query extends org.data2semantics.query.Query {
 	}
 	
 	public ExtractTriplePatternsVisitor fetchTriplesFromPatterns(QuerySolution solution, ExtractTriplePatternsVisitor visitor) {
-		
 		Element queryElement;
 		
 		for (String varName: getVarnamesFromPatterns()) {
 			RDFNode node = solution.get(varName);
 			if (node != null) {
+				if (node.isLiteral()) {
+					try {
+						//we need to process this.. if there are double quotes in here, we should add slashes! These quotes are escaped in pig, and we want to get the exact same string!
+						Literal literal = node.asLiteral();
+						String literalString = literal.getString();
+						literalString = literalString.replace("\"", "\\\"");
+						String lang = literal.getLanguage();
+						if (lang != null && lang.length() > 0) {
+							node = ResourceFactory.createLangLiteral(literalString, lang);
+						} else {
+							node = ResourceFactory.createPlainLiteral(literalString);
+						}
+						
+	//					node = new Literal("sdf");
+					} catch (Exception e) {
+						//ignore. We tried to retrieve a string from a typed (not as string) literal, which does not work
+					}
+				}
 				queryElement = getQueryPattern();
 				if (queryElement == null) return null;
 				queryElement.visit(new RewriteTriplePatternsVisitor(varName, node, this));

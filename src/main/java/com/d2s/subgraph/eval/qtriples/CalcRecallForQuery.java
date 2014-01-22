@@ -23,10 +23,10 @@ public class CalcRecallForQuery {
 	private ExperimentSetup experimentSetup;
 	private Query query;
 	private Double cutoffWeight;
-	private double recall = 0.0;
 	private String sample;
 	private HashMap<String, Double> sampleWeights;
 	private File queryDir;
+	private boolean verbose = true;
 	private File[] querySolutionDirs;
 	private int queryLimit = 0;
 	public CalcRecallForQuery(ExperimentSetup experimentSetup, String sample, HashMap<String, Double> sampleWeights, File queryDir, Double cutoffWeight) throws IOException {
@@ -64,12 +64,15 @@ public class CalcRecallForQuery {
 	
 	
 	public void run() throws NumberFormatException, IOException {
+		Double recall = null;
 		int correctCount = 0;
 		int incorrectCount = 0; 
 //		System.out.println(queryDir.getPath());
 		for (File qsDir: querySolutionDirs) {
+			if (verbose) System.out.println("processing query " + qsDir.getName());
 			if (queryLimit > 0 && correctCount > queryLimit) {
-				recall = 1;
+				recall = 1.0;
+				break;
 			}
 			boolean qsInSample = isQuerySolutionInSample(qsDir);
 			if (qsInSample) {
@@ -78,14 +81,14 @@ public class CalcRecallForQuery {
 				incorrectCount++;
 			}
 		}
-		
+		if (verbose) System.out.println("correct: " + correctCount + ", incorrect: " + incorrectCount);
 		//first take into account the query limit.
 		if (queryLimit > 0) {
 			int maxNumberOfIncorrect = (queryLimit - correctCount);
 			incorrectCount = Math.min(maxNumberOfIncorrect, incorrectCount);
 		}
 		if (correctCount > 0 || incorrectCount > 0) {
-			recall = (double)correctCount / (double)(correctCount + incorrectCount);
+			if (recall == null) recall = (double)correctCount / (double)(correctCount + incorrectCount);
 			QueryResultsRegular results = new QueryResultsRegular();
 			results.setRecall(recall);
 			query.setResults(results);

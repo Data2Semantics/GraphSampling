@@ -10,13 +10,13 @@ import com.d2s.subgraph.queries.Query;
 
 
 public abstract class SampleResults {
-	
+	public enum SampleType{REGULAR, BASELINE_FREQ, BASELINE_RANDOM};
 	public QueryCollection<Query> queryCollection;
 	public String graphName;
 	private double percentage;
 	public int totalTruePositives = 0;
 	public int totalGoldenStandardSize = 0;
-	
+	public abstract SampleType getSampleType();
 	public abstract void add(Query query);
 	public abstract String getRewriteMethod();
 	public abstract String getAlgorithm();

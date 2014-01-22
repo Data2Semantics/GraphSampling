@@ -22,20 +22,20 @@ fi
 
 
 hadoopLs "$dataset/roundtrip/";
-roundtripSamples="${hadoopLs[@]}"
-hadoopLs "$dataset/baselines/";
-baselineSamples="${hadoopLs[@]}"
-allSamples=("${roundtripSamples[@]}" "${baselineSamples[@]}")
-for dir in "${allSamples[@]}"; do
+for dir in "${hadoopLs[@]}"; do
 	if [[ ! "$dir" == $pattern ]]; then
 		continue
 	fi
 	if [[ ! "$dir" == *_long ]]; then
-                #hmm, we want to skip longs! 
-		#dirBasename=`basename $dir`
-		#IFS=_ read -a delimited <<< "$dirBasename"
-		#rewriteMethod=${delimited[0]}
-		#unset IFS
 		pig pigAnalysis/evaluation/fetchTripleWeights.py $dir;
 	fi
 done;
+
+
+echo "fetching query triples weights for random samples"
+iterations=10
+for (( it=1; it<=$iterations; it++ ))
+do
+	echo "generating random sample for iteration $it"
+	pig pigAnalysis/evaluation/fetchTripleWeightsRandom.py $dataset $it
+done

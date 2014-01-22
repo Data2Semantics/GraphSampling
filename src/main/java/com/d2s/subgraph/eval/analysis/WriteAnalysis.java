@@ -30,10 +30,10 @@ public class WriteAnalysis {
 	private OutputR outputR;
 
 	
-	public WriteAnalysis(ExperimentSetup experimentSetup) throws IOException {
+	public WriteAnalysis(ExperimentSetup experimentSetup, double maxSampleSize) throws IOException {
 		this.experimentSetup = experimentSetup;
 		this.queryCollection = experimentSetup.getQueryCollection();
-		this.resultsDir = new File(Config.PATH_EVALUATION_OUTPUT + experimentSetup.getId());
+		this.resultsDir = new File(Config.PATH_EVALUATION_OUTPUT + experimentSetup.getId() + "/" + maxSampleSize);
 		initResultsDir();
 		outputCsv = new OutputCsv(experimentSetup, allGraphResults, queryCollection, resultsDir);
 		outputHtml = new OutputHtml(experimentSetup, allGraphResults, queryCollection, resultsDir);

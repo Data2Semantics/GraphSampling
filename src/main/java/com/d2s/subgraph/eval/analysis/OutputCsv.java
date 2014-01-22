@@ -14,6 +14,7 @@ import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 import com.d2s.subgraph.eval.results.QueryResults;
 import com.d2s.subgraph.eval.results.SampleResults;
+import com.d2s.subgraph.eval.results.SampleResults.SampleType;
 import com.d2s.subgraph.queries.Query;
 import com.d2s.subgraph.util.StringUtils;
 import com.d2s.subgraph.util.StringUtils.Algorithms;
@@ -117,6 +118,7 @@ public class OutputCsv extends OutputWrapper {
 		HashMap<Algorithms, Double> path = new HashMap<Algorithms, Double>();
 		
 		for (SampleResults graphResults: allGraphResults) {
+			if (graphResults.getSampleType() == SampleType.REGULAR) {
 			String graphName = graphResults.getGraphName();
 //			if (StringUtils.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining) && !graphName.contains("sample") && !graphName.contains("Baseline")) {
 				HashMap<Algorithms, Double> hashmapPick = null;
@@ -135,7 +137,7 @@ public class OutputCsv extends OutputWrapper {
 					System.exit(1);
 				}
 				hashmapPick.put(analysisAlgorithm, graphResults.getAverageRecall());
-//			}
+			}
 		}
 		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + Config.FILE_CSV_REWR_VS_ALGS);
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
@@ -255,7 +257,7 @@ public class OutputCsv extends OutputWrapper {
 				double bestRecall = 0.0;
 				int numGraphResultsFound = 0;
 				for (SampleResults results: allGraphResults) {
-					if (StringUtils.getAnalysisAlgorithm(results.getGraphName()) == algorithm) {
+					if (results.getSampleType() == SampleType.REGULAR && StringUtils.getAnalysisAlgorithm(results.getGraphName()) == algorithm) {
 						numGraphResultsFound++;
 						totalRecall += results.getQueryCollection().getQuery(query.toString()).getResults().getRecall();
 						graphCount++;

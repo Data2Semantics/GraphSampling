@@ -104,7 +104,7 @@ public class StringUtils {
 			rewriteMethodString = "WithoutLiterals";
 		} else if (rewriteMethod == RewriteMethods.RESOURCE_UNIQUE) {
 			rewriteMethodString = "UniqueLiterals";
-		} else if (rewriteMethod == RewriteMethods.RESOURCE_UNIQUE) {
+		} else if (rewriteMethod == RewriteMethods.RESOURCE_CONTEXT) {
 			rewriteMethodString = "ContextLiterals";
 		} else if (rewriteMethod == RewriteMethods.PATH) {
 			rewriteMethodString = "Path";

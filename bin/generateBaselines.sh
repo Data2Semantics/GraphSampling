@@ -7,6 +7,6 @@ if [ -z "$1" ];then
 fi
 dataset=$1
 
-
-generateRandomSampleBaselines.sh $dataset;
+#we don't generate these anymore. We generate it on-the-go when fetching weights for query triples
+#generateRandomSampleBaselines.sh $dataset;
 generateFreqBaseline.sh $dataset;

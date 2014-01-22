@@ -71,4 +71,12 @@ public class SampleResultsRegular extends SampleResults {
 	public void setQueryCollection(QueryCollection<Query> queryCollection) {
 		this.queryCollection = queryCollection;
 	}
+	@Override
+	public SampleType getSampleType() {
+		if (getGraphName().toLowerCase().contains("freqbaseline")) {
+			return SampleType.BASELINE_FREQ;
+		} else {
+			return SampleType.REGULAR;
+		}
+	}
 }

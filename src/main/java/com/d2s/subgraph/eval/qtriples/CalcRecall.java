@@ -29,10 +29,13 @@ public class CalcRecall {
 	private File[] queryDirs;
 	ArrayList<SampleResults> regularResults = new ArrayList<SampleResults>();
 	ArrayList<SampleResults> baselineResults = new ArrayList<SampleResults>();
-	public CalcRecall(ExperimentSetup experimentSetup, double maxSampleSize) throws IOException {
+	private File cwd;
+	private double maxSampleSize;
+	public CalcRecall(ExperimentSetup experimentSetup, double maxSampleSize, File cwd) throws IOException {
 		this.experimentSetup = experimentSetup;
-		
-		cutoffWeights = new CalcCutoffWeight(experimentSetup, maxSampleSize);
+		this.cwd = cwd;
+		this.maxSampleSize = maxSampleSize;
+		cutoffWeights = new CalcCutoffWeight(experimentSetup, maxSampleSize, cwd);
 		cutoffWeights.calcForFiles();
 		if (cutoffWeights.getCutoffWeights().size() == 0) throw new IllegalStateException("Could not find any cutoff weights. unable to calc recall");
 		fetchQueryDirs();
@@ -43,7 +46,9 @@ public class CalcRecall {
 //		ArrayList<SampleResults> allResults = new ArrayList<SampleResults>();
 		int count = 0;
 		for (String sample: cutoffWeights.getCutoffWeights().keySet()) {
-//			if (!sample.equals("resourceUnique_outdegree")) continue;
+			System.out.println(sample);
+			
+			if (!sample.equals("resourceContext_indegree")) continue;
 //			System.out.println(sample);
 			if (count >= maxSamples) break;
 			count++;
@@ -63,7 +68,7 @@ public class CalcRecall {
 	}
 	
 	private void concatAndWriteOutput() throws IOException, InterruptedException {
-		WriteAnalysis analysisOutput = new WriteAnalysis(experimentSetup);
+		WriteAnalysis analysisOutput = new WriteAnalysis(experimentSetup, maxSampleSize);
 		ArrayList<SampleResults> randomSampleResultsList = new ArrayList<SampleResults>();
 		
 		for (SampleResults results: baselineResults) {
@@ -85,7 +90,7 @@ public class CalcRecall {
 		
 	}
 	private HashMap<String, Double> fetchSampleWeights(String sample) throws IOException {
-		File sampleFile = new File(Config.PATH_WEIGHTED_QUERY_TRIPLES + experimentSetup.getId() + "/" + sample);
+		File sampleFile = new File(cwd.getAbsolutePath() + "/" + Config.PATH_WEIGHTED_QUERY_TRIPLES + experimentSetup.getId() + "/" + sample);
 		if (!sampleFile.exists()) throw new IOException("tried to locate " + sampleFile.getPath() + ", but it isnt there. Unable to calc recall");
 		HashMap<String, Double> sampleWeights = new HashMap<String, Double>();
 		String line;
@@ -107,7 +112,7 @@ public class CalcRecall {
 		return sampleWeights;
 	}
 	private void fetchQueryDirs() {
-		File queryTripleDir = new File(Config.PATH_QUERY_TRIPLES + experimentSetup.getId());
+		File queryTripleDir = new File(cwd.getAbsolutePath() + "/" + Config.PATH_QUERY_TRIPLES + experimentSetup.getId());
 		File[] qsDirs = queryTripleDir.listFiles();
 		
 		TreeMap<Integer, File> filteredQsDirs = new TreeMap<Integer, File>();
@@ -126,6 +131,8 @@ public class CalcRecall {
 		results.setGraphName(sample);
 		int count = 0;
 		for (File queryDir: queryDirs) {
+//			System.out.println(queryDir.getName());System.exit(1);
+			if (!queryDir.getName().equals("query-1")) continue;
 //			System.out.println(queryDir.getName());dd
 			if (count > maxQueries) break;
 			try {
@@ -146,9 +153,10 @@ public class CalcRecall {
 	
 
 	public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException, InterruptedException {
-		CalcRecall calc = new CalcRecall(new SwdfExperimentSetup(true), 0.5);
-//		calc.maxSamples = 1;
-//		calc.maxQueries = 5;
+		File cwd = new File("");
+		CalcRecall calc = new CalcRecall(new SwdfExperimentSetup(true), 0.5, cwd);
+		calc.maxSamples = 1;
+		calc.maxQueries = 5;
 		calc.calcRecallForSamples();
 		calc.concatAndWriteOutput();
 	}

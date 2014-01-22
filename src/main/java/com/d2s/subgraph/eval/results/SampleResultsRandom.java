@@ -65,11 +65,12 @@ public class SampleResultsRandom extends SampleResults{
 	}
 	
 	public String getProperName() {
-		if (graphName.contains("0.5")) {
-			return "sample 50%";
-		} else {
-			return "sample 20%";
-		}
+		return "randomSample";
+//		if (graphName.contains("0.5")) {
+//			return "sample 50%";
+//		} else {
+//			return "sample 20%";
+//		}
 		
 	}
 
@@ -77,7 +78,7 @@ public class SampleResultsRandom extends SampleResults{
 		return "Baseline";
 	}
 	public String getAlgorithm() {
-		return "sample";
+		return "randomSample";
 	}
 	
 	public String getPercentage() {
@@ -92,5 +93,10 @@ public class SampleResultsRandom extends SampleResults{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public SampleType getSampleType() {
+		return SampleType.BASELINE_RANDOM;
 	}
 }

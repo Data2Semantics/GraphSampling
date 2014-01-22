@@ -15,6 +15,7 @@ import org.xml.sax.SAXException;
 
 import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
+import com.d2s.subgraph.eval.experiments.SwdfExperimentSetup;
 
 public class CalcCutoffWeight {
 	private double maxSampleSize;
@@ -22,18 +23,20 @@ public class CalcCutoffWeight {
 	private ExperimentSetup experimentSetup;
 	private HashMap<String, Double> cutoffWeights = new HashMap<String, Double>();
 	private HashMap<String, Double> cutoffSizes = new HashMap<String, Double>();
-	
 	private File weightDistDir;
-	public CalcCutoffWeight(ExperimentSetup experimentSetup, double maxSampleSize) throws IOException {
+	private boolean verbose = false;
+	public CalcCutoffWeight(ExperimentSetup experimentSetup, double maxSampleSize, File cwd) throws IOException {
 		this.experimentSetup = experimentSetup;
 		this.maxSampleSize = maxSampleSize;
 		
-		weightDistDir = new File(Config.PATH_WEIGHT_DISTRIBUTION + experimentSetup.getId());
+		weightDistDir = new File(cwd.getAbsolutePath() + "/" + Config.PATH_WEIGHT_DISTRIBUTION + experimentSetup.getId());
 		if (!weightDistDir.exists()) throw new IOException("path to get weight distribution from does not exist: " + weightDistDir.getPath());
 	}
 	
 	public void calcForFiles() throws IOException {
 		for (File distFile: FileUtils.listFiles(weightDistDir, null, false)) {
+			if (verbose) System.out.println("calcing cutoff weight for " + distFile.getName());
+//			if (!distFile.getName().toLowerCase().contains("random")) continue;
 			calcCutoff(distFile);
 		}
 	}
@@ -47,6 +50,7 @@ public class CalcCutoffWeight {
 	}
 	
 	private void calcCutoff(File file) throws IOException {
+		
 		TreeMap<Double, Integer> dist = new TreeMap<Double, Integer>();
 		int totalSize = 0;
 		
@@ -68,29 +72,40 @@ public class CalcCutoffWeight {
 				dist.put(weight, count);
 			}
 		}
+//		System.out.println(dist);System.exit(1);
 		br.close();
+		if (verbose) System.out.println("totalsize triples based on query dist: " + totalSize);
 		int cutoffSize = (int) Math.round(totalSize * maxSampleSize);
+		if (verbose) System.out.println("max size triples for cutoff " + cutoffSize);
 		//sort by weight
 		NavigableSet<Double> weights = dist.descendingKeySet();
-		int sampleSize = 0;
+		int previousSampleSize = 0;
 		Double previousWeight = null;
 		for (Double weight: weights) {
-			int weightCount = dist.get(weight);
-			if ((sampleSize + weightCount) > cutoffSize) {
+			int tripleNumWithWeight = dist.get(weight);
+			if ((previousSampleSize + tripleNumWithWeight) > cutoffSize) {
 				//ah, we don't want a bigger sample, but we'd prefer to be on the safe side
 				cutoffWeights.put(file.getName(), previousWeight);
-				cutoffSizes.put(file.getName(), (double)sampleSize / (double)totalSize);
+				
+				if (verbose) {
+					System.out.println("we reached triple " + (previousSampleSize + tripleNumWithWeight) + " now. we should break!");
+					System.out.println("cutoff weight: " + previousWeight);
+					System.out.println("cutoff " + file.getName() + ": " +  (double)previousSampleSize / (double)totalSize);
+				}
+				cutoffSizes.put(file.getName(), (double)previousSampleSize / (double)totalSize);
 				return;
 			} else {
-				sampleSize += weightCount;
+				previousSampleSize += tripleNumWithWeight;
 				previousWeight = weight;
 			}
 		}
-		throw new IOException("unable to find cutoff weight based on weight distribution!");
+		throw new IOException("unable to find cutoff weight based on weight distribution: "  + file.getPath());
 	}
 	
 	
 	public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException {
-//		get(new SwdfExperimentSetup(true, true), 0.5);
+		CalcCutoffWeight cutoffWeights = new CalcCutoffWeight(new SwdfExperimentSetup(true, true), 0.5, new File(""));
+		cutoffWeights.calcCutoff(new File("input/weightDistribution/swdf/resourceContext_indegree"));
+//		resourceContext_indegree
 	}
 }

@@ -105,7 +105,11 @@ public class FetchTriplesFromQuery {
 	private File getCollapsedQuerySolutionDir(File rootQsDir) {
 		//we use our own filecount object, to avoid using the listFiles() java function (which can get quite expensive)
 		Integer fileCount = fileCounts.get(rootQsDir);
-		if (fileCount == null) fileCounts.put(rootQsDir, 0);//havent used this dir yet to store stuff in, so it has zero files
+		if (fileCount == null) {
+			fileCount = 0;
+			fileCounts.put(rootQsDir, fileCount);//havent used this dir yet to store stuff in, so it has zero files
+			
+		}
 		
 		File file = new File(rootQsDir.getPath() + "/collapsed" + fileCount);
 		if (file.exists()) throw new IllegalStateException("Query solution dir " + file.getPath() + " already exists. Stopping getting triples from queries");
@@ -140,6 +144,7 @@ public class FetchTriplesFromQuery {
 			Set<TripleCollectorMark> knownToExist = new HashSet<TripleCollectorMark>(); 
 			Set<TripleCollectorMark> knownNotToExist = new HashSet<TripleCollectorMark>(); 
 			boolean hasResults = false;
+			
 			while (resultSet.hasNext()) {
 				hasResults = true;
 				QuerySolution solution = resultSet.next();
@@ -161,7 +166,9 @@ public class FetchTriplesFromQuery {
 				
 				
 				ExtractTriplePatternsVisitor visitor = new ExtractTriplePatternsVisitor(experimentSetup.getGoldenStandardGraph(), knownToExist, knownNotToExist);
-				rewrittenQuery.fetchTriplesFromPatterns(solution, visitor);
+				
+				Query queryToFetchPatternsFrom = rewrittenQuery.clone(); //clone, otherwise we replace vars with values, and our next iterations fucks up
+				queryToFetchPatternsFrom.fetchTriplesFromPatterns(solution, visitor);
 				writeRequiredTriples(new File(outputDir.getPath() + "/" + Config.FILE_QTRIPLES_REQUIRED), visitor.getRequiredTriples());
 				writeOptionalTriples(new File(outputDir.getPath() + "/" + Config.FILE_QTRIPLES_OPTIONAL), visitor.getOptionalTriples());
 				writeUnionTriples(new File(outputDir.getPath() + "/" + Config.FILE_QTRIPLES_UNION), visitor.getUnionTriples());
@@ -225,21 +232,40 @@ public class FetchTriplesFromQuery {
 		FetchTriplesFromQuery fetch = new FetchTriplesFromQuery(experimentSetup, query, experimentDir);
 		fetch.process();
 	}
+	
 
 	public static void main(String[] args) throws Exception {
 		boolean useCachedQueries = true;
 		ExperimentSetup experimentsetup = new SwdfExperimentSetup(useCachedQueries, true);
-		Query query = Query.create("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" + 
-				"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" + 
-				"PREFIX foaf: <http://xmlns.com/foaf/0.1/>\n" + 
-				"\n" + 
-				"SELECT DISTINCT ?paper FROM <http://swdf>\n" + 
-				"WHERE {\n" + 
-				"	?paper a <http://swrc.ontoware.org/ontology#InProceedings>;\n" + 
-				"      <http://swrc.ontoware.org/ontology#year> \"2009\";\n" + 
-				"      foaf:maker ?maker\n" + 
-				"} LIMIT 1000\n" + 
-				"");
+		Query query = Query.create(""
+				+ "PREFIX  dc:   <http://purl.org/dc/elements/1.1/>\n" + 
+				"PREFIX  :     <http://dbpedia.org/resource/>\n" + 
+				"PREFIX  dbpedia2: <http://dbpedia.org/property/>\n" + 
+				"PREFIX  geo:  <http://www.w3.org/2003/01/geo/wgs84_pos#>\n" + 
+				"PREFIX  foaf: <http://xmlns.com/foaf/0.1/>\n" + 
+				"PREFIX  swrc-ext: <http://www.cs.vu.nl/~mcaklein/onto/swrc_ext/2005/05#>\n" + 
+				"PREFIX  rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" + 
+				"PREFIX  owl:  <http://www.w3.org/2002/07/owl#>\n" + 
+				"PREFIX  xsd:  <http://www.w3.org/2001/XMLSchema#>\n" + 
+				"PREFIX  dbpedia: <http://dbpedia.org/>\n" + 
+				"PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" + 
+				"PREFIX  swrc: <http://swrc.ontoware.org/ontology#>\n" + 
+				"PREFIX  dbpprop: <http://dbpedia.org/property/>\n" + 
+				"PREFIX  ical: <http://www.w3.org/2002/12/cal/ical#>\n" + 
+				"PREFIX  skos: <http://www.w3.org/2004/02/skos/core#>\n" + 
+				"PREFIX  swc:  <http://data.semanticweb.org/ns/swc/ontology#>"
+				+ "SELECT DISTINCT  ?s ?t ?y ?to ?h\n" + 
+				"FROM <http://swdf>\n" + 
+				"WHERE\n" + 
+				"  { ?s dc:title ?t .\n" + 
+				"    ?s swrc:year ?y\n" + 
+				"    OPTIONAL\n" + 
+				"      { ?s foaf:homepage ?h }\n" + 
+				"    OPTIONAL\n" + 
+				"      { ?s foaf:topic ?to }\n" + 
+				"  }\n" + 
+				"ORDER BY DESC(?y)\n" + 
+				"LIMIT   200");
 //		System.out.println(query.toString());
 		
 		File outputDir = new File("test");
