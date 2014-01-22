@@ -12,6 +12,6 @@ createDict.sh $dataset;
 runAnalysis.sh $dataset;
 runGiraphAnalysisToString.sh $dataset;
 roundtrip.sh $dataset;
-generateWeightDistribution.sh $dataset;
 generateBaselines.sh $dataset;
+generateWeightDistribution.sh $dataset;
 validateHash.sh $dataset;
