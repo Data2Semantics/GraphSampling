@@ -28,6 +28,7 @@ public class WriteAnalysis {
 	private OutputCsv outputCsv;
 	private OutputHtml outputHtml;
 	private OutputR outputR;
+	private OutputWekaCsv outputWeka;
 
 	
 	public WriteAnalysis(ExperimentSetup experimentSetup, double maxSampleSize) throws IOException {
@@ -38,6 +39,7 @@ public class WriteAnalysis {
 		outputCsv = new OutputCsv(experimentSetup, allGraphResults, queryCollection, resultsDir);
 		outputHtml = new OutputHtml(experimentSetup, allGraphResults, queryCollection, resultsDir);
 		outputR = new OutputR(experimentSetup, allGraphResults, queryCollection, resultsDir);
+		outputWeka = new OutputWekaCsv(experimentSetup, allGraphResults, queryCollection, resultsDir);
 		
 	}
 	
@@ -70,6 +72,7 @@ public class WriteAnalysis {
 					outputCsv.rewriteVsAlgs();
 					outputCsv.outputAverageRecallPerQuery();
 					outputCsv.outputBestRecallPerAlgorithm();
+					outputWeka.store();
 //				}
 //			}
 			outputR.drawPlots();

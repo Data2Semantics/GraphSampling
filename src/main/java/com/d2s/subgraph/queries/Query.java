@@ -177,17 +177,18 @@ public class Query extends org.data2semantics.query.Query {
 				if (node.isLiteral()) {
 					try {
 						//we need to process this.. if there are double quotes in here, we should add slashes! These quotes are escaped in pig, and we want to get the exact same string!
+						//ah, and if there are slashes already, we should escape these as well.. :(
 						Literal literal = node.asLiteral();
 						String literalString = literal.getString();
-						literalString = literalString.replace("\"", "\\\"");
+						
+						literalString = literalString.replace("\\", "\\\\");//add escape to escape char
+						literalString = literalString.replace("\"", "\\\"");//add escape to quote
 						String lang = literal.getLanguage();
 						if (lang != null && lang.length() > 0) {
 							node = ResourceFactory.createLangLiteral(literalString, lang);
 						} else {
 							node = ResourceFactory.createPlainLiteral(literalString);
 						}
-						
-	//					node = new Literal("sdf");
 					} catch (Exception e) {
 						//ignore. We tried to retrieve a string from a typed (not as string) literal, which does not work
 					}

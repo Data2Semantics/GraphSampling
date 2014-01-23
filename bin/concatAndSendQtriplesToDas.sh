@@ -11,13 +11,13 @@ dirBasename=`basename $dir`
 echo "processing $dirBasename";
 concatFile=${dir}/../${dirBasename}AllQtriples;
 rm -f $concatFile;
-find $dir -type f | grep qs | xargs cat > ${concatFile};
+find $dir -type f | grep qs | xargs cat >> ${concatFile};
 uniqFile=${concatFile}_uniq; 
 sort $concatFile | uniq >>  ${uniqFile};
 mv ${uniqFile} ${concatFile};
 
-echo "now rsyncing"
-rsync -avz ${concatFile} fs0.das4.cs.vu.nl:/var/scratch/lrd900/qTriples/$dirBasename
+echo "now rsyncing"#also dels on the dest side
+rsync -avz --del ${concatFile} fs0.das4.cs.vu.nl:/var/scratch/lrd900/qTriples/$dirBasename
 
 echo "adding file to hdfs"
 ssh fs0.das4.cs.vu.nl uploadQueryTriplesToHdfs.sh $dirBasename
