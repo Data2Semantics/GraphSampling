@@ -3,8 +3,8 @@
 
 echo "copying subgraph dir to das"
 
-src="~/code/subgraphSelection"
-target="145.100.58.2:/virdir/Scratch/"
+src="/home/lrd900/code/subgraphSelection/*.jar"
+target="145.100.58.2:/virdir/Scratch/subgraphSelection/"
 eval rsync -avz $src $target
 #rsync -avz fs0.das4.cs.vu.nl:weightDistribution $localTargetDir;
 

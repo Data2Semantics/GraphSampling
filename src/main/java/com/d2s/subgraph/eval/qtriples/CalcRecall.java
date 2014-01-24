@@ -178,6 +178,9 @@ public class CalcRecall {
 
 	public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException, InterruptedException {
 		File cwd = new File("");
+		if (args.length > 0) {
+			cwd = new File("/run/shm/");
+		}
 		Double maxSampleSize = 0.5;
 		ExperimentSetup[] setups = {
 			new SwdfExperimentSetup(true),

@@ -82,7 +82,7 @@ public class OutputWekaCsv extends OutputWrapper {
 			ArrayList<String> row = new ArrayList<String>();
 			row.add(Integer.toString(count));
 			for (SampleResults results: allGraphResults) {
-				row.add("recall " + results.getQueryCollection().getQuery(query.toString()).getResults().getRecall());
+				row.add(Double.toString(results.getQueryCollection().getQuery(query.toString()).getResults().getRecall()));
 			}
 //			row.add(Double.toString(results.getQueryCollection().getQuery(query.toString()).getResults().getRecall()));
 			row.add(Integer.toString(query.triplePatternCount));
