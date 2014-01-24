@@ -8,6 +8,7 @@ import org.data2semantics.query.QueryCollection;
 
 import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
+import com.d2s.subgraph.eval.experiments.ObmExperimentSetup;
 import com.d2s.subgraph.eval.experiments.SwdfExperimentSetup;
 import com.d2s.subgraph.queries.Query;
 
@@ -58,7 +59,8 @@ public class FetchTriplesFromQueries {
 	public static void main(String[] args) throws Exception {
 		boolean useCachedQueries = true;
 		
-		FetchTriplesFromQueries fetch = new FetchTriplesFromQueries(new SwdfExperimentSetup(useCachedQueries));
+//		FetchTriplesFromQueries fetch = new FetchTriplesFromQueries(new SwdfExperimentSetup(useCachedQueries));
+		FetchTriplesFromQueries fetch = new FetchTriplesFromQueries(new ObmExperimentSetup(useCachedQueries));
 //		fetch.maxQueries = 20;
 		fetch.resetExperimentDir();
 		fetch.processQueries();

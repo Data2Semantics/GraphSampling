@@ -25,9 +25,10 @@ public class OutputWekaCsv extends OutputWrapper {
 	
 	public void store() throws IOException {
 		storeMappingFile();
-		for (SampleResults results: allGraphResults) {
-			storeFeaturesFile(results);
-		}
+		storeFeaturesFile();
+//		for (SampleResults results: allGraphResults) {
+//			storeFeaturesFile(results);
+//		}
 	}
 
 
@@ -44,18 +45,46 @@ public class OutputWekaCsv extends OutputWrapper {
 		writer.close();
 	}
 
-	private void storeFeaturesFile(SampleResults results) throws IOException {
+	
+	private String[] getCsvHeader() {
+		ArrayList<String> headerList = new ArrayList<String>();
+		headerList.add("queryId");
+		for (SampleResults results: allGraphResults) {
+			headerList.add("recall " + results.getProperName());
+		}
+		headerList.add("triplePatCount");
+		headerList.add("triplePatCountCcv");
+		headerList.add("triplePatCountCvv");
+		headerList.add("triplePatCountVcc");
+		headerList.add("hasLimit");
+		headerList.add("joinCount");
+		headerList.add("joinCountOo");
+		headerList.add("joinCountPo");
+		headerList.add("joinCountPp");
+		headerList.add("joinCountSo");
+		headerList.add("joinCountSp");
+		headerList.add("joinCountSs");
+		headerList.add("unions");
+		headerList.add("optionalBlocks");
+		headerList.add("optionalTriples");
+		
+		return headerList.toArray(new String[headerList.size()]);
+	}
+	private void storeFeaturesFile() throws IOException {
 		CSVWriter writer = new CSVWriter(new FileWriter(new File(resultsDir, Config.FILE_CSV_QUERY_FEATURES)), ',');
 		// write header
-		writer.writeNext(new String[] { "queryId", "recall", "triplePatCount", "triplePatCountCcv", "triplePatCountCvv", "triplePatCountVcc", "hasLimit", "joinCount",
-				"joinCountOo", "joinCountPo", "joinCountPp", "joinCountSo", "joinCountSp", "joinCountSs", "unions", "optionalBlocks", "optionalTriples", });
+		
+		writer.writeNext(getCsvHeader());
 		int count = 0;
 		for (Query query: getQueryCollection().getQueries()) {
 //			Query query = queries.get(i);
 
 			ArrayList<String> row = new ArrayList<String>();
 			row.add(Integer.toString(count));
-			row.add(Double.toString(results.getQueryCollection().getQuery(query.toString()).getResults().getRecall()));
+			for (SampleResults results: allGraphResults) {
+				row.add("recall " + results.getQueryCollection().getQuery(query.toString()).getResults().getRecall());
+			}
+//			row.add(Double.toString(results.getQueryCollection().getQuery(query.toString()).getResults().getRecall()));
 			row.add(Integer.toString(query.triplePatternCount));
 			row.add(Integer.toString(query.triplePatternCountCcv));
 			row.add(Integer.toString(query.triplePatternCountCvv));

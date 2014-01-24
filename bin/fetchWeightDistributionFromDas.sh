@@ -6,7 +6,14 @@ if [ -z "$1" ];then
         exit;
 fi
 dataset=$1
-localTargetDir="~/code/subgraphSelection/input/"
+host=`hostname -f`
+localTargetDir="/virdir/Scratch/subgraphSelection/input/"
+if [ "$host" == "note632" ];then
+	localTargetDir="/home/lrd900/code/subgraphSelection/input/"
+fi
+
+
+
 #echo $localTargetDir;exit;
 echo "fetching hdfs data for das4 master node"
 ssh fs0.das4.cs.vu.nl fetchWeightDistribution.sh $dataset;

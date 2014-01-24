@@ -15,8 +15,11 @@ import org.apache.commons.io.FileUtils;
 import org.xml.sax.SAXException;
 
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
+import com.d2s.subgraph.eval.experiments.SwdfExperimentSetup;
 import com.d2s.subgraph.eval.results.QueryResultsRegular;
 import com.d2s.subgraph.queries.Query;
+import com.hp.hpl.jena.rdf.model.Literal;
+import com.hp.hpl.jena.rdf.model.ResourceFactory;
 
 public class CalcRecallForQuery {
 	
@@ -37,8 +40,7 @@ public class CalcRecallForQuery {
 		this.queryDir = queryDir;
 		File queryFile = new File(queryDir.getPath() + "/query.txt");
 		if (!queryFile.exists()) throw new IOException("tried to locate " + queryFile.getPath() + ", but it isnt there. Unable to calc recall");
-		
-		
+
 		
 		query = Query.create(FileUtils.readFileToString(queryFile));
 		queryLimit = (int) query.getLimit();
@@ -69,13 +71,14 @@ public class CalcRecallForQuery {
 		int incorrectCount = 0; 
 //		System.out.println(queryDir.getPath());
 		for (File qsDir: querySolutionDirs) {
-			if (verbose) System.out.println("processing query " + qsDir.getName());
+			if (verbose) System.out.println("processing querysolution " + qsDir.getName());
 			if (queryLimit > 0 && correctCount > queryLimit) {
 				recall = 1.0;
 				break;
 			}
 			boolean qsInSample = isQuerySolutionInSample(qsDir);
 			if (qsInSample) {
+//				if (verbose) System.out.println(qsDir.getName());
 				correctCount++;
 			} else {
 				incorrectCount++;
@@ -87,8 +90,10 @@ public class CalcRecallForQuery {
 			int maxNumberOfIncorrect = (queryLimit - correctCount);
 			incorrectCount = Math.min(maxNumberOfIncorrect, incorrectCount);
 		}
+		
 		if (correctCount > 0 || incorrectCount > 0) {
 			if (recall == null) recall = (double)correctCount / (double)(correctCount + incorrectCount);
+			if (verbose) System.out.println("recall: " + recall);
 			QueryResultsRegular results = new QueryResultsRegular();
 			results.setRecall(recall);
 			query.setResults(results);
@@ -134,7 +139,7 @@ public class CalcRecallForQuery {
 				if (line.length() > 0) {
 					Double weight = sampleWeights.get(line);
 					if (weight != null) {
-						if (weight > cutoffWeight) {
+						if (weight >= cutoffWeight) {
 							//continue checking other triples
 						} else {
 							//1 of our required files would not be in the sample.
@@ -165,7 +170,7 @@ public class CalcRecallForQuery {
 				if (line.length() > 0) {
 					Double weight = sampleWeights.get(line);
 					if (weight != null) {
-						if (weight > cutoffWeight) {
+						if (weight >= cutoffWeight) {
 							//continue checking other triples
 						} else {
 							//1 of our required files would not be in the sample.
@@ -232,8 +237,19 @@ public class CalcRecallForQuery {
 	}
 
 	public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException {
-//		CalcRecallForQuery calc = new CalcRecallForQuery(new SwdfExperimentSetup(true, true), 0.5);
-//		calc.calcRecallForSamples();
+		ExperimentSetup experimentSetup = new SwdfExperimentSetup(true);
+//		CalcCutoffWeight cutoffWeights = new CalcCutoffWeight(experimentSetup, 0.5, new File(""));
+//		cutoffWeights.calcForFiles();
+		File queryDir = new File("output/queryTriples/swdf/query-8");
+		
+		CalcRecallForQuery calc = new CalcRecallForQuery(
+				experimentSetup, 
+				"resourceContext_indegree", 
+				CalcRecall.fetchSampleWeights(new File("input/qTripleWeights/swdf/resourceContext_indegree")), 
+				queryDir, 
+				9.0);
+		calc.run();
+//		System.out.println()
 	}
 
 

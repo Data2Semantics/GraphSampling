@@ -14,19 +14,24 @@ import org.apache.commons.io.FileUtils;
 
 import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
+import com.d2s.subgraph.eval.experiments.ObmExperimentSetup;
 import com.d2s.subgraph.eval.experiments.SwdfExperimentSetup;
 import com.d2s.subgraph.queries.Query;
 import com.d2s.subgraph.queries.qtriples.visitors.ExtractTriplePatternsVisitor;
 import com.d2s.subgraph.util.Utils;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.graph.impl.LiteralLabel;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.syntax.TripleCollectorMark;
+import com.hp.hpl.jena.sparql.util.NodeFactory;
 
 public class FetchTriplesFromQuery {
 	
@@ -57,7 +62,7 @@ public class FetchTriplesFromQuery {
 //		System.out.println("rewrite");
 		//rewrite to * query
 		rewrittenQuery = originalQuery.getQueryForTripleRetrieval();
-		
+//		System.out.println(rewrittenQuery.toString());
 		//make sure the query targets the proper graph
 		rewrittenQuery = rewrittenQuery.getQueryWithFromClause(experimentSetup.getGoldenStandardGraph());
 		
@@ -123,9 +128,45 @@ public class FetchTriplesFromQuery {
 		if (node.toString().startsWith("?")) {
 			throw new UnsupportedOperationException("Our node " + node.toString() + " is still a variable... We have a problem!");
 		}
-		nodeString = node.toString();
-		if (node.isURI()) {
-			nodeString = "<" + nodeString + ">";
+		
+		
+//		System.out.println("nodeString: " + nodeString);
+		if (node.isLiteral()) {
+//			try {
+				//we need to process this.. if there are double quotes in here, we should add slashes! These quotes are escaped in pig, and we want to get the exact same string!
+				//ah, and if there are slashes already, we should escape these as well.. :(
+				LiteralLabel literal = node.getLiteral();
+//				literal.getValue().toString();
+				String literalString = literal.getValue().toString();
+//				literal.getLexicalForm();
+//				System.out.println(nodeString);
+				
+				literalString = literalString.replace("\\", "\\\\");//add escape to escape char
+				literalString = literalString.replace("\"", "\\\"");//add escape to quote
+				literalString = literalString.replace("\t", "\\t");
+				node = NodeFactory.createLiteralNode(literalString, node.getLiteralLanguage(), node.getLiteralDatatypeURI());
+				
+				
+				nodeString = node.toString();
+				
+				String dataType = node.getLiteralDatatypeURI();
+				if (dataType != null && nodeString.contains(dataType)) {
+					nodeString = nodeString.replace(dataType, "<" + dataType + ">");
+				}
+//				if (lang != null && lang.length() > 0) {
+//					node = ResourceFactory.createLangLiteral(literalString, lang);
+//				} else {
+//					node = ResourceFactory.createPlainLiteral(literalString);
+//				}
+//			} catch (Exception e) {
+//				//ignore. We tried to retrieve a string from a typed (not as string) literal, which does not work
+//			}
+		} else {
+		
+			nodeString = node.toString();
+			if (node.isURI()) {
+				nodeString = "<" + nodeString + ">";
+			}
 		}
 		return nodeString;
 	}
@@ -143,7 +184,6 @@ public class FetchTriplesFromQuery {
 			Set<TripleCollectorMark> knownToExist = new HashSet<TripleCollectorMark>(); 
 			Set<TripleCollectorMark> knownNotToExist = new HashSet<TripleCollectorMark>(); 
 			boolean hasResults = false;
-			
 			while (resultSet.hasNext()) {
 				hasResults = true;
 				QuerySolution solution = resultSet.next();
@@ -163,12 +203,25 @@ public class FetchTriplesFromQuery {
 					outputDir = getCollapsedQuerySolutionDir(outputDir);
 				}
 				
-				
+//				int bla = 0;
 				ExtractTriplePatternsVisitor visitor = new ExtractTriplePatternsVisitor(experimentSetup.getGoldenStandardGraph(), knownToExist, knownNotToExist);
-				
+//				if (querySolutionsCount == 106) {
+//					bla = 1;
+//					
+//				}
 				Query queryToFetchPatternsFrom = rewrittenQuery.clone(); //clone, otherwise we replace vars with values, and our next iterations fucks up
 				queryToFetchPatternsFrom.fetchTriplesFromPatterns(solution, visitor);
+				
+//				if (querySolutionsCount == 106) {
+//					System.out.println(visitor.getRequiredTriples());
+//					System.out.println(visitor.getOptionalTriples());
+//					System.out.println(visitor.getUnionTriples());
+//					System.exit(1);
+//				}
+				
+				
 //				System.out.println(visitor.getRequiredTriples());
+				
 				writeRequiredTriples(new File(outputDir.getPath() + "/" + Config.FILE_QTRIPLES_REQUIRED), visitor.getRequiredTriples());
 				writeOptionalTriples(new File(outputDir.getPath() + "/" + Config.FILE_QTRIPLES_OPTIONAL), visitor.getOptionalTriples());
 				writeUnionTriples(new File(outputDir.getPath() + "/" + Config.FILE_QTRIPLES_UNION), visitor.getUnionTriples());
@@ -237,26 +290,18 @@ public class FetchTriplesFromQuery {
 	public static void main(String[] args) throws Exception {
 		boolean useCachedQueries = true;
 		ExperimentSetup experimentsetup = new SwdfExperimentSetup(useCachedQueries, true);
-		Query query = Query.create(""
-				+ "BASE    <http://192.168.27.144/eswc_planner/run/index.php>\n" + 
-				"PREFIX  dct:  <http://purl.org/dc/terms/>\n" + 
-				"PREFIX  swrc: <http://swrc.ontoware.org/ontology#>\n" + 
-				"PREFIX  swc:  <http://data.semanticweb.org/ns/swc/ontology#>\n" + 
+//		ExperimentSetup experimentsetup = new ObmExperimentSetup(useCachedQueries, true);
+		Query query = Query.create("PREFIX  rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" + 
+				"PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" + 
 				"\n" + 
-				"SELECT DISTINCT  ?paper ?title ?abstract\n" + 
+				"SELECT DISTINCT  *\n" + 
 				"FROM <http://swdf>\n" + 
 				"WHERE\n" + 
-				"  { ?conf swc:hasAcronym \"WWW2009\" .\n" + 
-				"    ?conf swc:hasRelatedDocument ?proceedings .\n" + 
-				"    ?proceedings swc:hasPart ?paper .\n" + 
-				"    ?paper dct:title ?title .\n" + 
-				"    ?paper swrc:abstract ?abstract\n" + 
+				"  { <http://data.semanticweb.org/conference/iswc/2009/paper/industry/01> <http://purl.org/dc/elements/1.1/title> ?label\n" + 
 				"  }\n" + 
-				"ORDER BY ?title\n" + 
-				"OFFSET  0\n" + 
-				"LIMIT   10" + 
-				"");
-//		System.out.println(query.toString());
+				"ORDER BY ?label\n" + 
+				"LIMIT   10");
+//		System.out.println(quesry.toString());
 		
 		File outputDir = new File("test");
 		if (outputDir.exists()) FileUtils.deleteDirectory(outputDir);

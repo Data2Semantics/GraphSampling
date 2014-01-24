@@ -8,8 +8,14 @@ dataset=$1
 
 echo "fetching hdfs data for das4 master node"
 ssh fs0.das4.cs.vu.nl fetchQueryTripleWeights.sh $dataset;
+host=`hostname -f`
 
-localTargetDir="~/code/subgraphSelection/input/"
+localTargetDir="/virdir/Scratch/subgraphSelection/input/"
+if [ "$host" == "note632" ];then
+	localTargetDir="/home/lrd900/code/subgraphSelection/input/"
+fi
+
+
 echo "rsyncing locally"#also dels on the dest side
 eval rsync -avz --del fs0.das4.cs.vu.nl:/var/scratch/lrd900/qTripleWeights $localTargetDir;
 #rsync -avz fs0.das4.cs.vu.nl:weightDistribution $localTargetDir;

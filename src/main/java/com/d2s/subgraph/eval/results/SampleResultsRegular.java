@@ -17,22 +17,22 @@ public class SampleResultsRegular extends SampleResults {
 		queryCollection.addQuery(query);
 	}
 	public String getRewriteMethod() {
-		String rewriteMethod = StringUtils.getRewriteMethodAsString(graphName);
-		if (rewriteMethod.length() == 0) {
-			if (graphName.contains("Baseline")) {
-				rewriteMethod = "Baseline";
-			} else {
-				rewriteMethod = graphName;
-			}
+		String rewriteMethod = "";
+		if (getSampleType() == SampleType.REGULAR) {
+			rewriteMethod = StringUtils.getRewriteMethodAsString(graphName);
 		}
 		return rewriteMethod;
 	}
 	
 	public String getProperName() {
 		String properName = "";
-		properName += StringUtils.getRewriteMethodAsString(getGraphName());
-		properName += " " + StringUtils.getAlgorithmAsString(getGraphName());
-		properName += " " + getPercentage();
+		if (getSampleType() == SampleType.BASELINE_FREQ) {
+			properName = "resource frequency " + getPercentage();
+		} else {
+			properName += StringUtils.getRewriteMethodAsString(getGraphName());
+			properName += " " + StringUtils.getAlgorithmAsString(getGraphName());
+			properName += " " + getPercentage();
+		}
 		return properName;
 	}
 	public String getShortGraphName() {
@@ -45,19 +45,17 @@ public class SampleResultsRegular extends SampleResults {
 		for (String part: parts) {
 			shortGraphname += part + "_";
 		}
-		shortGraphname = shortGraphname.substring(0, shortGraphname.length()-1);//remove trailing _
+		if (shortGraphname.length() > 0) {
+			shortGraphname = shortGraphname.substring(0, shortGraphname.length()-1);//remove trailing _
+		}
 		return shortGraphname;
 		
 	}
 	public String getAlgorithm() {
-		String algorithm = StringUtils.getAlgorithmAsString(graphName);
-		if (algorithm.length() == 0) {
-			algorithm = graphName;
-			if (graphName.contains("Baseline")) {
-				algorithm = "resource frequency";
-			} else {
-				algorithm = graphName;
-			}
+		String algorithm = "";
+		if (getSampleType() == SampleType.REGULAR) {
+			algorithm = StringUtils.getAlgorithmAsString(graphName);
+			
 		}
 		return algorithm;
 	}

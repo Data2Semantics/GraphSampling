@@ -124,6 +124,8 @@ public class Query extends org.data2semantics.query.Query {
 		query.setQueryResultStar(true);
 		query.setDistinct(true);
 		query.replaceBlankNodesByVars();
+		query.setLimit(NOLIMIT);
+		query.setOffset(NOLIMIT);
 		query = query.getQueryWithoutOrderBy();
 		
 		return query;
@@ -174,25 +176,7 @@ public class Query extends org.data2semantics.query.Query {
 		for (String varName: getVarnamesFromPatterns()) {
 			RDFNode node = solution.get(varName);
 			if (node != null) {
-				if (node.isLiteral()) {
-					try {
-						//we need to process this.. if there are double quotes in here, we should add slashes! These quotes are escaped in pig, and we want to get the exact same string!
-						//ah, and if there are slashes already, we should escape these as well.. :(
-						Literal literal = node.asLiteral();
-						String literalString = literal.getString();
-						
-						literalString = literalString.replace("\\", "\\\\");//add escape to escape char
-						literalString = literalString.replace("\"", "\\\"");//add escape to quote
-						String lang = literal.getLanguage();
-						if (lang != null && lang.length() > 0) {
-							node = ResourceFactory.createLangLiteral(literalString, lang);
-						} else {
-							node = ResourceFactory.createPlainLiteral(literalString);
-						}
-					} catch (Exception e) {
-						//ignore. We tried to retrieve a string from a typed (not as string) literal, which does not work
-					}
-				}
+				
 				queryElement = getQueryPattern();
 				if (queryElement == null) return null;
 				queryElement.visit(new RewriteTriplePatternsVisitor(varName, node, this));
@@ -230,7 +214,7 @@ public class Query extends org.data2semantics.query.Query {
 		 * fetch triples based on query patterns
 		 */
 		query.replaceBlankNodesByVars();
-		System.out.println(query.toString());
+//		System.out.println(query.toString());
 		
 		/**
 		 * rewrite queries for triple retrieval

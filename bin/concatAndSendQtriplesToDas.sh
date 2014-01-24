@@ -6,8 +6,17 @@ if [ -z "$1" ];then
         exit;
 fi
 dataset=$1
-dir=/home/lrd900/code/subgraphSelection/output/queryTriples/$dataset
+
+
+host=`hostname -f`
+
+dir=/virdir/Scratch/subgraphSelection/output/queryTriples/$dataset
+if [ "$host" == "note632" ];then
+	dir=/home/lrd900/code/subgraphSelection/output/queryTriples/$dataset
+fi
+
 dirBasename=`basename $dir`
+
 echo "processing $dirBasename";
 concatFile=${dir}/../${dirBasename}AllQtriples;
 rm -f $concatFile;
