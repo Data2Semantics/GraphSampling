@@ -22,7 +22,7 @@ public class ObmExperimentSetup extends ExperimentSetup {
 	private static String GRAPH_PREFIX = "obm_";
 	private static String QUERY_RESULTS_DIR = "obmQueryResults";
 	private static String EVAL_RESULTS_DIR = "obmResults";
-	private static boolean PRIVATE_QUERIES = true;
+	private static boolean PRIVATE_QUERIES = false;
 	private static int MAX_NUM_QUERIES = 0;
 	private QueriesFetcher queriesFetcher;
 	private boolean UNIQUE_QUERIES = true;

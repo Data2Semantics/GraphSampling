@@ -22,7 +22,7 @@ public class Bio2RdfExperimentSetup extends ExperimentSetup {
 	private static String GRAPH_PREFIX = "bio2rdf_";
 	private static String QUERY_RESULTS_DIR = "bio2rdfQueryResults";
 	private static String EVAL_RESULTS_DIR = "bio2rdfResults";
-	private static boolean PRIVATE_QUERIES = true;
+	private static boolean PRIVATE_QUERIES = false;
 	private static int MAX_NUM_QUERIES = 0;
 	private QueriesFetcher queriesFetcher;
 	private boolean UNIQUE_QUERIES = true;

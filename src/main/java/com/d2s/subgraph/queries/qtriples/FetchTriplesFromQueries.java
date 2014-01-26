@@ -7,9 +7,11 @@ import org.apache.commons.io.FileUtils;
 import org.data2semantics.query.QueryCollection;
 
 import com.d2s.subgraph.eval.Config;
+import com.d2s.subgraph.eval.experiments.Bio2RdfExperimentSetup;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
+import com.d2s.subgraph.eval.experiments.ExperimentSetupHelper;
+import com.d2s.subgraph.eval.experiments.LgdExperimentSetup;
 import com.d2s.subgraph.eval.experiments.ObmExperimentSetup;
-import com.d2s.subgraph.eval.experiments.SwdfExperimentSetup;
 import com.d2s.subgraph.queries.Query;
 
 
@@ -57,24 +59,22 @@ public class FetchTriplesFromQueries {
 	
 	
 	public static void main(String[] args) throws Exception {
-		boolean useCachedQueries = true;
+		FetchTriplesFromQueries fetch;
+		if (args.length > 0) {
+			fetch = new FetchTriplesFromQueries(ExperimentSetupHelper.get(args[0]));
+		} else {
 		
-//		FetchTriplesFromQueries fetch = new FetchTriplesFromQueries(new SwdfExperimentSetup(useCachedQueries));
-		FetchTriplesFromQueries fetch = new FetchTriplesFromQueries(new ObmExperimentSetup(useCachedQueries));
+		
+			boolean useCachedQueries = true;
+			
+	//		FetchTriplesFromQueries fetch = new FetchTriplesFromQueries(new SwdfExperimentSetup(useCachedQueries));
+			fetch = new FetchTriplesFromQueries(new ObmExperimentSetup(useCachedQueries));
+//			fetch = new FetchTriplesFromQueries(new Bio2RdfExperimentSetup(useCachedQueries));
+		}
 //		fetch.maxQueries = 20;
 		fetch.resetExperimentDir();
 		fetch.processQueries();
-//		fetch.createUniqueTripleFile();
-		// new EvaluateGraphs(new
-		// DbpoExperimentSetup(DbpoExperimentSetup.QALD_REMOVE_OPTIONALS)),
-		// new EvaluateGraphs(new
-		// DbpoExperimentSetup(DbpoExperimentSetup.QALD_KEEP_OPTIONALS)),
-		// new EvaluateGraphs(new
-		// DbpoExperimentSetup(DbpoExperimentSetup.QUERY_LOGS)),
-		// new EvaluateGraphs(new Sp2bExperimentSetup()),
-		// new EvaluateGraphs(new LmdbExperimentSetup()),
-		// new EvaluateGraphs(new LgdExperimentSetup()),
-		// new EvaluateGraphs(new DbpExperimentSetup()),
+
 	}
 
 

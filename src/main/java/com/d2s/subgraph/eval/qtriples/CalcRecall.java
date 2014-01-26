@@ -15,16 +15,18 @@ import org.xml.sax.SAXException;
 import com.d2s.subgraph.eval.Config;
 import com.d2s.subgraph.eval.analysis.WriteAnalysis;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
-import com.d2s.subgraph.eval.experiments.SwdfExperimentSetup;
+import com.d2s.subgraph.eval.experiments.ExperimentSetupHelper;
+import com.d2s.subgraph.eval.experiments.ObmExperimentSetup;
 import com.d2s.subgraph.eval.results.SampleResults;
 import com.d2s.subgraph.eval.results.SampleResultsRandom;
 import com.d2s.subgraph.eval.results.SampleResultsRegular;
 import com.d2s.subgraph.queries.Query;
 
-public class CalcRecall {
+public class CalcRecall implements Runnable{
 	private int maxSamples = Integer.MAX_VALUE;
 	private int maxQueries = Integer.MAX_VALUE;
 	private ExperimentSetup experimentSetup;
+	
 //	CalcCutoffWeight cutoffWeights;
 	private File[] queryDirs;
 	ArrayList<SampleResults> regularResults = new ArrayList<SampleResults>();
@@ -146,6 +148,7 @@ public class CalcRecall {
 		SampleResults results = new SampleResultsRegular();
 		results.setGraphName(sample);
 		int count = 0;
+		
 		for (File queryDir: queryDirs) {
 //			System.out.print(".");
 //			System.out.println(queryDir.getName());System.exit(1);
@@ -161,6 +164,7 @@ public class CalcRecall {
 					if (cutoffWeight == null) throw new IllegalStateException("wanted to calc recall for " + sample + " but it seems we do not have the calculated cutoff weights!");
 				}
 				Query query = CalcRecallForQuery.calc(experimentSetup, sample, sampleWeights, queryDir, cutoffWeight);
+
 				query.setQueryId(count);
 				results.add(query);
 				count++;
@@ -178,16 +182,15 @@ public class CalcRecall {
 
 	public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException, InterruptedException {
 		File cwd = new File("");
-		if (args.length > 0) {
-			cwd = new File("/run/shm/");
-		}
+		ExperimentSetup experimentSetup = null;
 		Double maxSampleSize = 0.5;
-		ExperimentSetup[] setups = {
-			new SwdfExperimentSetup(true),
-		};
-		
-		
-		for (ExperimentSetup experimentSetup: setups) {
+		System.out.println(args.length + " args");
+		for (String arg: args) {
+			System.out.println("arg: " + arg);
+		}
+		if (args.length > 0) {
+			experimentSetup = ExperimentSetupHelper.get(args[0]);
+			cwd = new File("/run/shm/");
 			CalcCutoffWeight cutoffWeights = new CalcCutoffWeight(experimentSetup, cwd, maxSampleSize);
 			cutoffWeights.calcForFiles();
 			
@@ -197,6 +200,38 @@ public class CalcRecall {
 	//		calc.maxQueries = 2;
 			calc.calcRecallForSamples();
 			calc.concatAndWriteOutput();
+		} else {
+			ExperimentSetup[] setups = {
+//				new SwdfExperimentSetup(true),
+				new ObmExperimentSetup(true),
+			};
+			
+			
+			for (ExperimentSetup setup: setups) {
+				CalcCutoffWeight cutoffWeights = new CalcCutoffWeight(setup, cwd, maxSampleSize);
+				cutoffWeights.calcForFiles();
+				
+		//		ExperimentSetup experimentSetup, double maxSampleSize, TreeMap<String, Double> cutoffWeights, TreeMap<String, Double> cutoffSizes, File cwd) throws IOExceptio
+				CalcRecall calc = new CalcRecall(setup, maxSampleSize, cutoffWeights.getCutoffWeights(maxSampleSize), cutoffWeights.getCutoffSizes(maxSampleSize),  cwd);
+		//		calc.maxSamples = 1;
+		//		calc.maxQueries = 2;
+				calc.calcRecallForSamples();
+				calc.concatAndWriteOutput();
+			}
+		}
+	}
+
+
+
+
+	public void run() {
+		try {
+			calcRecallForSamples();
+			concatAndWriteOutput();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 	}
 }

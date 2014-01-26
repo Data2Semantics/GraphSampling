@@ -2,11 +2,8 @@ package com.d2s.subgraph.eval.qtriples;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.TreeMap;
@@ -34,12 +31,12 @@ public class CalcCutoffWeight {
 //	private TreeMap<String, Double> cutoffWeights = new TreeMap<String, Double>();
 //	private TreeMap<String, Double> cutoffSizes = new TreeMap<String, Double>();
 	private File weightDistDir;
-	private boolean verbose = true;
+	private boolean verbose = false;
 	
 	public CalcCutoffWeight(ExperimentSetup experimentSetup, File cwd) throws IOException {
 		this(experimentSetup, cwd, null);
 	}
-	public NavigableSet<Double> getMaxCutoffOptions() {
+	public NavigableSet<Double> getMaxCutoffs() {
 		return cutoffWeights.descendingKeySet();
 	}
 	
@@ -54,8 +51,11 @@ public class CalcCutoffWeight {
 	
 	public void calcForFiles() throws IOException {
 		for (File distFile: FileUtils.listFiles(weightDistDir, null, false)) {
-			if (verbose) System.out.println("calcing cutoff weight for " + distFile.getName());
-			calcCutoff(distFile);
+			if (!distFile.getName().startsWith(".")) {
+				if (verbose) System.out.println("calcing cutoff weight for " + distFile.getName());
+				
+				calcCutoff(distFile);
+			}
 		}
 	}
 	
@@ -67,12 +67,14 @@ public class CalcCutoffWeight {
 	}
 	
 	private void calcCutoff(File file) throws IOException {
-		System.out.println(maxSampleSize);
-		System.exit(1);
+//		System.out.println(maxSampleSize);
+//		System.exit(1);
+		TreeMap<Double, Integer> dist = readWeightDistribution(file);
+		int totalSize = getTotalSampleSize(dist);
 		if (maxSampleSize != null) {
-			calcSingleCutoff(file);
+			calcSingleCutoff(file, dist, totalSize, maxSampleSize);
 		} else {
-			calcMultipleCutoffs(file);
+			calcMultipleCutoffs(file, dist, totalSize);
 		}
 		
 	}
@@ -89,13 +91,23 @@ public class CalcCutoffWeight {
 					br.close();
 					throw new IOException("tried to get size from weight dist file, but unable to detect # triples for this weight, as we couldnt split the line by tab: " + line);
 				}
+				try {
+					double weight = Double.parseDouble(fields[0]);
+					int count = Integer.parseInt(fields[1]);
+					dist.put(weight, count);
+				} catch (Exception e) {
+					System.out.println("could not parse line:");
+					System.out.println(line);
+					System.out.println(e.getMessage());
+					
+				}
 				
-				double weight = Double.parseDouble(fields[0]);
-				int count = Integer.parseInt(fields[1]);
-				dist.put(weight, count);
 			}
 		}
 		br.close();
+		if (dist.size() == 0) {
+			throw new IllegalStateException("we just loaded an empty weight distribution file. something is wrong. file: " + file.getName());
+		}
 		return dist;
 	}
 	
@@ -109,38 +121,12 @@ public class CalcCutoffWeight {
 	}
 	
 
-	private void calcMultipleCutoffs(File file) throws IOException {
-		TreeMap<Double, Integer> dist = readWeightDistribution(file);
-		int totalSize = getTotalSampleSize(dist);
-		
+	private void calcMultipleCutoffs(File file, TreeMap<Double, Integer> dist, int totalSize) throws IOException {
 		//stepSizes of 1%
-		
-		int stepSize = (int) Math.round((double)totalSize / (double)100);
-		if (verbose) System.out.println("step sizes (i.e. 1% of total): " + stepSize);
-		
-		//sort by weight
-		NavigableSet<Double> weights = dist.descendingKeySet();
-//		if (verbose) System.out.println("looping through " + weights.size() + " weights");
-		
-		int totalSampleSizeSoFar = 0;
-		Double previousWeight = 0.0;
-		int stepsDone = 0;
-		for (Double weight: weights) {
-			int tripleNumWithWeight = dist.get(weight);
-			//if difference with last cutoff is larger than our stepsize, we want to add this one as a cutoff
-			if (totalSampleSizeSoFar + tripleNumWithWeight > (stepSize * stepsDone)) {
-				double maxCutoffOfThisIteration = (double)stepsDone / (double)100.0;
-				addCutoffSize(file.getName(), maxCutoffOfThisIteration, (double)totalSampleSizeSoFar / (double)totalSize);
-				addCutoffWeight(file.getName(), maxCutoffOfThisIteration, previousWeight);
-			}
-			totalSampleSizeSoFar += tripleNumWithWeight;
-			System.out.println(totalSampleSizeSoFar);
-			stepsDone ++;
-			previousWeight = weight;
+		for (int step = 0; step <= 100; step++) {
+//			System.out.println("step: " + step);
+			calcSingleCutoff(file, dist, totalSize, (double)step / (double)100.0);
 		}
-		
-		
-//		System.out.println(cutoffWeights);
 	}
 	
 	private void addCutoffWeight(String sample, Double maxSampleSize, Double weight) {
@@ -160,16 +146,24 @@ public class CalcCutoffWeight {
 		cutoffSizesForMaxSampleSize.put(sample, size);
 	}
 	
-	private void calcSingleCutoff(File file) throws IOException {
-		TreeMap<Double, Integer> dist = readWeightDistribution(file);
-		int totalSize = getTotalSampleSize(dist);
+	private void calcSingleCutoff(File file, TreeMap<Double, Integer> dist, int totalSize, Double maxSampleSize) throws IOException {
+		if (maxSampleSize == 1.0) {
+			addCutoffSize(file.getName(), maxSampleSize, (double)totalSize);
+			addCutoffWeight(file.getName(), maxSampleSize, 0.0);
+			return;
+		} else if (maxSampleSize == 0.0) {
+			addCutoffSize(file.getName(), maxSampleSize, 0.0);
+//			System.out.println("sample size of zero! Use weight: " + (dist.descendingKeySet().first() + 1.0));
+			addCutoffWeight(file.getName(), maxSampleSize, dist.descendingKeySet().first() + 1.0);
+			return;
+		}
 		
 		int cutoffSize = (int) Math.round(totalSize * maxSampleSize);
 		if (verbose) System.out.println("max size triples for cutoff " + cutoffSize);
 		//sort by weight
 		NavigableSet<Double> weights = dist.descendingKeySet();
 		int previousSampleSize = 0;
-		Double previousWeight = null;
+		Double previousWeight = dist.descendingKeySet().first() + 1.0;
 		for (Double weight: weights) {
 			int tripleNumWithWeight = dist.get(weight);
 			if ((previousSampleSize + tripleNumWithWeight) > cutoffSize) {
@@ -181,6 +175,10 @@ public class CalcCutoffWeight {
 					System.out.println("we reached triple " + (previousSampleSize + tripleNumWithWeight) + " now. we should break!");
 					System.out.println(cutoffWeights);
 					System.out.println(cutoffSizes);
+				}
+				if (file.getName().equals("resourceContext_indegree")) {
+					System.out.println("size (context indegree): " + ((double)previousSampleSize / (double)totalSize));
+					System.out.println("weight (context indegree): " + previousWeight);
 				}
 				return;
 			} else {

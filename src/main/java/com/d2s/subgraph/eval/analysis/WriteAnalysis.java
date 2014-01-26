@@ -34,7 +34,7 @@ public class WriteAnalysis {
 	public WriteAnalysis(ExperimentSetup experimentSetup, double maxSampleSize) throws IOException {
 		this.experimentSetup = experimentSetup;
 		this.queryCollection = experimentSetup.getQueryCollection();
-		this.resultsDir = new File(Config.PATH_EVALUATION_OUTPUT + experimentSetup.getId() + "/" + maxSampleSize);
+		this.resultsDir = new File(Config.PATH_EVALUATION_OUTPUT + experimentSetup.getId() + "/" + String.format( "%.2f", maxSampleSize ));
 		initResultsDir();
 		outputCsv = new OutputCsv(experimentSetup, allGraphResults, queryCollection, resultsDir);
 		outputHtml = new OutputHtml(experimentSetup, allGraphResults, queryCollection, resultsDir);
@@ -46,7 +46,7 @@ public class WriteAnalysis {
 	private void initResultsDir() throws IOException {
 		Utils.mkdir(Config.PATH_EVALUATION_OUTPUT);
 		FileUtils.deleteDirectory(resultsDir);
-		resultsDir.mkdir();
+		FileUtils.forceMkdir(resultsDir);
 	}
 	
 	public void writeOutput() throws IOException, InterruptedException {
