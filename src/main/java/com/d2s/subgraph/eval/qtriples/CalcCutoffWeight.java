@@ -192,6 +192,6 @@ public class CalcCutoffWeight {
 
 	public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException {
 		CalcCutoffWeight cutoffWeights = new CalcCutoffWeight(new SwdfExperimentSetup(true, true), new File(""), 0.5);
-		cutoffWeights.calcCutoff(new File("input/weightDistribution/swdf/resourceContext_indegree"));
+		cutoffWeights.calcCutoff(new File("input/weightDistribution/obm/resourceContext_indegree"));
 	}
 }

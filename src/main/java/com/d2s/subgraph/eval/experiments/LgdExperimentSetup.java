@@ -23,7 +23,7 @@ public class LgdExperimentSetup extends ExperimentSetup {
 	private static String QUERY_RESULTS_DIR = "lgdQueryResults";
 	private static String EVAL_RESULTS_DIR = "lgdResults";
 	private static boolean PRIVATE_QUERIES = false;
-	private static int MAX_NUM_QUERIES = 0;
+	private static int MAX_NUM_QUERIES = 5000;
 	private QueriesFetcher queriesFetcher;
 	private boolean UNIQUE_QUERIES = true;
 	

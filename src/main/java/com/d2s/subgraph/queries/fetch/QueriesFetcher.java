@@ -216,7 +216,7 @@ public abstract class QueriesFetcher {
 						Date timeStart = new Date();
 						try {
 							query = execQueryToTest(query.getQueryWithFromClause(experimentSetup.getGoldenStandardGraph()));
-							System.out.print("+");
+							System.out.println(queryCollection.getDistinctQueryCount());
 	//						System.out.println(queryString);
 							query.setQueryId(queryCollection.getDistinctQueryCount());
 							queryCollection.addQuery(query);

@@ -158,7 +158,7 @@ public class CalcRecall implements Runnable{
 			try {
 				Double cutoffWeight;
 				if (isRandomSample(sample)) {
-					cutoffWeight = maxSampleSize;
+					cutoffWeight = 1.0 - maxSampleSize;
 				} else {
 					cutoffWeight = cutoffWeights.get(sample);
 					if (cutoffWeight == null) throw new IllegalStateException("wanted to calc recall for " + sample + " but it seems we do not have the calculated cutoff weights!");

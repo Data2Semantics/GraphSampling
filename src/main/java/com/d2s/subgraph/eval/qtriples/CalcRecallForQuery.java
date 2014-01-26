@@ -114,6 +114,7 @@ public class CalcRecallForQuery {
 //		System.out.println(qsDir.getPath());
 		for (File collapsedDir: qsDir.listFiles()) {
 			if (!collapsedDir.getName().startsWith("collapsed")) throw new IllegalStateException("expected a set of collapsed dirs in this path. but found: " + collapsedDir.getPath());
+			if (!validateCollapsedDir(collapsedDir)) throw new IllegalStateException("could not find triple files in qs dir: " + qsDir.getPath());
 //			System.out.print("+");
 			if (querySolutionOk) {
 //				System.out.println("match!");
@@ -121,7 +122,6 @@ public class CalcRecallForQuery {
 			}
 			querySolutionOk = checkRequiredFile(collapsedDir);
 			if (querySolutionOk) {
-				//todo: check optionals
 				querySolutionOk = checkUnionFiles(collapsedDir);
 			}
 			
@@ -129,6 +129,17 @@ public class CalcRecallForQuery {
 		return querySolutionOk;
 	}
 	
+	private boolean validateCollapsedDir(File qsDir) {
+		boolean valid = new File(qsDir, "required").exists();
+		if (!valid) {
+			File unionDir = new File(qsDir, "unions");
+			if (unionDir.exists()) {
+				valid = unionDir.listFiles().length > 0;
+			}
+		}
+		return valid;
+	}
+
 	private boolean checkRequiredFile(File qsDir) throws NumberFormatException, IOException {
 		boolean requiredTriplesInSample = true;
 		File reqFile = new File(qsDir.getPath() + "/required");

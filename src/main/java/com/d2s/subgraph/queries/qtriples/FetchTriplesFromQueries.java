@@ -11,7 +11,9 @@ import com.d2s.subgraph.eval.experiments.Bio2RdfExperimentSetup;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 import com.d2s.subgraph.eval.experiments.ExperimentSetupHelper;
 import com.d2s.subgraph.eval.experiments.LgdExperimentSetup;
+import com.d2s.subgraph.eval.experiments.MetalexExperimentSetup;
 import com.d2s.subgraph.eval.experiments.ObmExperimentSetup;
+import com.d2s.subgraph.eval.experiments.SwdfExperimentSetup;
 import com.d2s.subgraph.queries.Query;
 
 
@@ -43,6 +45,11 @@ public class FetchTriplesFromQueries {
 		QueryCollection<Query> queries = experimentSetup.getQueryCollection();
 		int count = 1;
 		for (Query query: queries.getQueries()) {
+			if (query.onlyOptionals()) {
+				System.out.println("only optionals in query");
+//				System.out.println(query.toString());
+				continue;
+			}
 			System.out.println(count + "/" + queries.getDistinctQueryCount());
 			count++;
 			FetchTriplesFromQuery.fetch(experimentSetup, query, experimentDir);
@@ -68,8 +75,10 @@ public class FetchTriplesFromQueries {
 			boolean useCachedQueries = true;
 			
 	//		FetchTriplesFromQueries fetch = new FetchTriplesFromQueries(new SwdfExperimentSetup(useCachedQueries));
-			fetch = new FetchTriplesFromQueries(new ObmExperimentSetup(useCachedQueries));
-//			fetch = new FetchTriplesFromQueries(new Bio2RdfExperimentSetup(useCachedQueries));
+//			fetch = new FetchTriplesFromQueries(new SwdfExperimentSetup(useCachedQueries));
+			fetch = new FetchTriplesFromQueries(new LgdExperimentSetup(useCachedQueries));
+//			fetch = new FetchTriplesFromQueries(new MetalexExperimentSetup(useCachedQueries));
+//			fetch = new FetchTriplesFromQueries(new ObmExperimentSetup(useCachedQueries));
 		}
 //		fetch.maxQueries = 20;
 		fetch.resetExperimentDir();

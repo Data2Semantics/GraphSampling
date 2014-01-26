@@ -11,6 +11,7 @@ import org.data2semantics.query.QueryCollection;
 import com.d2s.subgraph.eval.results.QueryResults;
 import com.d2s.subgraph.queries.qtriples.visitors.ExtractQueryVariablesVisitor;
 import com.d2s.subgraph.queries.qtriples.visitors.ExtractTriplePatternsVisitor;
+import com.d2s.subgraph.queries.qtriples.visitors.OnlyOptionalsVisitor;
 import com.d2s.subgraph.queries.qtriples.visitors.ReplaceBlankNodesVisitor;
 import com.d2s.subgraph.queries.qtriples.visitors.RewriteTriplePatternsVisitor;
 import com.hp.hpl.jena.query.QueryFactory;
@@ -203,24 +204,39 @@ public class Query extends org.data2semantics.query.Query {
 	
 	
 	public static void main(String[] args) throws IOException {
-		Query query = Query.create("SELECT * FROM <http://lgd>\n" + 
-				"WHERE {\n" + 
-				"[] a ?bla ;"
-				+ "a ?bf ." +
-				
-				"}");
+		Query query = Query.create(""
+				+ "PREFIX  rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" + 
+				"PREFIX  geo:  <http://www.w3.org/2003/01/geo/wgs84_pos#>\n" + 
+				"PREFIX  xsd:  <http://www.w3.org/2001/XMLSchema#>\n" + 
+				"PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" + 
+				"\n" + 
+				"SELECT  *\n" + 
+				"FROM <http://lgd>\n" + 
+				"WHERE\n" + 
+				"  { ?p rdfs:label ?label\n" + 
+				"    OPTIONAL\n" + 
+				"      { ?p geo:lat ?lat .\n" + 
+				"        ?p geo:long ?lon\n" + 
+				"      }\n" + 
+				"    ?p rdf:type ?t\n" + 
+				"    FILTER regex(?label, \".* School\", \"i\")\n" + 
+				"  }");
 		
-		/**
-		 * fetch triples based on query patterns
-		 */
-		query.replaceBlankNodesByVars();
-//		System.out.println(query.toString());
 		
 		/**
 		 * rewrite queries for triple retrieval
 		 */
-//		Query rewrittenQuery = query.getQueryForTripleRetrieval();
-//		System.out.println(rewrittenQuery);
+		Query rewrittenQuery = query.getQueryForTripleRetrieval();
+		System.out.println(rewrittenQuery);
+	}
+
+	public boolean onlyOptionals() {
+		Element queryElement = getQueryPattern();
+		
+		OnlyOptionalsVisitor visitor = new OnlyOptionalsVisitor();
+		if (queryElement != null) queryElement.visit(visitor);
+		
+		return visitor.onlyOptionals;
 	}
 
 
