@@ -183,7 +183,7 @@ public class CalcRecall implements Runnable{
 	public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException, InterruptedException {
 		File cwd = new File("");
 		ExperimentSetup experimentSetup = null;
-		Double maxSampleSize = 0.5;
+		Double maxSampleSize = 0.01;
 		System.out.println(args.length + " args");
 		for (String arg: args) {
 			System.out.println("arg: " + arg);

@@ -152,6 +152,10 @@ public class CalcRecallForQuery {
 					if (weight != null) {
 						if (weight >= cutoffWeight) {
 							//continue checking other triples
+							if (line.contains("tp://purl.org/net/open-biomed/id/flyted/probe/Nep4")) {
+								System.out.println("weight: " + weight);
+								System.out.println("cutoffweight: " + cutoffWeight);
+							}
 						} else {
 							//1 of our required files would not be in the sample.
 							//no need checking the others. stop!
@@ -182,10 +186,17 @@ public class CalcRecallForQuery {
 					Double weight = sampleWeights.get(line);
 					if (weight != null) {
 						if (weight >= cutoffWeight) {
+//							System.out.println(weight);
+//							System.out.println(cutoffWeight);
 							//continue checking other triples
+							if (line.contains("tp://purl.org/net/open-biomed/id/flyted/probe/Nep4")) {
+								System.out.println("weight: " + weight);
+								System.out.println("cutoffweight: " + cutoffWeight);
+							}
 						} else {
 							//1 of our required files would not be in the sample.
 							//no need checking the others. stop!
+							
 							checkOk = false;
 							break;
 						}

@@ -31,7 +31,7 @@ public class CalcCutoffWeight {
 //	private TreeMap<String, Double> cutoffWeights = new TreeMap<String, Double>();
 //	private TreeMap<String, Double> cutoffSizes = new TreeMap<String, Double>();
 	private File weightDistDir;
-	private boolean verbose = false;
+	private boolean verbose = true;
 	
 	public CalcCutoffWeight(ExperimentSetup experimentSetup, File cwd) throws IOException {
 		this(experimentSetup, cwd, null);
@@ -165,6 +165,7 @@ public class CalcCutoffWeight {
 		int previousSampleSize = 0;
 		Double previousWeight = dist.descendingKeySet().first() + 1.0;
 		for (Double weight: weights) {
+//			System.out.println("weight: " + weight + ", size: " + dist.get(weight));
 			int tripleNumWithWeight = dist.get(weight);
 			if ((previousSampleSize + tripleNumWithWeight) > cutoffSize) {
 				//ah, we don't want a bigger sample, but we'd prefer to be on the safe side
@@ -173,12 +174,10 @@ public class CalcCutoffWeight {
 				addCutoffWeight(file.getName(), maxSampleSize, previousWeight);
 				if (verbose) {
 					System.out.println("we reached triple " + (previousSampleSize + tripleNumWithWeight) + " now. we should break!");
-					System.out.println(cutoffWeights);
-					System.out.println(cutoffSizes);
-				}
-				if (file.getName().equals("resourceContext_indegree")) {
-					System.out.println("size (context indegree): " + ((double)previousSampleSize / (double)totalSize));
-					System.out.println("weight (context indegree): " + previousWeight);
+					System.out.println("size (" + file.getName() + "): " + ((double)previousSampleSize / (double)totalSize));
+					System.out.println("weight (" + file.getName() + "): " + previousWeight);
+//					System.out.println(cutoffWeights);
+//					System.out.println(cutoffSizes);
 				}
 				return;
 			} else {
@@ -191,7 +190,7 @@ public class CalcCutoffWeight {
 
 
 	public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException {
-		CalcCutoffWeight cutoffWeights = new CalcCutoffWeight(new SwdfExperimentSetup(true, true), new File(""), 0.5);
-		cutoffWeights.calcCutoff(new File("input/weightDistribution/obm/resourceContext_indegree"));
+		CalcCutoffWeight cutoffWeights = new CalcCutoffWeight(new SwdfExperimentSetup(true, true), new File(""), 0.99);
+		cutoffWeights.calcCutoff(new File("input/weightDistribution/obm/freqBaseline"));
 	}
 }
