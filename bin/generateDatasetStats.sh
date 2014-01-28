@@ -10,4 +10,4 @@ dataset=$1
 
 
 echo "generating dataset stats"
-pig pigAnalysis/stats/generateBio2RdfStats.py.py $dataset
+pig pigAnalysis/stats/generateBio2RdfStats.py $dataset

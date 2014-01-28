@@ -7,8 +7,6 @@ if [ -z "$1" ];then
 fi
 dataset=$1
 
-echo "getting number of triples used as input (for validation purposes)"
-numRequiredTriples=`hadoop fs -cat $dataset/evaluation/qTriples | wc -l`
 
 statsDir="$dataset/stats"
 
@@ -18,11 +16,13 @@ subCount=`hadoop fs -cat $statsDir/subCount/*`;
 predCount=`hadoop fs -cat $statsDir/predCount/*`;
 objCount=`hadoop fs -cat $statsDir/objCount/*`;
 typeCount=`hadoop fs -cat $statsDir/distinctTypeCount/*`;
-literalCount=`hadoop fs -cat $statsDir/distinctLiteralCount/*`;
+distinctLiteralCount=`hadoop fs -cat $statsDir/distinctLiteralCount/*`;
+literalCount=`hadoop fs -cat $statsDir/literalCount/*`;
 
 echo "numTriples: $numTriples";
 echo "subCount: $subCount";
 echo "predCount: $predCount";
 echo "objCount: $objCount";
-echo "typeCount: $typeCount";
-echo "literalCount: $literalCount"; 
+echo "distinct typeCount: $typeCount";
+echo "literalCount: $literalCount"
+echo "distinct literalCount: $distinctLiteralCount"; 
