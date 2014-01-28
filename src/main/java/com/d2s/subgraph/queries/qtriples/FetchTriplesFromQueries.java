@@ -44,14 +44,36 @@ public class FetchTriplesFromQueries {
 	private void processQueries() throws IOException {
 		QueryCollection<Query> queries = experimentSetup.getQueryCollection();
 		int count = 1;
+		int startFrom = -1;
 		for (Query query: queries.getQueries()) {
+			System.out.println(count + "/" + queries.getDistinctQueryCount());
 			if (query.onlyOptionals()) {
 				System.out.println("only optionals in query");
 //				System.out.println(query.toString());
 				continue;
 			}
-			System.out.println(count + "/" + queries.getDistinctQueryCount());
 			count++;
+			if (query.toString().equals("PREFIX  rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" + 
+					"PREFIX  owl:  <http://www.w3.org/2002/07/owl#>\n" + 
+					"PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" + 
+					"\n" + 
+					"SELECT DISTINCT  ?c1 ?i2\n" + 
+					"FROM <http://lgd>\n" + 
+					"WHERE\n" + 
+					"  { ?c1 rdf:type owl:Class .\n" + 
+					"    ?i1 owl:sameAs ?i2 .\n" + 
+					"    ?i1 rdf:type ?c1\n" + 
+					"  }")) {
+				startFrom = count + 2;
+				continue;
+			}
+			if (startFrom == -1 || count <= startFrom) {
+//				System.out.print("-");
+				continue;
+			}
+			System.out.println("hmmm, starting from here?");
+//			System.exit(1);
+			
 			FetchTriplesFromQuery.fetch(experimentSetup, query, experimentDir);
 			if (count > maxQueries) break;
 		}
@@ -59,7 +81,7 @@ public class FetchTriplesFromQueries {
 	
 	public static void fetch(ExperimentSetup experimentSetup) throws IOException {
 		FetchTriplesFromQueries fetch = new FetchTriplesFromQueries(experimentSetup);
-		fetch.resetExperimentDir();
+//		fetch.resetExperimentDir();
 		fetch.processQueries();
 //		fetch.createUniqueTripleFile();
 	}
@@ -81,7 +103,7 @@ public class FetchTriplesFromQueries {
 //			fetch = new FetchTriplesFromQueries(new ObmExperimentSetup(useCachedQueries));
 		}
 //		fetch.maxQueries = 20;
-		fetch.resetExperimentDir();
+//		fetch.resetExperimentDir();
 		fetch.processQueries();
 
 	}

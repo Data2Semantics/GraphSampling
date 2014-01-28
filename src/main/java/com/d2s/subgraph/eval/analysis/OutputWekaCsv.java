@@ -24,6 +24,7 @@ public class OutputWekaCsv extends OutputWrapper {
 	}
 	
 	public void store() throws IOException {
+		System.out.println("printing weka csv table");
 		storeMappingFile();
 		storeFeaturesFile();
 //		for (SampleResults results: allGraphResults) {

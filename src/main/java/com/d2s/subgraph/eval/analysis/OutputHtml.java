@@ -26,6 +26,7 @@ public class OutputHtml extends OutputWrapper{
 	 * @throws IOException
 	 */
 	public void asHtmlTable() throws IOException {
+		System.out.println("printing as html table");
 //		System.out.println("writing html files for "  + onlyGraphsContaining);
 		String encodedEndpoint = URLEncoder.encode(Config.EXPERIMENT_ENDPOINT, "UTF-8"); 
 		String html = "<html><head>\n" +
@@ -41,6 +42,7 @@ public class OutputHtml extends OutputWrapper{
 		
 		
 		//fill first two col of table (queryId and avg for this query)
+		System.out.println("html table header");
 		for (Query query: allGraphResults.get(0).getQueryCollection().getQueries()) {
 			int queryId = query.getQueryId();
 			
@@ -84,7 +86,7 @@ public class OutputHtml extends OutputWrapper{
 		
 		html += "<thead>\n<tr>";
 		html += "<th>queryId</th><th>avg</th><th>#tp's<br>(non opt)<br><th>#ccv<br></th><th>#cvv<br></th><th>#vcc<br></th>";
-		
+		System.out.println("html table body");
 		for (SampleResults graphResults: allGraphResults) {
 //			if (StringUtils.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
 				html += "\n<th>" + graphResults.getProperName() + "<br>(avg: " + StringUtils.getDoubleAsFormattedString(graphResults.getAverageRecall()) + ")</th>";

@@ -33,6 +33,7 @@ public class OutputCsv extends OutputWrapper {
 	 */
 	public void asCsvTable() throws IOException {
 //		System.out.println("writing csv files for "  + onlyGraphsContaining);
+		System.out.println("printing as alborate csv table");
 		HashMap<Integer, ArrayList<String>> table = new HashMap<Integer, ArrayList<String>>();
 		
 		for (Query query: getQueryCollection().getQueries()) {
@@ -214,6 +215,7 @@ public class OutputCsv extends OutputWrapper {
 		
 	}
 	public void outputAverageRecallPerQuery() throws IOException {
+		System.out.println("printing csv with avg recall per query");
 		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + Config.FILE_CSV_AVG_RECALL_PER_QUERY);
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
 		writer.writeNext(new String[]{"queryId", "avgRecall"});
@@ -239,6 +241,7 @@ public class OutputCsv extends OutputWrapper {
 		
 	}
 	public void outputBestRecallPerAlgorithm() throws IOException {
+		System.out.println("printing csv with best recall per algorithm");
 		File csvFile = new File(resultsDir.getAbsolutePath() + "/" + Config.FILE_CSV_BEST_RECALL_PER_ALG);
 		CSVWriter writer = new CSVWriter(new FileWriter(csvFile), ';');
 		writer.writeNext(new String[]{"queryId", "algorithm", "bestRecall", "avgQueryRecall"});

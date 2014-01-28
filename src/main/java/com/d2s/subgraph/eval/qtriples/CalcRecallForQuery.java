@@ -14,6 +14,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.io.FileUtils;
 import org.xml.sax.SAXException;
 
+import com.d2s.subgraph.eval.experiments.Bio2RdfExperimentSetup;
 import com.d2s.subgraph.eval.experiments.ExperimentSetup;
 import com.d2s.subgraph.eval.experiments.SwdfExperimentSetup;
 import com.d2s.subgraph.eval.results.QueryResultsRegular;
@@ -259,17 +260,18 @@ public class CalcRecallForQuery {
 	}
 
 	public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException {
-		ExperimentSetup experimentSetup = new SwdfExperimentSetup(true);
+		ExperimentSetup experimentSetup = new Bio2RdfExperimentSetup(true);
 //		CalcCutoffWeight cutoffWeights = new CalcCutoffWeight(experimentSetup, 0.5, new File(""));
 //		cutoffWeights.calcForFiles();
-		File queryDir = new File("output/queryTriples/swdf/query-8");
+		File queryDir = new File("output/queryTriples/bio2rdf/query-2");
 		
 		CalcRecallForQuery calc = new CalcRecallForQuery(
 				experimentSetup, 
-				"resourceContext_indegree", 
-				CalcRecall.fetchSampleWeights(new File("input/qTripleWeights/swdf/resourceContext_indegree")), 
+				"resourceWithoutLit_outdegree", 
+				CalcRecall.fetchSampleWeights(new File("input/qTripleWeights/bio2rdf/resourceWithoutLit_outdegree")), 
 				queryDir, 
-				9.0);
+				1380.0);
+		calc.verbose = true;
 		calc.run();
 //		System.out.println()
 	}

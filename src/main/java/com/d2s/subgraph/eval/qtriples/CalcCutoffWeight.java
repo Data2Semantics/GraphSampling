@@ -31,7 +31,7 @@ public class CalcCutoffWeight {
 //	private TreeMap<String, Double> cutoffWeights = new TreeMap<String, Double>();
 //	private TreeMap<String, Double> cutoffSizes = new TreeMap<String, Double>();
 	private File weightDistDir;
-	private boolean verbose = true;
+	private boolean verbose = false;
 	
 	public CalcCutoffWeight(ExperimentSetup experimentSetup, File cwd) throws IOException {
 		this(experimentSetup, cwd, null);
@@ -85,6 +85,7 @@ public class CalcCutoffWeight {
 		String line;
 		//load file in memory
 		while ((line = br.readLine()) != null) {
+//			System.out.println(line);
 			if (line.length() > 0) {
 				String[] fields = line.split("\t");
 				if (fields.length < 2) {
@@ -111,13 +112,13 @@ public class CalcCutoffWeight {
 		return dist;
 	}
 	
-	private int getTotalSampleSize(Map<Double, Integer> weightDistribution) {
-		int totalSize = 0;
-		for (Integer size: weightDistribution.values()) {
-			totalSize += size;
+	private int getTotalSampleSize(TreeMap<Double, Integer> weightDistribution) {
+		int totalCount = 0;
+		for (Integer count: weightDistribution.values()) {
+			totalCount += count;
 		}
-		if (verbose) System.out.println("totalsize triples based on query dist: " + totalSize);
-		return totalSize;
+		if (verbose) System.out.println("totalsize triples based on query dist: " + totalCount);
+		return totalCount;
 	}
 	
 
@@ -167,14 +168,16 @@ public class CalcCutoffWeight {
 		for (Double weight: weights) {
 //			System.out.println("weight: " + weight + ", size: " + dist.get(weight));
 			int tripleNumWithWeight = dist.get(weight);
+//			System.out.println("tripleNumWithWeight: " + tripleNumWithWeight);
 			if ((previousSampleSize + tripleNumWithWeight) > cutoffSize) {
-				//ah, we don't want a bigger sample, but we'd prefer to be on the safe side
+				//ah, we don't want a bigger sample. We'd prefer to be on the safe side
 //				cutoffWeights.put(file.getName(), previousWeight);
 				addCutoffSize(file.getName(), maxSampleSize, (double)previousSampleSize / (double)totalSize);
 				addCutoffWeight(file.getName(), maxSampleSize, previousWeight);
 				if (verbose) {
 					System.out.println("we reached triple " + (previousSampleSize + tripleNumWithWeight) + " now. we should break!");
 					System.out.println("size (" + file.getName() + "): " + ((double)previousSampleSize / (double)totalSize));
+					System.out.println("size (abs) (" + file.getName() + "): " + previousSampleSize);
 					System.out.println("weight (" + file.getName() + "): " + previousWeight);
 //					System.out.println(cutoffWeights);
 //					System.out.println(cutoffSizes);
@@ -190,7 +193,8 @@ public class CalcCutoffWeight {
 
 
 	public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException {
-		CalcCutoffWeight cutoffWeights = new CalcCutoffWeight(new SwdfExperimentSetup(true, true), new File(""), 0.99);
-		cutoffWeights.calcCutoff(new File("input/weightDistribution/obm/freqBaseline"));
+		CalcCutoffWeight cutoffWeights = new CalcCutoffWeight(new SwdfExperimentSetup(true, true), new File(""), 0.30);
+		cutoffWeights.verbose = true;
+		cutoffWeights.calcCutoff(new File("input/weightDistribution/bio2rdf/resourceWithoutLit_outdegree"));
 	}
 }

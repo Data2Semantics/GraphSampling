@@ -21,7 +21,10 @@ public class ExperimentSetupHelper {
 			experimentSetup = new ObmExperimentSetup(true);
 		} else if (setupId.equals("swdf")) {
 			experimentSetup = new SwdfExperimentSetup(true);
+		} else if (setupId.equals("metalex")) {
+			experimentSetup = new MetalexExperimentSetup(true);
 		}
+		
 		System.out.println("fetching experiment setup " + experimentSetup.getId());
 		return experimentSetup;
 	}
