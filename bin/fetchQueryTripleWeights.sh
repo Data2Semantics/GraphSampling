@@ -47,3 +47,8 @@ for dir in "${hadoopLs[@]}"; do
 		echo "number of fetched triples: $fetchedTriples";
 	fi
 done;
+
+echo "also fetching our randomly weighted qtriples"
+rm -f /var/scratch/lrd900/randomlyWeightedQtriples/$dataset;
+hadoop fs -cat $dataset/evaluation/randomlyWeightedQtriples* >> /var/scratch/lrd900/randomlyWeightedQtriples/$dataset;
+

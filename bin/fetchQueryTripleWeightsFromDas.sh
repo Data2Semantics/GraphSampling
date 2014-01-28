@@ -18,5 +18,6 @@ fi
 
 echo "rsyncing locally"#also dels on the dest side
 eval rsync -rtvz --del fs0.das4.cs.vu.nl:/var/scratch/lrd900/qTripleWeights $localTargetDir;
+eval rsync -rtvz --del fs0.das4.cs.vu.nl:/var/scratch/lrd900/randomlyWeightedQtriples $localTargetDir;
 #rsync -avz fs0.das4.cs.vu.nl:weightDistribution $localTargetDir;
 

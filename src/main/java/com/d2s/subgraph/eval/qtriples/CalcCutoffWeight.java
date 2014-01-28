@@ -28,6 +28,9 @@ public class CalcCutoffWeight {
 	
 	private TreeMap<Double, TreeMap<String, Double>> cutoffWeights = new TreeMap<Double, TreeMap<String, Double>>();
 	private TreeMap<Double, TreeMap<String, Double>> cutoffSizes = new TreeMap<Double, TreeMap<String, Double>>();
+	private TreeMap<Double, TreeMap<String, Double>> cutoffWeightsPlusOne = new TreeMap<Double, TreeMap<String, Double>>();
+	private TreeMap<Double, TreeMap<String, Double>> cutoffSizesPlusOne = new TreeMap<Double, TreeMap<String, Double>>();
+	private Integer totalSampleSize = null;
 //	private TreeMap<String, Double> cutoffWeights = new TreeMap<String, Double>();
 //	private TreeMap<String, Double> cutoffSizes = new TreeMap<String, Double>();
 	private File weightDistDir;
@@ -66,11 +69,18 @@ public class CalcCutoffWeight {
 		return cutoffSizes.get(maxCutoff);
 	}
 	
+	public TreeMap<String, Double> getCutoffWeightsPlusOne(double maxCutoff) {
+		return cutoffWeightsPlusOne.get(maxCutoff);
+	}
+	public TreeMap<String, Double> getCutoffSizesPlusOne(double maxCutoff) {
+		return cutoffSizesPlusOne.get(maxCutoff);
+	}
+	
 	private void calcCutoff(File file) throws IOException {
 //		System.out.println(maxSampleSize);
 //		System.exit(1);
 		TreeMap<Double, Integer> dist = readWeightDistribution(file);
-		int totalSize = getTotalSampleSize(dist);
+		int totalSize = getTotalSampleSize();
 		if (maxSampleSize != null) {
 			calcSingleCutoff(file, dist, totalSize, maxSampleSize);
 		} else {
@@ -79,10 +89,12 @@ public class CalcCutoffWeight {
 		
 	}
 	
+	
 	private TreeMap<Double, Integer> readWeightDistribution(File file) throws IOException {
 		TreeMap<Double, Integer> dist = new TreeMap<Double, Integer>();
 		BufferedReader br = new BufferedReader(new FileReader(file));
 		String line;
+		totalSampleSize = 0;
 		//load file in memory
 		while ((line = br.readLine()) != null) {
 //			System.out.println(line);
@@ -95,6 +107,7 @@ public class CalcCutoffWeight {
 				try {
 					double weight = Double.parseDouble(fields[0]);
 					int count = Integer.parseInt(fields[1]);
+					totalSampleSize += count;
 					dist.put(weight, count);
 				} catch (Exception e) {
 					System.out.println("could not parse line:");
@@ -112,13 +125,8 @@ public class CalcCutoffWeight {
 		return dist;
 	}
 	
-	private int getTotalSampleSize(TreeMap<Double, Integer> weightDistribution) {
-		int totalCount = 0;
-		for (Integer count: weightDistribution.values()) {
-			totalCount += count;
-		}
-		if (verbose) System.out.println("totalsize triples based on query dist: " + totalCount);
-		return totalCount;
+	public int getTotalSampleSize() {
+		return totalSampleSize;
 	}
 	
 
@@ -143,6 +151,22 @@ public class CalcCutoffWeight {
 		if (cutoffSizesForMaxSampleSize == null) {
 			cutoffSizesForMaxSampleSize = new TreeMap<String, Double>();
 			cutoffSizes.put(maxSampleSize, cutoffSizesForMaxSampleSize);
+		}
+		cutoffSizesForMaxSampleSize.put(sample, size);
+	}
+	private void addCutoffWeightPlusOne(String sample, Double maxSampleSize, Double weight) {
+		TreeMap<String, Double> cutoffWeightsForMaxSampleSize = cutoffWeightsPlusOne.get(maxSampleSize);
+		if (cutoffWeightsForMaxSampleSize == null) {
+			cutoffWeightsForMaxSampleSize = new TreeMap<String, Double>();
+			cutoffWeightsPlusOne.put(maxSampleSize, cutoffWeightsForMaxSampleSize);
+		}
+		cutoffWeightsForMaxSampleSize.put(sample, weight);
+	}
+	private void addCutoffSizePlusOne(String sample, Double maxSampleSize, Double size) {
+		TreeMap<String, Double> cutoffSizesForMaxSampleSize = cutoffSizesPlusOne.get(maxSampleSize);
+		if (cutoffSizesForMaxSampleSize == null) {
+			cutoffSizesForMaxSampleSize = new TreeMap<String, Double>();
+			cutoffSizesPlusOne.put(maxSampleSize, cutoffSizesForMaxSampleSize);
 		}
 		cutoffSizesForMaxSampleSize.put(sample, size);
 	}
@@ -174,6 +198,11 @@ public class CalcCutoffWeight {
 //				cutoffWeights.put(file.getName(), previousWeight);
 				addCutoffSize(file.getName(), maxSampleSize, (double)previousSampleSize / (double)totalSize);
 				addCutoffWeight(file.getName(), maxSampleSize, previousWeight);
+				
+				
+				//we want to keep track of the current weight and size as well, so we can randomly add triples during the recall calc process to get a smooth result
+				addCutoffSizePlusOne(file.getName(), maxSampleSize, ((double)previousSampleSize + (double)tripleNumWithWeight) / (double)totalSize);
+				addCutoffWeightPlusOne(file.getName(), weight, previousWeight);
 				if (verbose) {
 					System.out.println("we reached triple " + (previousSampleSize + tripleNumWithWeight) + " now. we should break!");
 					System.out.println("size (" + file.getName() + "): " + ((double)previousSampleSize / (double)totalSize));

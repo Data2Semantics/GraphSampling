@@ -15,6 +15,7 @@ public class Config {
 	public static String PATH_FAILED_QUERIES = "output/failedQueries/";
 	public static String PATH_WEIGHTED_QUERY_TRIPLES = "input/qTripleWeights/";
 	public static String PATH_WEIGHT_DISTRIBUTION = "input/weightDistribution/";
+	public static String PATH_RANDOM_WEIGHTED_QTRIPLES = "input/randomlyWeightedQtriples/";
 	public static String PATH_EVALUATION_OUTPUT = "output/evaluation/";
 	public static String PATH_QUERY_FEATURES = "output/queryFeatures/";
 	

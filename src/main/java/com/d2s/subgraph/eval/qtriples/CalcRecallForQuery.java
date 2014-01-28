@@ -33,9 +33,15 @@ public class CalcRecallForQuery {
 	private boolean verbose = false;
 	private File[] querySolutionDirs;
 	private int queryLimit = 0;
-	public CalcRecallForQuery(ExperimentSetup experimentSetup, String sample, HashMap<String, Double> sampleWeights, File queryDir, Double cutoffWeight) throws IOException {
+	private double cutoffSize;
+	private double maxSampleSize;
+	private int totalSampleSize;
+	public CalcRecallForQuery(ExperimentSetup experimentSetup, String sample, HashMap<String, Double> sampleWeights, File queryDir, Double cutoffWeight, double cutoffSize, double maxSampleSize, int totalSampleSize) throws IOException {
 		this.experimentSetup = experimentSetup;
+		this.cutoffSize = cutoffSize;
 		this.cutoffWeight = cutoffWeight;
+		this.maxSampleSize = maxSampleSize;
+		this.totalSampleSize = totalSampleSize;
 		this.sample = sample;
 		this.sampleWeights = sampleWeights;
 		this.queryDir = queryDir;
@@ -142,43 +148,13 @@ public class CalcRecallForQuery {
 	}
 
 	private boolean checkRequiredFile(File qsDir) throws NumberFormatException, IOException {
-		boolean requiredTriplesInSample = true;
-		File reqFile = new File(qsDir.getPath() + "/required");
-		if (reqFile.exists()) {
-			String line;
-			BufferedReader br = new BufferedReader(new FileReader(reqFile));
-			while ((line = br.readLine()) != null) {
-				if (line.length() > 0) {
-					Double weight = sampleWeights.get(line);
-					if (weight != null) {
-						if (weight >= cutoffWeight) {
-							//continue checking other triples
-							if (line.contains("tp://purl.org/net/open-biomed/id/flyted/probe/Nep4")) {
-								System.out.println("weight: " + weight);
-								System.out.println("cutoffweight: " + cutoffWeight);
-							}
-						} else {
-							//1 of our required files would not be in the sample.
-							//no need checking the others. stop!
-							requiredTriplesInSample = false;
-							break;
-						}
-					} else {
-						br.close();
-						throw new IllegalStateException("tried to find sample weight for triple " + line + " from file " + reqFile.getPath() + ", but could not match them!");
-					}
-				}
-			}
-			br.close();
-		} else {
-//			System.out.println("notice: required file does not exist for querysolutiondir " + qsDir.getPath());
-		}
 		
-		return requiredTriplesInSample;
+		File reqFile = new File(qsDir.getPath() + "/required");
+		return checkTriplesFile(reqFile);
 	}
 	
 	private boolean checkTriplesFile(File triplesFile) throws IOException {
-		boolean checkOk = true;
+		boolean triplesFileInSample = true;
 		if (triplesFile.exists()) {
 			String line;
 			BufferedReader br = new BufferedReader(new FileReader(triplesFile));
@@ -187,18 +163,17 @@ public class CalcRecallForQuery {
 					Double weight = sampleWeights.get(line);
 					if (weight != null) {
 						if (weight >= cutoffWeight) {
-//							System.out.println(weight);
-//							System.out.println(cutoffWeight);
-							//continue checking other triples
-							if (line.contains("tp://purl.org/net/open-biomed/id/flyted/probe/Nep4")) {
-								System.out.println("weight: " + weight);
-								System.out.println("cutoffweight: " + cutoffWeight);
-							}
+//							//this triple has a weight which is high enough, and should be included in our sample! continue checking other triples
 						} else {
+							if (cutoffSize < maxSampleSize) {
+								//ok, so we have a lower cutoff size than expected (as the triples just above this cutoff size have the same weight)
+								//we want smooth results, so we want to simulate creating a sample of size 'maxSampleSize'
+								//therefore, we randomly 
+							}
 							//1 of our required files would not be in the sample.
 							//no need checking the others. stop!
 							
-							checkOk = false;
+							triplesFileInSample = false;
 							break;
 						}
 					} else {
@@ -212,7 +187,7 @@ public class CalcRecallForQuery {
 			System.out.println("notice: required file does not exist for querysolutiondir " + triplesFile.getPath());
 		}
 		
-		return checkOk;
+		return triplesFileInSample;
 	}
 	private boolean checkUnionFiles(File qsDir) throws NumberFormatException, IOException {
 		boolean checkOk = true;
@@ -253,8 +228,8 @@ public class CalcRecallForQuery {
 //	private boolean isTripleIncluded(String triple) {
 //		return sampleWeights.get(triple) > cutoffWeight;
 //	}
-	public static Query calc(ExperimentSetup experimentSetup, String sample, HashMap<String, Double> sampleWeights, File queryDir, Double cutoffWeight) throws IOException {
-		CalcRecallForQuery calc = new CalcRecallForQuery(experimentSetup, sample, sampleWeights, queryDir, cutoffWeight);
+	public static Query calc(ExperimentSetup experimentSetup, String sample, HashMap<String, Double> sampleWeights, File queryDir, Double cutoffWeight, double cutoffSize, double maxSampleSize, int totalSampleSize) throws IOException {
+		CalcRecallForQuery calc = new CalcRecallForQuery(experimentSetup, sample, sampleWeights, queryDir, cutoffWeight, cutoffSize, maxSampleSize, totalSampleSize);
 		calc.run();
 		return calc.query;
 	}
@@ -270,7 +245,10 @@ public class CalcRecallForQuery {
 				"resourceWithoutLit_outdegree", 
 				CalcRecall.fetchSampleWeights(new File("input/qTripleWeights/bio2rdf/resourceWithoutLit_outdegree")), 
 				queryDir, 
-				1380.0);
+				1380.0,
+				0.5,
+				0.5,
+				11000010);
 		calc.verbose = true;
 		calc.run();
 //		System.out.println()

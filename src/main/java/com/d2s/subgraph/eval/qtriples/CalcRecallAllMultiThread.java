@@ -21,9 +21,13 @@ public class CalcRecallAllMultiThread implements Runnable {
 		CalcCutoffWeight cutoffWeights = new CalcCutoffWeight(experimentSetup, cwd);
 		cutoffWeights.calcForFiles();
 		ExecutorService executor = Executors.newFixedThreadPool(MAX_THREADS);
+		
+		
+		
+		
 		for (Double maxCutoff: cutoffWeights.getMaxCutoffs()) {
 			System.out.println("calculating for max cutoff " + maxCutoff);
-			CalcRecall calc = new CalcRecall(experimentSetup, maxCutoff, cutoffWeights.getCutoffWeights(maxCutoff), cutoffWeights.getCutoffSizes(maxCutoff),  cwd);
+			CalcRecall calc = new CalcRecall(experimentSetup, maxCutoff, cutoffWeights.getCutoffWeights(maxCutoff), cutoffWeights.getCutoffSizes(maxCutoff), cutoffWeights.getTotalSampleSize(), cwd);
 			executor.execute(calc);
 		}
 	    // This will make the executor accept no new threads
