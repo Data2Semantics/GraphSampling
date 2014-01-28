@@ -27,7 +27,7 @@ public class MetalexExperimentSetup extends ExperimentSetup {
 	private static String QUERY_RESULTS_DIR = "metalexQueryResults";
 	private static String EVAL_RESULTS_DIR = "metalexResults";
 	private static boolean UNIQUE_QUERIES = true;
-	private static boolean PRIVATE_QUERIES = false;
+	private static boolean PRIVATE_QUERIES = true;
 	private static int MAX_NUM_QUERIES = 5000;
 	private QueriesFetcher qFetcher;
 	

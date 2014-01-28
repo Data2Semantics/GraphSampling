@@ -42,7 +42,7 @@ public class OutputHtml extends OutputWrapper{
 		
 		
 		//fill first two col of table (queryId and avg for this query)
-		System.out.println("html table header");
+//		System.out.println("html table header");
 		for (Query query: allGraphResults.get(0).getQueryCollection().getQueries()) {
 			int queryId = query.getQueryId();
 			
@@ -86,7 +86,7 @@ public class OutputHtml extends OutputWrapper{
 		
 		html += "<thead>\n<tr>";
 		html += "<th>queryId</th><th>avg</th><th>#tp's<br>(non opt)<br><th>#ccv<br></th><th>#cvv<br></th><th>#vcc<br></th>";
-		System.out.println("html table body");
+//		System.out.println("html table body");
 		for (SampleResults graphResults: allGraphResults) {
 //			if (StringUtils.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
 				html += "\n<th>" + graphResults.getProperName() + "<br>(avg: " + StringUtils.getDoubleAsFormattedString(graphResults.getAverageRecall()) + ")</th>";
@@ -95,14 +95,14 @@ public class OutputHtml extends OutputWrapper{
 					ArrayList<String> row = table.get(query.getQueryId());
 					if (query.getResults() != null) {
 						QueryResults queryResults = query.getResults();
-						String queryString = query.getQueryWithFromClause(graphResults.getGraphName()).toString();
-						String encodedQuery = URLEncoder.encode(queryString, "UTF-8");
-						String url = "http://yasgui.laurensrietveld.nl?endpoint=" + encodedEndpoint + "&query=" + encodedQuery + "&tabTitle=" + query.getQueryId();
-						String title = StringEscapeUtils.escapeHtml(queryString);
-						String cell = "<td title='" + title + "'><a href='" + url + "' target='_blank'>" + StringUtils.getDoubleAsFormattedString(queryResults.getRecall()) + "</a></td>";
 						if (experimentSetup.privateQueries()) {
 							row.add("<td>" + StringUtils.getDoubleAsFormattedString(queryResults.getRecall()) + "</td>");
 						} else {
+							String queryString = query.getQueryWithFromClause(graphResults.getGraphName()).toString();
+							String encodedQuery = URLEncoder.encode(queryString, "UTF-8");
+							String url = "http://yasgui.laurensrietveld.nl?endpoint=" + encodedEndpoint + "&query=" + encodedQuery + "&tabTitle=" + query.getQueryId();
+							String title = StringEscapeUtils.escapeHtml(queryString);
+							String cell = "<td title='" + title + "'><a href='" + url + "' target='_blank'>" + StringUtils.getDoubleAsFormattedString(queryResults.getRecall()) + "</a></td>";
 							row.add(cell);
 						}
 					} else {

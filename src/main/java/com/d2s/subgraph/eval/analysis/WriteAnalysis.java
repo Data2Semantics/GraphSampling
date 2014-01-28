@@ -66,7 +66,7 @@ public class WriteAnalysis {
 //					}
 //				}
 //				if (outputThisMode) {
-					outputHtml.asHtmlTable();
+//					outputHtml.asHtmlTable();
 					outputCsv.asCsvTable();
 					outputCsv.asCsvFlatList();
 					outputCsv.rewriteVsAlgs();
