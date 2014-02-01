@@ -29,7 +29,8 @@ public class OutputHtml extends OutputWrapper{
 		System.out.println("printing as html table");
 //		System.out.println("writing html files for "  + onlyGraphsContaining);
 		String encodedEndpoint = URLEncoder.encode(Config.EXPERIMENT_ENDPOINT, "UTF-8"); 
-		String html = "<html><head>\n" +
+		StringBuilder html = new StringBuilder();
+		html.append("<html><head>\n" +
 				"<link rel='stylesheet' href='http://www.few.vu.nl/~lrietveld/static/style.css' type='text/css' />\n" +
 				"<script src='http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js'></script>\n" +
 				"<script src='http://www.few.vu.nl/~lrietveld/static/tablesorter/jquery.tablesorter.min.js'></script>\n" +
@@ -37,7 +38,7 @@ public class OutputHtml extends OutputWrapper{
 				"<script src='http://www.few.vu.nl/~lrietveld/static/jquery.stickytableheaders.js'></script>\n" +
 				"</head>" +
 				"\n<body>" +
-				"\n<table id='myTable' class='tablesorter'>\n";
+				"\n<table id='myTable' class='tablesorter'>\n");
 		HashMap<Integer, ArrayList<String>> table = new HashMap<Integer, ArrayList<String>>();
 		
 		
@@ -84,12 +85,12 @@ public class OutputHtml extends OutputWrapper{
 		}
 		
 		
-		html += "<thead>\n<tr>";
-		html += "<th>queryId</th><th>avg</th><th>#tp's<br>(non opt)<br><th>#ccv<br></th><th>#cvv<br></th><th>#vcc<br></th>";
-//		System.out.println("html table body");
+		html.append("<thead>\n<tr>" +
+		"<th>queryId</th><th>avg</th><th>#tp's<br>(non opt)<br><th>#ccv<br></th><th>#cvv<br></th><th>#vcc<br></th>");
+		
 		for (SampleResults graphResults: allGraphResults) {
 //			if (StringUtils.partialStringMatch(graphResults.getGraphName(), onlyGraphsContaining)) {
-				html += "\n<th>" + graphResults.getProperName() + "<br>(avg: " + StringUtils.getDoubleAsFormattedString(graphResults.getAverageRecall()) + ")</th>";
+				html.append("\n<th>" + graphResults.getProperName() + "<br>(avg: " + StringUtils.getDoubleAsFormattedString(graphResults.getAverageRecall()) + ")</th>");
 //				for (Query query: queryCollection.getQueries()) {
 				for (Query query: graphResults.getQueryCollection().getQueries()) {
 					ArrayList<String> row = table.get(query.getQueryId());
@@ -111,16 +112,16 @@ public class OutputHtml extends OutputWrapper{
 				}
 //			}
 		}
+		html.append("</tr></thead><tbody>\n");
 		
-		html += "</tr></thead><tbody>\n";
 		for (ArrayList<String> row: table.values()) {
-			html += "\n<tr>";
+			html.append("\n<tr>");
 			for (String cell: row) {
-				html += cell;
+				html.append(cell);
 			}
-			html += "</tr>";
+			html.append("</tr>");
 		}
-		html += "\n</tbody> </table></body></html>";
-		FileUtils.writeStringToFile(new File(resultsDir, Config.FILE_HTML_SUMMARY), html);
+		html.append("\n</tbody> </table></body></html>");
+		FileUtils.writeStringToFile(new File(resultsDir, Config.FILE_HTML_SUMMARY), html.toString());
 	}
 }

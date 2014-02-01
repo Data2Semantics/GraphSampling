@@ -12,6 +12,7 @@ memDir="/run/shm"
 rsync -rtvz --del $subgraphDir/*.jar $memDir;
 mkdir -p $memDir/input/qTripleWeights/;
 mkdir -p $memDir/input/weightDistribution/;
+
 mkdir -p $memDir/output/evaluation/;
 mkdir -p $memDir/output/queryTriples/;
 mkdir -p $memDir/cache/queries/;
@@ -23,6 +24,7 @@ rsync -rtvzq --del $subgraphDir/src/main/resources/rScripts/* $memDir/src/main/r
 rsync -rtvzq --del $subgraphDir/input/qTripleWeights/$dataset $memDir/input/qTripleWeights;
 rsync -rtvzq --del $subgraphDir/input/weightDistribution/$dataset $memDir/input/weightDistribution;
 #rsync -rtvzq --del $subgraphDir/output/queryTriples/$dataset $memDir/output/queryTriples;
+rsync -rtvzq --del $subgraphDir/input/randomlyWeightedQtriples $memDir/input/;
 rsync -rtvzq --del $subgraphDir/cache/queries $memDir/cache/;
 
 echo "extracting query triples"

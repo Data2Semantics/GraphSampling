@@ -2,6 +2,7 @@ package com.d2s.subgraph.eval.qtriples;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -18,16 +19,30 @@ public class CalcRecallAllMultiThread implements Runnable {
 	private static int MAX_THREADS = 10;
 	Thread t;
 	public static void calc(ExperimentSetup experimentSetup, File cwd) throws IOException, InterruptedException {
+		boolean andDelete = false;
+		
+		if (andDelete) System.out.println("WE ARE DELETING THE SAMPLE WEIGHT FILES AFTER LOADING THEM IN MEM. WATCH OUT!!!!");
 		CalcCutoffWeight cutoffWeights = new CalcCutoffWeight(experimentSetup, cwd);
 		cutoffWeights.calcForFiles();
 		ExecutorService executor = Executors.newFixedThreadPool(MAX_THREADS);
 		
 		
 		
-		
+		Map<String, Map<String, Double>> allSampleWeights = Util.fetchAllSampleWeights(cwd, experimentSetup.getId(), andDelete);
+		Map<String, Double> randomWeights = Util.getQueryTriplesWithRandomWeightFromFile(experimentSetup.getId());
+		CalcRecall.setTripleRandomWeights(randomWeights);
 		for (Double maxCutoff: cutoffWeights.getMaxCutoffs()) {
 			System.out.println("calculating for max cutoff " + maxCutoff);
-			CalcRecall calc = new CalcRecall(experimentSetup, maxCutoff, cutoffWeights.getCutoffWeights(maxCutoff), cutoffWeights.getCutoffSizes(maxCutoff), cutoffWeights.getTotalSampleSize(), cwd);
+			CalcRecall calc = new CalcRecall(
+					experimentSetup, 
+					maxCutoff, 
+					cutoffWeights.getCutoffWeights(maxCutoff), 
+					cutoffWeights.getCutoffSizes(maxCutoff), 
+					cutoffWeights.getCutoffWeightsPlusOne(maxCutoff), 
+					cutoffWeights.getCutoffSizesPlusOne(maxCutoff), 
+					cutoffWeights.getTotalSampleSize(), 
+					cwd);
+			calc.setTripleWeights(allSampleWeights);
 			executor.execute(calc);
 		}
 	    // This will make the executor accept no new threads

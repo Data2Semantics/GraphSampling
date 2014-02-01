@@ -175,11 +175,15 @@ public class CalcCutoffWeight {
 		if (maxSampleSize == 1.0) {
 			addCutoffSize(file.getName(), maxSampleSize, (double)totalSize);
 			addCutoffWeight(file.getName(), maxSampleSize, 0.0);
+			addCutoffSizePlusOne(file.getName(), maxSampleSize, (double)totalSize);
+			addCutoffWeightPlusOne(file.getName(), maxSampleSize, 0.0);
 			return;
 		} else if (maxSampleSize == 0.0) {
 			addCutoffSize(file.getName(), maxSampleSize, 0.0);
 //			System.out.println("sample size of zero! Use weight: " + (dist.descendingKeySet().first() + 1.0));
 			addCutoffWeight(file.getName(), maxSampleSize, dist.descendingKeySet().first() + 1.0);
+			addCutoffSizePlusOne(file.getName(), maxSampleSize, 0.0);
+			addCutoffWeightPlusOne(file.getName(), maxSampleSize, dist.descendingKeySet().first() + 1.0);
 			return;
 		}
 		
@@ -199,15 +203,18 @@ public class CalcCutoffWeight {
 				addCutoffSize(file.getName(), maxSampleSize, (double)previousSampleSize / (double)totalSize);
 				addCutoffWeight(file.getName(), maxSampleSize, previousWeight);
 				
-				
+
 				//we want to keep track of the current weight and size as well, so we can randomly add triples during the recall calc process to get a smooth result
 				addCutoffSizePlusOne(file.getName(), maxSampleSize, ((double)previousSampleSize + (double)tripleNumWithWeight) / (double)totalSize);
-				addCutoffWeightPlusOne(file.getName(), weight, previousWeight);
+				addCutoffWeightPlusOne(file.getName(), maxSampleSize, weight);
 				if (verbose) {
 					System.out.println("we reached triple " + (previousSampleSize + tripleNumWithWeight) + " now. we should break!");
 					System.out.println("size (" + file.getName() + "): " + ((double)previousSampleSize / (double)totalSize));
 					System.out.println("size (abs) (" + file.getName() + "): " + previousSampleSize);
 					System.out.println("weight (" + file.getName() + "): " + previousWeight);
+					System.out.println("sizePlusOne (" + file.getName() + "): " + ((double)previousSampleSize + (double)tripleNumWithWeight) / (double)totalSize);
+					System.out.println("sizePlusOne (abs) (" + file.getName() + "): " + ((double)previousSampleSize + (double)tripleNumWithWeight));
+					System.out.println("weightPlusOne (" + file.getName() + "): " + weight);
 //					System.out.println(cutoffWeights);
 //					System.out.println(cutoffSizes);
 				}

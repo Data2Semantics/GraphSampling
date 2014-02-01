@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.TreeMap;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -28,22 +29,26 @@ public class CalcRecallForQuery {
 	private Query query;
 	private Double cutoffWeight;
 	private String sample;
-	private HashMap<String, Double> sampleWeights;
+	private Map<String, Double> sampleWeights;
 	private File queryDir;
 	private boolean verbose = false;
 	private File[] querySolutionDirs;
 	private int queryLimit = 0;
-	private double cutoffSize;
-	private double maxSampleSize;
+	private Double cutoffSize;
+	private Double maxSampleSize;
 	private int totalSampleSize;
-	public CalcRecallForQuery(ExperimentSetup experimentSetup, String sample, HashMap<String, Double> sampleWeights, File queryDir, Double cutoffWeight, double cutoffSize, double maxSampleSize, int totalSampleSize) throws IOException {
+	private Double cutoffSizePlusOne;
+	private Double cutoffWeightPlusOne;
+	public CalcRecallForQuery(ExperimentSetup experimentSetup, String sample, Map<String, Double> map, File queryDir, Double cutoffWeight, Double cutoffSize, Double cutoffWeightPlusOne, Double cutoffSizePlusOne, Double maxSampleSize, int totalSampleSize) throws IOException {
 		this.experimentSetup = experimentSetup;
 		this.cutoffSize = cutoffSize;
 		this.cutoffWeight = cutoffWeight;
+		this.cutoffSizePlusOne = cutoffSizePlusOne;
+		this.cutoffWeightPlusOne = cutoffWeightPlusOne;
 		this.maxSampleSize = maxSampleSize;
 		this.totalSampleSize = totalSampleSize;
 		this.sample = sample;
-		this.sampleWeights = sampleWeights;
+		this.sampleWeights = map;
 		this.queryDir = queryDir;
 		File queryFile = new File(queryDir.getPath() + "/query.txt");
 		if (!queryFile.exists()) throw new IOException("tried to locate " + queryFile.getPath() + ", but it isnt there. Unable to calc recall");
@@ -150,10 +155,12 @@ public class CalcRecallForQuery {
 	private boolean checkRequiredFile(File qsDir) throws NumberFormatException, IOException {
 		
 		File reqFile = new File(qsDir.getPath() + "/required");
-		return checkTriplesFile(reqFile);
+		return checkTriplesFile(reqFile, true);
 	}
-	
 	private boolean checkTriplesFile(File triplesFile) throws IOException {
+		return checkTriplesFile(triplesFile, false);
+	}
+	private boolean checkTriplesFile(File triplesFile, boolean skipNotice) throws IOException {
 		boolean triplesFileInSample = true;
 		if (triplesFile.exists()) {
 			String line;
@@ -162,29 +169,51 @@ public class CalcRecallForQuery {
 				if (line.length() > 0) {
 					Double weight = sampleWeights.get(line);
 					if (weight != null) {
+//						if (weight == 1.0 && sample.toLowerCase().contains("path_indegree")) {
+//							System.out.println("heyyy!!!");
+//						}
 						if (weight >= cutoffWeight) {
 //							//this triple has a weight which is high enough, and should be included in our sample! continue checking other triples
-						} else {
-							if (cutoffSize < maxSampleSize) {
-								//ok, so we have a lower cutoff size than expected (as the triples just above this cutoff size have the same weight)
-								//we want smooth results, so we want to simulate creating a sample of size 'maxSampleSize'
-								//therefore, we randomly 
+							continue;
+						} 
+						if (cutoffSize != null && cutoffSize < maxSampleSize && !sample.toLowerCase().contains("random")) {
+//							System.out.println(cutoffWeight + " vs. " + cutoffWeightPlusOne);
+							//ok, so we have a lower cutoff size than expected (as the triples just above this cutoff size have the same weight)
+							//we want smooth results, so we want to simulate creating a sample of size 'maxSampleSize'
+							//therefore, we need to check whether this triple has the weight which has been cut off. If it has, we randomly select some of these triples
+							if ((double)weight == (double)cutoffWeightPlusOne) {
+//								System.out.println("yes?");
+//								System.out.println(line);
+//								System.exit(1);
+								double bridgeSizeGaph = maxSampleSize - cutoffSize;//7
+								//how big is this gap wrt to number of triples for this cutoff weight?
+								double sizeWithPlusOneWeight = cutoffSizePlusOne - cutoffSize;//9
+								
+								double randomCutoff = bridgeSizeGaph / sizeWithPlusOneWeight;
+								double randomWeight = CalcRecall.queryTriplesWithRandomWeight.get(line);
+								if (randomWeight < randomCutoff) {
+									//fine, continue checking others
+									continue;
+								}
 							}
-							//1 of our required files would not be in the sample.
-							//no need checking the others. stop!
-							
-							triplesFileInSample = false;
-							break;
 						}
+						//1 of our required files would not be in the sample.
+						//no need checking the others. stop!
+						triplesFileInSample = false;
+						break;
+						
 					} else {
-						br.close();
-						throw new IllegalStateException("tried to find sample weight for triple " + line + " from file " + triplesFile.getPath() + ", but could not match them!");
+//						br.close();
+//						throw new IllegalStateException("tried to find sample weight for triple " + line + " from file " + triplesFile.getPath() + ", but could not match them!");
+						System.out.println("found no weight for triple " + line);
+						System.out.println(triplesFile.getPath());
+						triplesFileInSample = false;
 					}
 				}
 			}
 			br.close();
 		} else {
-			System.out.println("notice: required file does not exist for querysolutiondir " + triplesFile.getPath());
+			if (!skipNotice) System.out.println("notice: file does not exist for querysolutiondir " + triplesFile.getPath());
 		}
 		
 		return triplesFileInSample;
@@ -228,8 +257,8 @@ public class CalcRecallForQuery {
 //	private boolean isTripleIncluded(String triple) {
 //		return sampleWeights.get(triple) > cutoffWeight;
 //	}
-	public static Query calc(ExperimentSetup experimentSetup, String sample, HashMap<String, Double> sampleWeights, File queryDir, Double cutoffWeight, double cutoffSize, double maxSampleSize, int totalSampleSize) throws IOException {
-		CalcRecallForQuery calc = new CalcRecallForQuery(experimentSetup, sample, sampleWeights, queryDir, cutoffWeight, cutoffSize, maxSampleSize, totalSampleSize);
+	public static Query calc(ExperimentSetup experimentSetup, String sample, Map<String, Double> map, File queryDir, Double cutoffWeight, Double cutoffSize, Double cutoffWeightPlusOne, Double cutoffSizePlusOne, double maxSampleSize, int totalSampleSize) throws IOException {
+		CalcRecallForQuery calc = new CalcRecallForQuery(experimentSetup, sample, map, queryDir, cutoffWeight, cutoffSize, cutoffWeightPlusOne, cutoffSizePlusOne, maxSampleSize, totalSampleSize);
 		calc.run();
 		return calc.query;
 	}
@@ -243,10 +272,12 @@ public class CalcRecallForQuery {
 		CalcRecallForQuery calc = new CalcRecallForQuery(
 				experimentSetup, 
 				"resourceWithoutLit_outdegree", 
-				CalcRecall.fetchSampleWeights(new File("input/qTripleWeights/bio2rdf/resourceWithoutLit_outdegree")), 
+				Util.fetchSampleWeights(new File("input/qTripleWeights/bio2rdf/resourceWithoutLit_outdegree")), 
 				queryDir, 
 				1380.0,
 				0.5,
+				(double) 1381,
+				0.51,
 				0.5,
 				11000010);
 		calc.verbose = true;

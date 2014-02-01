@@ -27,7 +27,7 @@ public class DbpediaExperimentSetup extends ExperimentSetup {
 	private static String EVAL_RESULTS_DIR = "dbplResults";
 	private static boolean UNIQUE_QUERIES = true;
 	private static boolean PRIVATE_QUERIES = false;
-	private static int MAX_NUM_QUERIES = 100;
+	private static int MAX_NUM_QUERIES = 2000;
 	private QueriesFetcher qFetcher;
 	
 	public DbpediaExperimentSetup(boolean useCacheFile) throws IOException, QueryParseException, ParserConfigurationException, SAXException {

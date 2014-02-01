@@ -1,11 +1,9 @@
 package com.d2s.subgraph.eval.qtriples;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.TreeMap;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -26,7 +24,7 @@ public class CalcRecall implements Runnable{
 	private int maxSamples = Integer.MAX_VALUE;
 	private int maxQueries = Integer.MAX_VALUE;
 	private ExperimentSetup experimentSetup;
-	private static HashMap<String, Double> queryTriplesWithRandomWeight = null;
+	public static Map<String, Double> queryTriplesWithRandomWeight = null;
 //	CalcCutoffWeight cutoffWeights;
 	private File[] queryDirs;
 	ArrayList<SampleResults> regularResults = new ArrayList<SampleResults>();
@@ -36,6 +34,9 @@ public class CalcRecall implements Runnable{
 	private TreeMap<String, Double> cutoffWeights;
 	private TreeMap<String, Double> cutoffSizes;
 	private int totalSampleSize;
+	private TreeMap<String, Double> cutoffWeightsPlusOne;
+	private TreeMap<String, Double> cutoffSizesPlusOne;
+	private Map<String, Map<String, Double>> allSampleWeights;
 	public CalcRecall(ExperimentSetup experimentSetup, double maxSampleSize, TreeMap<String, Double> cutoffWeights, TreeMap<String, Double> cutoffSizes, TreeMap<String, Double> cutoffWeightsPlusOne, TreeMap<String, Double> cutoffSizesPlusOne, int totalSampleSize, File cwd) throws IOException {
 		this.experimentSetup = experimentSetup;
 		this.cwd = cwd;
@@ -45,6 +46,7 @@ public class CalcRecall implements Runnable{
 		this.cutoffSizes = cutoffSizes;
 		this.cutoffWeightsPlusOne = cutoffWeightsPlusOne;
 		this.cutoffSizesPlusOne = cutoffSizesPlusOne;
+//		queryTriplesWithRandomWeight = getQueryTriplesWithRandomWeightFromFile();
 //		cutoffWeights = new CalcCutoffWeight(experimentSetup, cwd, maxSampleSize);
 //		cutoffWeights.calcForFiles();
 //		System.out.println(cutoffWeights.getCutoffWeights());
@@ -54,36 +56,49 @@ public class CalcRecall implements Runnable{
 	}
 	
 	
+	public void setTripleWeights(Map<String, Map<String, Double>> allSampleWeights) {
+		this.allSampleWeights = allSampleWeights;
+	}
+	
+	public static void setTripleRandomWeights(Map<String, Double> sampleWeights) {
+		queryTriplesWithRandomWeight = sampleWeights;
+	}
+	
+	private void initWeights() throws IOException {
+		setTripleWeights(Util.fetchAllSampleWeights(cwd, experimentSetup.getId()));
+		setTripleRandomWeights(Util.getQueryTriplesWithRandomWeightFromFile(experimentSetup.getId()));
+	}
 	
 	
 	void calcRecallForSamples() throws IOException, InterruptedException {
+		
 //		ArrayList<SampleResults> allResults = new ArrayList<SampleResults>();
 		int count = 0;
 		
-		
-		File weightedQueryTriplesDir = new File(cwd.getAbsolutePath() + "/" + Config.PATH_WEIGHTED_QUERY_TRIPLES + experimentSetup.getId());
-		for (File weightedQueryTriplesOfSample: weightedQueryTriplesDir.listFiles()) {
+//		File weightedQueryTriplesDir = new File(cwd.getAbsolutePath() + "/" + Config.PATH_WEIGHTED_QUERY_TRIPLES + experimentSetup.getId());
+		for (String sample: allSampleWeights.keySet()) {
+			if (count >= maxSamples) break;
+			count++;
+			System.out.println("calculating recall for dataset " + experimentSetup.getId() + " and sample " + sample);
+			if (isBaselineSample(sample)) {
+				baselineResults.add(calcForQueries(sample, allSampleWeights.get(sample)));
+			} else {
+				regularResults.add(calcForQueries(sample, allSampleWeights.get(sample)));
+			}
+		}
+//		for (File weightedQueryTriplesOfSample: weightedQueryTriplesDir.listFiles()) {
 //		for (String sample: cutoffWeights.getCutoffWeights().keySet()) {
 //			System.out.println(weightedQueryTriplesOfSample.getName());
 			
 //			if (!sample.equals("resourceContext_indegree")) continue;
 //			System.out.println(sample);
-			if (count >= maxSamples) break;
-			count++;
-			HashMap<String, Double> sampleWeights = fetchSampleWeights(weightedQueryTriplesOfSample);
-			System.out.println("calculating recall for dataset " + experimentSetup.getId() + " and sample " + weightedQueryTriplesOfSample.getName());
-			if (isBaselineSample(weightedQueryTriplesOfSample)) {
-				baselineResults.add(calcForQueries(weightedQueryTriplesOfSample.getName(), sampleWeights));
-			} else {
-				regularResults.add(calcForQueries(weightedQueryTriplesOfSample.getName(), sampleWeights));
-			}
-		}
+			
+//		}
 	}
 	
-	private boolean isBaselineSample(File sampleFile) {
-		return sampleFile.getName().toLowerCase().contains("baseline");
+	private boolean isBaselineSample(String sampleName) {
+		return sampleName.toLowerCase().contains("baseline");
 	}
-	
 	void concatAndWriteOutput() throws IOException, InterruptedException {
 		WriteAnalysis analysisOutput = new WriteAnalysis(experimentSetup, maxSampleSize);
 		ArrayList<SampleResults> randomSampleResultsList = new ArrayList<SampleResults>();
@@ -113,36 +128,33 @@ public class CalcRecall implements Runnable{
 	}
 	
 	
-	public HashMap<String, Double> getQueryTriplesWithRandomWeight() throws IOException {
-		if (queryTriplesWithRandomWeight == null) {
-			return fetchSampleWeights(new File(Config.PATH_RANDOM_WEIGHTED_QTRIPLES + experimentSetup.getId()));
-		} else {
-			return queryTriplesWithRandomWeight;
-		}
-	}
-	public static HashMap<String, Double> fetchSampleWeights(File sampleFile) throws IOException {
-		
-//		File sampleFile = new File(cwd.getAbsolutePath() + "/" + Config.PATH_WEIGHTED_QUERY_TRIPLES + experimentSetup.getId() + "/" + sample);
-//		if (!sampleFile.exists()) throw new IOException("tried to locate " + sampleFile.getPath() + ", but it isnt there. Unable to calc recall");
-		HashMap<String, Double> sampleWeights = new HashMap<String, Double>();
-		String line;
-		BufferedReader br = new BufferedReader(new FileReader(sampleFile));
-		while ((line = br.readLine()) != null) {
-			if (line.length() > 0) {
-				String[] splitLine = line.split("\t");
-				String triple = "";
-				Double weight = null;
-				for (int i = 0; i < (splitLine.length -1); i++) {
-					if (triple.length() > 0) triple += "\t";
-					triple += splitLine[i];
-				}
-				weight = Double.parseDouble(splitLine[splitLine.length - 1]);
-				sampleWeights.put(triple, weight);
-			}
-		}
-		br.close();
-		return sampleWeights;
-	}
+	
+//	private HashMap<String, Double> getQueryTriplesWithRandomWeightFromFile() throws IOException {
+//		return fetchSampleWeights(new File(Config.PATH_RANDOM_WEIGHTED_QTRIPLES + experimentSetup.getId()));
+//	}
+//	public static HashMap<String, Double> fetchSampleWeights(File sampleFile) throws IOException {
+//		
+////		File sampleFile = new File(cwd.getAbsolutePath() + "/" + Config.PATH_WEIGHTED_QUERY_TRIPLES + experimentSetup.getId() + "/" + sample);
+////		if (!sampleFile.exists()) throw new IOException("tried to locate " + sampleFile.getPath() + ", but it isnt there. Unable to calc recall");
+//		HashMap<String, Double> sampleWeights = new HashMap<String, Double>();
+//		String line;
+//		BufferedReader br = new BufferedReader(new FileReader(sampleFile));
+//		while ((line = br.readLine()) != null) {
+//			if (line.length() > 0) {
+//				String[] splitLine = line.split("\t");
+//				StringBuilder triple = new StringBuilder();
+//				Double weight = null;
+//				for (int i = 0; i < (splitLine.length -1); i++) {
+//					if (triple.length() > 0) triple.append("\t");
+//					triple.append(splitLine[i]);
+//				}
+//				weight = Double.parseDouble(splitLine[splitLine.length - 1]);
+//				sampleWeights.put(triple.toString(), weight);
+//			}
+//		}
+//		br.close();
+//		return sampleWeights;
+//	}
 	
 	
 	private void fetchQueryDirs() {
@@ -160,7 +172,7 @@ public class CalcRecall implements Runnable{
 		if (queryDirs.length == 0) throw new IllegalStateException("could not find queries to calc recall for. Searching in dir " + queryTripleDir.getPath());
 	}
 	
-	private SampleResults calcForQueries(String sample, HashMap<String, Double> sampleWeights) throws IOException {
+	private SampleResults calcForQueries(String sample, Map<String, Double> map) throws IOException {
 		SampleResults results = new SampleResultsRegular();
 		results.setGraphName(sample);
 		int count = 0;
@@ -180,8 +192,19 @@ public class CalcRecall implements Runnable{
 					if (cutoffWeight == null) throw new IllegalStateException("wanted to calc recall for " + sample + " but it seems we do not have the calculated cutoff weights!");
 				}
 				Double cutoffSize = cutoffSizes.get(sample);
-				
-				Query query = CalcRecallForQuery.calc(experimentSetup, sample, sampleWeights, queryDir, cutoffWeight, cutoffSize, maxSampleSize, totalSampleSize);
+				Double cutoffWeightPlusOne = cutoffWeightsPlusOne.get(sample);
+				Double cutoffSizePlusOne = cutoffSizesPlusOne.get(sample);
+				Query query = CalcRecallForQuery.calc(
+						experimentSetup, 
+						sample, 
+						map, 
+						queryDir, 
+						cutoffWeight, 
+						cutoffSize, 
+						cutoffWeightPlusOne, 
+						cutoffSizePlusOne, 
+						maxSampleSize, 
+						totalSampleSize);
 
 				query.setQueryId(count);
 				results.add(query);
@@ -217,12 +240,13 @@ public class CalcRecall implements Runnable{
 	public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException, InterruptedException {
 		File cwd = new File("");
 		ExperimentSetup experimentSetup = null;
-		Double maxSampleSize = 0.01;
+		Double maxSampleSize = 0.0;
 		for (String arg: args) {
 			System.out.println("arg: " + arg);
 		}
 		if (args.length > 0) {
 			experimentSetup = ExperimentSetupHelper.get(args[0]);
+			maxSampleSize = Double.parseDouble(args[1]);
 			cwd = new File("/run/shm/");
 			CalcCutoffWeight cutoffWeights = new CalcCutoffWeight(experimentSetup, cwd, maxSampleSize);
 			cutoffWeights.calcForFiles();
@@ -238,6 +262,7 @@ public class CalcRecall implements Runnable{
 					cutoffWeights.getTotalSampleSize(),  cwd);
 	//		calc.maxSamples = 1;
 	//		calc.maxQueries = 2;
+			calc.initWeights();
 			calc.calcRecallForSamples();
 			calc.concatAndWriteOutput();
 		} else {
@@ -251,8 +276,18 @@ public class CalcRecall implements Runnable{
 				CalcCutoffWeight cutoffWeights = new CalcCutoffWeight(setup, cwd, maxSampleSize);
 				cutoffWeights.calcForFiles();
 				
+//				System.out.println(cutoffWeights.getCutoffWeightsPlusOne(maxSampleSize));
+//				System.exit(1);
 		//		ExperimentSetup experimentSetup, double maxSampleSize, TreeMap<String, Double> cutoffWeights, TreeMap<String, Double> cutoffSizes, File cwd) throws IOExceptio
-				CalcRecall calc = new CalcRecall(setup, maxSampleSize, cutoffWeights.getCutoffWeights(maxSampleSize), cutoffWeights.getCutoffSizes(maxSampleSize), cutoffWeights.getTotalSampleSize(), cwd);
+				CalcRecall calc = new CalcRecall(
+						setup, 
+						maxSampleSize, 
+						cutoffWeights.getCutoffWeights(maxSampleSize), 
+						cutoffWeights.getCutoffSizes(maxSampleSize), 
+						cutoffWeights.getCutoffWeightsPlusOne(maxSampleSize), 
+						cutoffWeights.getCutoffSizesPlusOne(maxSampleSize), 
+						cutoffWeights.getTotalSampleSize(), 
+						cwd);
 		//		calc.maxSamples = 1;
 		//		calc.maxQueries = 2;
 				calc.calcRecallForSamples();
