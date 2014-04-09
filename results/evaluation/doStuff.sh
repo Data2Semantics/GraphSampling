@@ -1,10 +1,11 @@
-
+#!/bin/bash
 #sed 's/<a href=.http:\/\/yasgui\.laurensrietveld\.nl.*_blank.>//g' $1 -i;
 #sed 's/\([[:digit:]]<\/span>\)<\/a>/\1/g' $1 -i;
 #cat $1 | tr '\n' ' ' > output.html;
 #mv output.html  $1
 #perl -pe "s/title\='.*?'//g;  print;" $1 > output.html;
 #mv output.html  $1;
-
-sed 's/[[:digit:]]*.[[:digit:]]%<br>//g' $1 -i
+find . -type f -name 'results.html' | while read line; do
+   sed -i 's/\/static/\.\.\/\.\.\/\.\.\/\.\.\/static\//g' $line;
+done
 

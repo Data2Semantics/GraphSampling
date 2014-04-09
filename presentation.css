@@ -1,0 +1,50 @@
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+
+
+.sorting_asc, .sorting_desc, .sorting {
+	cursor: pointer;
+}
+
+
+.constantFromQuery {
+	color: #ae81ff;
+} 
+.variableFromQuery {
+	color: #9effff;
+}
+
+.borderTop {
+	border-top: 2px solid red;
+}
+.borderRight {
+	border-right: 2px solid red;
+}
+.borderLeft {
+	border-left: 2px solid red;
+}
+.borderBottom {
+	border-bottom: 2px solid red;
+}
+#datasetExampleSample td, #datasetExampleSample th, #resultSetSelection td, #resultSetSelection th{
+	font-size:60%;
+}
+.dualColElement {
+	float: left;
+	width: 50%;
+	clear: none
+}
+

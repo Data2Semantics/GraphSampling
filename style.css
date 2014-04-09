@@ -1,0 +1,81 @@
+#iframeRow, #d3jsRow {
+display:none;
+}
+
+
+
+svg {
+  font: 11px "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.axis--y path {
+  display: none;
+}
+
+.cities {
+  fill: none;
+  stroke: #aaa;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  stroke-width: 1.5px;
+}
+
+.city--hover {
+  stroke: #000;
+}
+
+.focus text {
+  text-anchor: middle;
+  text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
+}
+
+.voronoi path {
+  fill: none;
+  pointer-events: all;
+}
+
+.voronoi--show path {
+  stroke: red;
+  stroke-opacity: .2;
+}
+
+
+
+th.rotate {
+    white-space: nowrap;
+    -webkit-transform-origin: 65px 60px;
+    -moz-transform-origin: 65px 60px;
+    -o-transform-origin: 65px 60px;
+    -ms-transform-origin: 65px 60px;
+    transform-origin: 65px 60px;
+    
+	-webkit-transform: rotate(270deg);
+	-moz-transform: rotate(270deg);
+	-ms-transform: rotate(270deg);
+	-o-transform: rotate(270deg);
+	transform: rotate(270deg);
+	/*display:inline-block;*/
+	/*height:30px;*/
+	/*float:left;*/
+	/*width:30px;*/
+}
+span.intact {
+	display:inline-block;
+	width:30px;
+	height:130px;
+}
+.selectWholeCol td {
+	padding-bottom: 15px;
+}
+td.selectWholeRow  {
+	padding-right: 20px;
+}
+
+
