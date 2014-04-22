@@ -98,7 +98,9 @@ span.intact {
 td.selectWholeRow  {
 	padding-right: 20px;
 }
-
+.sampleMethodLegend text {
+	font-size: 15px;
+}
 .sampleMethod {
 }
 .sampleMethodLegend {
@@ -113,4 +115,11 @@ table {
 svg {
 	display: inline-block;
 	margin-top:200px;
+}
+.grid .tick {
+    stroke: lightgrey;
+    opacity: 0.7;
+}
+.grid path {
+      stroke-width: 0;
 }

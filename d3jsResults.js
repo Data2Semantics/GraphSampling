@@ -12,6 +12,9 @@ var x = d3.scale.linear().range([ 0, plotWidth ]);
 
 var y = d3.scale.linear().range([ plotHeight, 0 ]);
 
+
+
+
 var xAxis = d3.svg.axis().scale(x).orient("bottom");
 
 var yAxis = d3.svg.axis().scale(y).orient("left");
@@ -41,7 +44,7 @@ var drawLegend = function() {
 	 * add legend
 	 */
 	if (!legends) {
-		legends = svgContainer.append('g').attr('class', 'legend').attr("transform", "translate(35 ,0)");
+		legends = svgContainer.append('g').attr('class', 'legend').attr('id', 'legendBox').attr("transform", "translate(35 ,0)");
 	}
 	
 	legends.selectAll('g').remove();
@@ -67,6 +70,24 @@ var drawLegend = function() {
 			}).text(function(d) {
 		return d.name.replace(/_/g, " - ");
 	});
+	
+	
+	
+	var ctx = document.getElementById("legendBox"),
+	SVGRect = ctx.getBBox();
+
+	var rect = document.getElementById("whitebackground");
+	if (!rect) {
+		rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+		rect.setAttribute("id", "whitebackground");
+		ctx.insertBefore(rect, ctx.firstChild);
+	}
+    rect.setAttribute("x", SVGRect.x);
+    rect.setAttribute("y", SVGRect.y);
+    rect.setAttribute("width", SVGRect.width);
+    rect.setAttribute("height", SVGRect.height);
+    rect.setAttribute("fill", "white");
+    
 };
 
 function updateSampleMethodVisibility() {
@@ -208,7 +229,7 @@ d3.tsv("allResults.tsv", function(error, data) {
 			"transform",
 			"translate(" + (plotWidth) + " ,"
 					+ (plotHeight + margin.bottom - 40) + ")").style(
-			"text-anchor", "end").text("Sample Size");
+			"text-anchor", "end").style("font-size", "15px").text("Sample Size");
 
 	// draw y axis
 	svgContainer.append("g").attr("class", "y axis").call(yAxis);
@@ -216,14 +237,18 @@ d3.tsv("allResults.tsv", function(error, data) {
 	// add y label
 	svgContainer.append("text").attr("transform", "rotate(-90)").attr(
 			"y", 6)// offset to right
-	.attr("dy", ".71em").style("text-anchor", "end").text("Recall");
+	.attr("dy", ".71em").style("text-anchor", "end").style("font-size", "15px").text("Recall");
 	
 	
+	if (window.location.search.match( /showGrid/gi)) {
+		//draw grid
+		svgContainer.append("g").attr("class", "grid").attr("transform",
+				"translate(0," + plotHeight + ")").call(
+						xAxis.tickSize(-plotHeight, 0, 0).tickFormat(""))
 	
-	
-	
-//	drawResults();
-			
+		svgContainer.append("g").attr("class", "grid").call(
+				yAxis.tickSize(-plotWidth, 0, 0).tickFormat(""))
+	}
 	drawSelectionTable();
 });
 
