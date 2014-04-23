@@ -76,20 +76,22 @@ Select sample size: <select id="interactiveSampleSizeSelect"></select><br>
 <button onclick="showHtmlTable();" class="btn btn-primary">show</button>
 
 </div>
+</div> <!-- /container -->
+</div> <!-- /container -->
 
-<div id="d3jsRow" class="row">
-<div class="col-md-12">
-	<iframe id="d3Iframe" src="d3jsResults.html" style="height:500px; width: 100%;" frameBorder=0></iframe>
-</div>
+<div id="d3jsRow" >
+<!-- <div class="col-md-12"> -->
+	<iframe id="d3Iframe" src="d3jsResults.html" style="width: 100%;" frameBorder=0 onLoad="resizeD3Iframe();" ></iframe>
+<!-- </div> -->
 </div>
 <div id="iframeRow" class="row">
 <div class="col-md-12">
-<iframe id="tableIframe" style="height:10px; width: 100%;" frameBorder=0></iframe>
+<iframe id="tableIframe" style="height:10px; width: 100%;" frameBorder=0 onLoad="resizeTableIframe();"></iframe>
 
 </div>
 
 </div>
-    </div> <!-- /container -->
+    
 
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
@@ -121,6 +123,28 @@ Select sample size: <select id="interactiveSampleSizeSelect"></select><br>
 		$("#tableIframe").attr("src", "results/evaluation/" + dataset + "/" + sampleSize + "/results.html").height(700);
 		//console.log(dataset, sampleSize);
 	}
+    function resizeD3Iframe()
+    {
+      //find the height of the internal page
+      var the_height=
+        document.getElementById("d3Iframe").contentWindow.
+          document.body.scrollHeight;
+	console.log(the_height);
+      //change the height of the iframe
+      document.getElementById("d3Iframe").style.height =
+          the_height + "px";
+    }
+    
+    function resizeTableIframe() {
+    	 //find the height of the internal page
+        var the_height=
+          document.getElementById("tableIframe").contentWindow.
+            document.body.scrollHeight;
+  	console.log(the_height);
+        //change the height of the iframe
+        document.getElementById("tableIframe").style.height =
+            the_height + "px";
+    }
     </script>
     <script src="d3js/3.4.3/d3.min.js"></script>
     <script src="d3jsResults.js"></script>
