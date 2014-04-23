@@ -326,12 +326,41 @@ var drawSelectionTable = function() {
 			onCheckboxChanged($(this), true);
 		});
 	};
-	setEnabled("SemanticWebDogFood", "Path - Pagerank");
-	setEnabled("DBpedia", "Path - Pagerank");
-	setEnabled("OpenBioMed", "WithoutLiterals - Outdegree");
-	setEnabled("BIO2RDF", "UniqueLiterals - Outdegree");
-	setEnabled("LinkedGeoData", "UniqueLiterals - Outdegree");
-	setEnabled("Metalex", "ResourceFrequency");
+	
+	
+	var getEnabledPlots = function() {
+		  var params = location.search.substr(location.search.indexOf("?")+1);
+		  var plots = [];
+		  params = params.split("&");
+		    // split param and value into individual pieces
+		    for (var i=0; i<params.length; i++)
+		       {
+		         temp = params[i].split("=");
+		         if (temp[0] == "enabled") {
+		        	var value = temp[1];
+		        	var sampleMethod = decodeURIComponent(value.substring(value.indexOf('-')+1));
+		        	var dataset = value.substring(0, value.indexOf('-'));
+		        	if (sampleMethod.length > 0 && dataset.length > 0) plots.push({dataset: dataset, sampleMethod:sampleMethod});
+		         }
+//		         if ( [temp[0]] == sname ) { sval = temp[1]; }
+		       }
+		  return plots;
+	}
+	var enabledPlots = getEnabledPlots();
+	console.log(enabledPlots);
+	if (enabledPlots.length == 0) {
+		enabledPlots = [
+			{dataset:"SemanticWebDogFood",sampleMethod: "Path - Pagerank"},
+			{dataset:"DBpedia",sampleMethod: "Path - Pagerank"},
+			{dataset:"OpenBioMed",sampleMethod: "WithoutLiterals - Outdegree"},
+			{dataset:"BIO2RDF",sampleMethod:  "UniqueLiterals - Outdegree"},
+			{dataset:"LinkedGeoData",sampleMethod:  "UniqueLiterals - Outdegree"},
+			{dataset:"Metalex",sampleMethod: "ResourceFrequency"}	
+		];
+	}
+	for (var i = 0; i < enabledPlots.length; i++) {
+		setEnabled(enabledPlots[i].dataset, enabledPlots[i].sampleMethod);
+	}
 	drawResults();
 	drawLegend();
 };
