@@ -2,7 +2,10 @@
 display:none;
 }
 
-
+#d3Iframe {
+	height: 1000px;
+	width: 1000px;
+}
 
 svg {
   font: 11px "Helvetica Neue", Helvetica, Arial, sans-serif;

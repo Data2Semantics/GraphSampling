@@ -21,9 +21,7 @@ body {
   stroke-width: 1.5px;
 }
 
-svg {
-  font: 11px "Helvetica Neue", Helvetica, Arial, sans-serif;
-}
+
 
 .axis path,
 .axis line {
@@ -109,12 +107,14 @@ td.selectWholeRow  {
 table {
 /* 	position:absolute;top:0px;right:0px;margin-top:50px; */
 	display: inline-block;
-	position: absolute;
-	top: 50px;
+	margin-top: 35px;
+/* 	position: absolute; */
+/* 	top: 50px; */
 }
 svg {
+	font: 11px "Helvetica Neue", Helvetica, Arial, sans-serif;
 	display: inline-block;
-	margin-top:200px;
+/* 	margin-top:200px; */
 }
 .grid .tick {
     stroke: lightgrey;

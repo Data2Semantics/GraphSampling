@@ -3,8 +3,8 @@ var margin = {
 	right : 20,
 	bottom : 30,
 	left : 50
-}, width = 900 - margin.left - margin.right, height = 700 - margin.top
-		- margin.bottom, plotWidth = width - 300, plotHeight = height - 200;
+}, width = 900 - margin.left - margin.right, height = 500 - margin.top
+		- margin.bottom, plotWidth = width - 300, plotHeight = height;
 
 var color = d3.scale.category20();
 
@@ -73,21 +73,22 @@ var drawLegend = function() {
 	
 	
 	
-	var ctx = document.getElementById("legendBox"),
-	SVGRect = ctx.getBBox();
-
-	var rect = document.getElementById("whitebackground");
-	if (!rect) {
-		rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-		rect.setAttribute("id", "whitebackground");
-		ctx.insertBefore(rect, ctx.firstChild);
+	var ctx = document.getElementById("legendBox");
+	if (ctx) {
+		SVGRect = ctx.getBBox();
+	
+		var rect = document.getElementById("whitebackground");
+		if (!rect) {
+			rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+			rect.setAttribute("id", "whitebackground");
+			ctx.insertBefore(rect, ctx.firstChild);
+		}
+	    rect.setAttribute("x", SVGRect.x);
+	    rect.setAttribute("y", SVGRect.y);
+	    rect.setAttribute("width", SVGRect.width);
+	    rect.setAttribute("height", SVGRect.height);
+	    rect.setAttribute("fill", "white");
 	}
-    rect.setAttribute("x", SVGRect.x);
-    rect.setAttribute("y", SVGRect.y);
-    rect.setAttribute("width", SVGRect.width);
-    rect.setAttribute("height", SVGRect.height);
-    rect.setAttribute("fill", "white");
-    
 };
 
 function updateSampleMethodVisibility() {
@@ -347,7 +348,6 @@ var drawSelectionTable = function() {
 		  return plots;
 	}
 	var enabledPlots = getEnabledPlots();
-	console.log(enabledPlots);
 	if (enabledPlots.length == 0) {
 		enabledPlots = [
 			{dataset:"SemanticWebDogFood",sampleMethod: "Path - Pagerank"},
@@ -433,4 +433,10 @@ $( document ).ready(function() {
 		$("body").css("overflow", "hidden");
 		$("svg").css("margin-top", 0);
 	}
+//	console.log($("table").outerWidth());
+//	console.log( $("svg").width());
+//	console.log(window.innerWidth);
+//	if (($("table").width() + $("svg").width()) > window.innerWidth) {
+//		console.log("width issue!");
+//	} 
 });
