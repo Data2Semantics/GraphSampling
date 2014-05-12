@@ -81,7 +81,7 @@ Select sample size: <select id="interactiveSampleSizeSelect"></select><br>
 
 <div id="d3jsRow" >
 <!-- <div class="col-md-12"> -->
-	<iframe id="d3Iframe" src="d3jsResults.html" style="width: 100%;" frameBorder=0 onLoad="resizeD3Iframe();" ></iframe>
+<!-- 	<iframe id="d3Iframe" src="d3jsResults.html" style="width: 100%;" frameBorder=0 onLoad="resizeD3Iframe();" ></iframe> -->
 <!-- </div> -->
 </div>
 <div id="iframeRow" class="row">
@@ -112,8 +112,9 @@ Select sample size: <select id="interactiveSampleSizeSelect"></select><br>
 		//console.log($(buttonEl).prev().val());
 	}
 	function showD3jsResults() {
-		$("#iframeRow").hide();
-		$("#d3jsRow").show();
+		//$("#iframeRow").hide();
+		//$("#d3jsRow").show();
+		window.open("d3jsResults.html", "_blank");
 	}
     function showHtmlTable() {
 		$("#iframeRow").show();
