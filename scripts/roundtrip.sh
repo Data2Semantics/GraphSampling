@@ -1,4 +1,5 @@
 #!/bin/bash
+[ -z "$PIG_SCRIPTS" ] && echo "PIG_SCRIPTS variable not set. Exiting" && exit 1;
 function hadoopLs {
 	hadoopLs=()
 	echo "hadoop fs -ls $1";
@@ -32,6 +33,6 @@ for dir in "${hadoopLs[@]}"; do
 		IFS=_ read -a delimited <<< "$dirBasename"
 		rewriteMethod=${delimited[0]}
 		unset IFS
-		pig pigAnalysis/roundtrip/$rewriteMethod.py $dir;
+		pig $PIG_SCRIPTS/roundtrip/$rewriteMethod.py $dir;
 	fi
 done;

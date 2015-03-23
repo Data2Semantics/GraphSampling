@@ -1,4 +1,5 @@
 #!/bin/bash
+[ -z "$PIG_SCRIPTS" ] && echo "PIG_SCRIPTS variable not set. Exiting" && exit 1;
 function hadoopLs {
 	hadoopLs=()
 	echo "hadoop fs -ls $1";

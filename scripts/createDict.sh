@@ -9,7 +9,7 @@ function hadoopLs {
 	    fi
 	done
 }  
-
+[ -z "$PIG_SCRIPTS" ] && echo "PIG_SCRIPTS variable not set. Exiting" && exit 1;
 if [ -z "$1" ];then
 	echo "at least 1 argument required (dataset). (second arg enables validation check)"
 	exit;
@@ -21,7 +21,7 @@ hadoopLs "$dataset/rewrite";
 for rewrite in "${hadoopLs[@]}"; do
 	if [[ "$rewrite" != "_dict" ]]; then
 		if [[ "$rewrite" != "_long" ]]; then
-			pig pigAnalysis/utils/edgeListCreateDictHash.py $rewrite;
+			pig $PIG_SCRIPTS/utils/edgeListCreateDictHash.py $rewrite;
 		fi
 	fi
 done

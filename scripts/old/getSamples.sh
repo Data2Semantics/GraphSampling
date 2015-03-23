@@ -9,7 +9,7 @@ function hadoopLs {
 	    fi
 	done
 }  
-
+[ -z "$PIG_SCRIPTS" ] && echo "PIG_SCRIPTS variable not set. Exiting" && exit 1;
 
 #rewriteMethods=(spo-spo.py)
 if [ -z "$1" ];then
@@ -32,7 +32,7 @@ for (( run=1; run<=$numRuns; run++ )); do
 		outputFile+="$sample.nt"
 		outputPath+="$outputFile"
 		
-		pig pigAnalysis/stats/sample.py $dataset/$dataset.nt $outputPath $sample;
+		pig $PIG_SCRIPTS/stats/sample.py $dataset/$dataset.nt $outputPath $sample;
 		
 		localTargetDir="load/subgraphs/$outputFile"
 		if [ ! -d "$localTargetDir" ]; then

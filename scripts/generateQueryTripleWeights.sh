@@ -9,7 +9,7 @@ function hadoopLs {
 	    fi
 	done
 }
-
+[ -z "$PIG_SCRIPTS" ] && echo "PIG_SCRIPTS variable not set. Exiting" && exit 1;
 if [ -z "$1" ];then
         echo "at least 1 argument required (dataset). Optional second arg is pattern used in hadoop ls"
         exit;
@@ -27,7 +27,7 @@ for dir in "${hadoopLs[@]}"; do
 		continue
 	fi
 	if [[ ! "$dir" == *_long ]]; then
-		pig pigAnalysis/evaluation/fetchTripleWeights.py $dir;
+		pig $PIG_SCRIPTS/evaluation/fetchTripleWeights.py $dir;
 	fi
 done;
 
@@ -37,5 +37,5 @@ iterations=10
 for (( it=1; it<=$iterations; it++ ))
 do
 	echo "generating random sample for iteration $it"
-	pig pigAnalysis/evaluation/fetchTripleWeightsRandom.py $dataset $it
+	pig $PIG_SCRIPTS/evaluation/fetchTripleWeightsRandom.py $dataset $it
 done

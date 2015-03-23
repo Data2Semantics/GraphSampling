@@ -9,7 +9,7 @@ function hadoopLs {
 	    fi
 	done
 }  
-
+[ -z "$PIG_SCRIPTS" ] && echo "PIG_SCRIPTS variable not set. Exiting" && exit 1;
 
 #rewriteMethods=(spo-spo.py)
 if [ -z "$1" ];then
@@ -28,7 +28,7 @@ for sample in "${samples[@]}"; do
 	outputFile+="$sample.nt"
 	outputPath+="$outputFile"
 	
-	#pig pigAnalysis/stats/freqBaseline.py $dataset/$dataset.nt $outputPath $sample;
+	#pig $PIG_SCRIPTS/stats/freqBaseline.py $dataset/$dataset.nt $outputPath $sample;
 	echo "hadoop fs -cat $outputPath/part*"
 	hadoop fs -cat $outputPath/part* > tmp/$outputFile;
 	newFileSize=`cat tmp/$outputFile | wc -l`

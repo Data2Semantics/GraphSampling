@@ -9,6 +9,8 @@ function hadoopLs {
 	done
 }  
 
+[ -z "$PIG_SCRIPTS" ] && echo "PIG_SCRIPTS variable not set. Exiting" && exit 1;
+
 if [ -z "$1" ];then
         echo "at least 1 argument required (rewrite methods as directories to get query triples stats for). as optional first argument -skipPig. as optional second argument: -queryPattern <pattern>"
         exit;
@@ -66,7 +68,7 @@ for dir in "$@"; do
 		for queryFile in "${hadoopLs[@]}"; do
 			if [ ${queryFile: -3} == ".nt" ]; then
 				if [ $skipPig == 0 ]; then
-					pig pigAnalysis/stats/getQueryTripleWeights.py $dataset/roundtrip/$inputHadoopFile $queryFile;
+					pig $PIG_SCRIPTS/stats/getQueryTripleWeights.py $dataset/roundtrip/$inputHadoopFile $queryFile;
 				fi
 				queryFileBasename=`basename $queryFile`
 				#IFS=_ read -a delimited <<< "$queryFileBasename"

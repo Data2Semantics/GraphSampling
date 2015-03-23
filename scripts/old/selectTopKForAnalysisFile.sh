@@ -1,5 +1,5 @@
 #!/bin/bash
-
+[ -z "$PIG_SCRIPTS" ] && echo "PIG_SCRIPTS variable not set. Exiting" && exit 1;
 if [ -z "$1" ];then
 	echo "at least 1 argument required (the analysis file)"
 	exit;
@@ -8,7 +8,7 @@ fi
 #topKVariants=(0.2 0.5 1000n "1w")
 topKVariants=(0.5 "1w")
 analysisFile=$(readlink -f $1)
-pigRoundtripDir="$HOME/pigAnalysis/roundtrip"
+pigRoundtripDir="$PIG_SCRIPTS/roundtrip"
 analysisBasename=`basename $analysisFile`;
 rewriteDir1=`dirname $analysisFile`;
 rewriteDir=`dirname $rewriteDir1`;#quick and ugly

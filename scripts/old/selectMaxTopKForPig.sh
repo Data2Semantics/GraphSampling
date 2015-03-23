@@ -1,5 +1,5 @@
 #!/bin/bash
-
+[ -z "$PIG_SCRIPTS" ] && echo "PIG_SCRIPTS variable not set. Exiting" && exit 1;
 topK="0.5"
 aggrMethod="max"
 dataset="dbpl"
@@ -13,7 +13,7 @@ for rewriteMethod in "${rewriteMethods[@]}"; do
 		inputFile+="_max"
 	    fi
 		inputPath="$dataset/roundtrip/$inputFile"
-	    #pig pigAnalysis/roundtrip/selectMaxTopK.py $inputPath $topK;
+	    #pig $PIG_SCRIPTS/roundtrip/selectMaxTopK.py $inputPath $topK;
 	    #continue
 		
 #drwxr-xr-x   - lrietvld lrietvld          0 2013-05-07 19:26 /user/lrietvld/dbpl/roundtrip/dbpl_s-o-noLit_unweighted_directed_outdegree_max_max0.5.nt
