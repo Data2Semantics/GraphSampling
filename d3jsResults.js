@@ -351,10 +351,10 @@ var drawSelectionTable = function() {
 	if (enabledPlots.length == 0) {
 		enabledPlots = [
 			{dataset:"SemanticWebDogFood",sampleMethod: "Path - Pagerank"},
-			{dataset:"DBpedia",sampleMethod: "Path - Pagerank"},
+			{dataset:"DBpedia",sampleMethod: "Path - Indegree"},
 			{dataset:"OpenBioMed",sampleMethod: "WithoutLiterals - Outdegree"},
-			{dataset:"BIO2RDF",sampleMethod:  "UniqueLiterals - Outdegree"},
-			{dataset:"LinkedGeoData",sampleMethod:  "UniqueLiterals - Outdegree"},
+			{dataset:"BIO2RDF",sampleMethod:  "Simple - Outdegree"},
+			{dataset:"LinkedGeoData",sampleMethod:  "Simple - Outdegree"},
 			{dataset:"Metalex",sampleMethod: "ResourceFrequency"}	
 		];
 	}
